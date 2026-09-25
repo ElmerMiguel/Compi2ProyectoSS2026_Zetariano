@@ -15,6 +15,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import elmer.compi2.zetariano.CompilerService;
@@ -80,12 +81,41 @@ public class MainWindow extends JFrame {
     private JMenuBar buildMenuBar() {
         JMenuBar bar = new JMenuBar();
         JMenu menuArchivo = new JMenu("Archivo");
+
+        JMenuItem itemNuevo = new JMenuItem("Nuevo Archivo...");
+        itemNuevo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        itemNuevo.addActionListener(e -> createNewFile());
+        menuArchivo.add(itemNuevo);
+
+        JMenuItem itemAbrirArchivo = new JMenuItem("Abrir Archivo...");
+        itemAbrirArchivo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        itemAbrirArchivo.addActionListener(e -> chooseFile());
+        menuArchivo.add(itemAbrirArchivo);
+
         JMenuItem itemAbrir = new JMenuItem("Abrir Carpeta...");
         itemAbrir.addActionListener(e -> chooseDirectory());
         menuArchivo.add(itemAbrir);
 
+        menuArchivo.addSeparator();
+
+        JMenuItem itemGuardar = new JMenuItem("Guardar Archivo");
+        itemGuardar.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        itemGuardar.addActionListener(e -> saveActiveFile(false));
+        menuArchivo.add(itemGuardar);
+
+        JMenuItem itemGuardarComo = new JMenuItem("Guardar Como...");
+        itemGuardarComo.addActionListener(e -> saveActiveFile(true));
+        menuArchivo.add(itemGuardarComo);
+
+        menuArchivo.addSeparator();
+
+        JMenuItem itemSalir = new JMenuItem("Salir");
+        itemSalir.addActionListener(e -> System.exit(0));
+        menuArchivo.add(itemSalir);
+
         JMenu menuCompilar = new JMenu("Compilar");
         JMenuItem itemRun = new JMenuItem("Ejecutar Compilacion");
+        itemRun.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, 0));
         itemRun.addActionListener(e -> triggerCompilation());
         menuCompilar.add(itemRun);
 
@@ -98,9 +128,23 @@ public class MainWindow extends JFrame {
         JToolBar toolBar = new JToolBar();
         toolBar.setFloatable(false);
 
+        JButton newBtn = new JButton("Nuevo");
+        newBtn.addActionListener(e -> createNewFile());
+        toolBar.add(newBtn);
+
+        JButton openFileBtn = new JButton("Abrir Archivo");
+        openFileBtn.addActionListener(e -> chooseFile());
+        toolBar.add(openFileBtn);
+
         JButton openDirBtn = new JButton("Abrir Carpeta");
         openDirBtn.addActionListener(e -> chooseDirectory());
         toolBar.add(openDirBtn);
+
+        JButton saveBtn = new JButton("Guardar");
+        saveBtn.addActionListener(e -> saveActiveFile(false));
+        toolBar.add(saveBtn);
+
+        toolBar.addSeparator();
 
         compileBtn.addActionListener(e -> triggerCompilation());
         toolBar.add(compileBtn);
@@ -122,6 +166,72 @@ public class MainWindow extends JFrame {
                 JOptionPane.showMessageDialog(this, "Error al abrir archivo: " + e.getMessage());
             }
         });
+    }
+
+    private void chooseFile() {
+        JFileChooser chooser = new JFileChooser(activeFile != null ? activeFile.getParentFile() : new File("."));
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File selected = chooser.getSelectedFile();
+            try {
+                String content = Files.readString(selected.toPath());
+                editorTabPane.openFile(selected, content);
+                activeFile = selected;
+                statusLabel.setText("Abierto: " + selected.getName());
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error al abrir archivo: " + e.getMessage());
+            }
+        }
+    }
+
+    private void createNewFile() {
+        String name = JOptionPane.showInputDialog(this,
+                "Nombre del nuevo archivo (ej. Programa.pig, Modulo.y, Clase.z):",
+                "Nuevo Archivo", JOptionPane.PLAIN_MESSAGE);
+        if (name == null || name.trim().isEmpty()) {
+            return;
+        }
+        name = name.trim();
+        CodeEditor.LanguageMode mode = CodeEditor.LanguageMode.PLAIN;
+        if (name.endsWith(".pig")) mode = CodeEditor.LanguageMode.PIG_LATIN;
+        else if (name.endsWith(".y")) mode = CodeEditor.LanguageMode.Y_PYTHON;
+        else if (name.endsWith(".z")) mode = CodeEditor.LanguageMode.ZETARIANO;
+
+        CodeEditor newEditor = new CodeEditor(mode);
+        newEditor.setText("");
+        editorTabPane.addTab(name, newEditor);
+        activeFile = null;
+        statusLabel.setText("Creado: " + name);
+    }
+
+    private void saveActiveFile(boolean saveAs) {
+        CodeEditor currentEditor = editorTabPane.getCurrentEditor();
+        if (currentEditor == null) {
+            JOptionPane.showMessageDialog(this, "No hay ningun editor abierto para guardar.");
+            return;
+        }
+
+        File target = activeFile;
+        if (saveAs || target == null) {
+            JFileChooser chooser = new JFileChooser(activeFile != null ? activeFile.getParentFile() : new File("."));
+            chooser.setDialogTitle("Guardar Archivo Como...");
+            if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                target = chooser.getSelectedFile();
+            } else {
+                return;
+            }
+        }
+
+        try {
+            Files.writeString(target.toPath(), currentEditor.getText(), StandardCharsets.UTF_8);
+            activeFile = target;
+            statusLabel.setText("Guardado: " + target.getName());
+            JOptionPane.showMessageDialog(this, "Archivo guardado exitosamente: " + target.getName(),
+                    "Guardado", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error al guardar archivo: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void chooseDirectory() {
