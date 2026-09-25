@@ -7,11 +7,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- *
+ * Representacion semantica de una clase en Zetariano.
+ * Almacena atributos, metodos y constructores definidos.
  */
 public class ClaseZ {
 
+    // TODO Fase 2: Soporte para Herencia simple y multiple (extends, implements)
+    // TODO Fase 2: Registro de clase padre y resolucion polimorfica de metodos
     private final String nombre;
+
 
     private final Map<String, AtributoZ> atributos;
     private final Map<String, MetodoZ> metodos;
