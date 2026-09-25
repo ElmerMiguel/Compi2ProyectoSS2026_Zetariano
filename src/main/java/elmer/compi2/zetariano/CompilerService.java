@@ -25,8 +25,6 @@ import elmer.compi2.zetariano.analysis.semantic.PigAnalyzer;
 import elmer.compi2.zetariano.runtime.piglatin.ConstructorMemoriaPig;
 import elmer.compi2.zetariano.runtime.piglatin.MarcoPrincipalPig;
 import elmer.compi2.zetariano.runtime.zeta.TablaMemoriaZ;
-import lombok.Builder;
-import lombok.Data;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
@@ -42,17 +40,120 @@ import java.util.List;
  */
 public class CompilerService {
 
-    @Data
-    @Builder
     public static class CompilationResult {
-        private boolean success;
-        private String consoleLog;
-        private List<Cuadruplo> c3dInstructions;
-        private String c3dText;
-        private String generatedCCode;
-        private Path nativeBinaryPath;
-        private String nativeCompileLog;
-        private List<ErrorReport> errors;
+        private final boolean success;
+        private final String consoleLog;
+        private final List<Cuadruplo> c3dInstructions;
+        private final String c3dText;
+        private final String generatedCCode;
+        private final Path nativeBinaryPath;
+        private final String nativeCompileLog;
+        private final List<ErrorReport> errors;
+
+        public CompilationResult(boolean success, String consoleLog, List<Cuadruplo> c3dInstructions,
+                                 String c3dText, String generatedCCode, Path nativeBinaryPath,
+                                 String nativeCompileLog, List<ErrorReport> errors) {
+            this.success = success;
+            this.consoleLog = consoleLog;
+            this.c3dInstructions = (c3dInstructions != null) ? c3dInstructions : new ArrayList<>();
+            this.c3dText = c3dText;
+            this.generatedCCode = generatedCCode;
+            this.nativeBinaryPath = nativeBinaryPath;
+            this.nativeCompileLog = nativeCompileLog;
+            this.errors = (errors != null) ? errors : new ArrayList<>();
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getConsoleLog() {
+            return consoleLog;
+        }
+
+        public List<Cuadruplo> getC3dInstructions() {
+            return c3dInstructions;
+        }
+
+        public String getC3dText() {
+            return c3dText;
+        }
+
+        public String getGeneratedCCode() {
+            return generatedCCode;
+        }
+
+        public Path getNativeBinaryPath() {
+            return nativeBinaryPath;
+        }
+
+        public String getNativeCompileLog() {
+            return nativeCompileLog;
+        }
+
+        public List<ErrorReport> getErrors() {
+            return errors;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+            private boolean success;
+            private String consoleLog;
+            private List<Cuadruplo> c3dInstructions = new ArrayList<>();
+            private String c3dText;
+            private String generatedCCode;
+            private Path nativeBinaryPath;
+            private String nativeCompileLog;
+            private List<ErrorReport> errors = new ArrayList<>();
+
+            public Builder success(boolean success) {
+                this.success = success;
+                return this;
+            }
+
+            public Builder consoleLog(String consoleLog) {
+                this.consoleLog = consoleLog;
+                return this;
+            }
+
+            public Builder c3dInstructions(List<Cuadruplo> c3dInstructions) {
+                this.c3dInstructions = c3dInstructions;
+                return this;
+            }
+
+            public Builder c3dText(String c3dText) {
+                this.c3dText = c3dText;
+                return this;
+            }
+
+            public Builder generatedCCode(String generatedCCode) {
+                this.generatedCCode = generatedCCode;
+                return this;
+            }
+
+            public Builder nativeBinaryPath(Path nativeBinaryPath) {
+                this.nativeBinaryPath = nativeBinaryPath;
+                return this;
+            }
+
+            public Builder nativeCompileLog(String nativeCompileLog) {
+                this.nativeCompileLog = nativeCompileLog;
+                return this;
+            }
+
+            public Builder errors(List<ErrorReport> errors) {
+                this.errors = errors;
+                return this;
+            }
+
+            public CompilationResult build() {
+                return new CompilationResult(success, consoleLog, c3dInstructions, c3dText,
+                        generatedCCode, nativeBinaryPath, nativeCompileLog, errors);
+            }
+        }
     }
 
     public CompilationResult compilePigSource(String source, Path baseDir) {

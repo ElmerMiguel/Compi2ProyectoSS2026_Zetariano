@@ -1,8 +1,5 @@
 package elmer.compi2.zetariano;
 
-import lombok.Builder;
-import lombok.Data;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -17,13 +14,69 @@ import java.util.List;
  */
 public class NativeCompilerService {
 
-    @Data
-    @Builder
     public static class NativeCompileResult {
-        private boolean success;
-        private int exitCode;
-        private String outputMessage;
-        private Path binaryPath;
+        private final boolean success;
+        private final int exitCode;
+        private final String outputMessage;
+        private final Path binaryPath;
+
+        public NativeCompileResult(boolean success, int exitCode, String outputMessage, Path binaryPath) {
+            this.success = success;
+            this.exitCode = exitCode;
+            this.outputMessage = outputMessage;
+            this.binaryPath = binaryPath;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public int getExitCode() {
+            return exitCode;
+        }
+
+        public String getOutputMessage() {
+            return outputMessage;
+        }
+
+        public Path getBinaryPath() {
+            return binaryPath;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+            private boolean success;
+            private int exitCode;
+            private String outputMessage;
+            private Path binaryPath;
+
+            public Builder success(boolean success) {
+                this.success = success;
+                return this;
+            }
+
+            public Builder exitCode(int exitCode) {
+                this.exitCode = exitCode;
+                return this;
+            }
+
+            public Builder outputMessage(String outputMessage) {
+                this.outputMessage = outputMessage;
+                return this;
+            }
+
+            public Builder binaryPath(Path binaryPath) {
+                this.binaryPath = binaryPath;
+                return this;
+            }
+
+            public NativeCompileResult build() {
+                return new NativeCompileResult(success, exitCode, outputMessage, binaryPath);
+            }
+        }
     }
 
     public static boolean isWindows() {

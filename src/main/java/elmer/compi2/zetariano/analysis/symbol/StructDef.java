@@ -1,7 +1,5 @@
 package elmer.compi2.zetariano.analysis.symbol;
 
-import lombok.Getter;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,7 +8,6 @@ import java.util.Map;
 /**
  * Definicion de una estructura con sus atributos asociados.
  */
-@Getter
 public class StructDef {
 
     private final String name;
@@ -18,6 +15,14 @@ public class StructDef {
 
     public StructDef(String name) {
         this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Map<String, Symbol> getFields() {
+        return fields;
     }
 
     public List<Symbol> getOrderedFields() {
