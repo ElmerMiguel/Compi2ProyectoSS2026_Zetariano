@@ -1,24 +1,12 @@
-/*
- */
 package elmer.compi2.zetariano.codegen;
 
 /**
- *
+ * Resultado temporal o literal de una expresion C3D.
+ * Extiende de {@link ExprResult}.
  */
-public class ResultadoExpresion {
-
-    private final String valor;
+public class ResultadoExpresion extends ExprResult {
 
     public ResultadoExpresion(String valor) {
-        this.valor = valor;
-    }
-
-    public String getValor() {
-        return valor;
-    }
-
-    @Override
-    public String toString() {
-        return valor;
+        super(valor);
     }
 }

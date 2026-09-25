@@ -1,28 +1,12 @@
-/*
- */
 package elmer.compi2.zetariano.codegen;
 
 /**
- *
+ * Generador secuencial de etiquetas (L1, L2, ...) para C3D.
+ * Extiende de {@link LabelManager}.
  */
-public class GeneradorEtiquetas {
-
-    private int contador;
+public class GeneradorEtiquetas extends LabelManager {
 
     public GeneradorEtiquetas() {
-        contador = 0;
-    }
-
-    public String nuevaEtiqueta() {
-        contador++;
-        return "L" + contador;
-    }
-
-    public void reiniciar() {
-        contador = 0;
-    }
-
-    public int getCantidad() {
-        return contador;
+        super();
     }
 }
