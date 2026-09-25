@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import elmer.compi2.zetariano.CompilerService;
+import elmer.compi2.zetariano.NativeCompilerService;
 
 /**
  * Ventana Principal del Compilador Zetariano con arquitectura desacoplada y responsiva.
@@ -29,8 +30,10 @@ public class MainWindow extends JFrame {
     private final EditorTabPane editorTabPane;
     private final OutputPanel outputPanel;
 
-    private final JButton compileBtn = new JButton("Compilar Proyecto");
+    private final JButton compileBtn = new JButton("Compilar Proyecto (F5)");
+    private final JButton executeBtn = new JButton("Ejecutar Programa (F6)");
     private final JLabel statusLabel = new JLabel("Listo");
+    private CompilerService.CompilationResult lastResult = null;
 
     public MainWindow() {
         super("Compilador Zetariano - Contacto Extraterrestre");
@@ -114,10 +117,15 @@ public class MainWindow extends JFrame {
         menuArchivo.add(itemSalir);
 
         JMenu menuCompilar = new JMenu("Compilar");
-        JMenuItem itemRun = new JMenuItem("Ejecutar Compilacion");
+        JMenuItem itemRun = new JMenuItem("Compilar Proyecto");
         itemRun.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, 0));
         itemRun.addActionListener(e -> triggerCompilation());
         menuCompilar.add(itemRun);
+
+        JMenuItem itemExec = new JMenuItem("Ejecutar Programa (Terminal)");
+        itemExec.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F6, 0));
+        itemExec.addActionListener(e -> triggerExecution());
+        menuCompilar.add(itemExec);
 
         bar.add(menuArchivo);
         bar.add(menuCompilar);
@@ -148,6 +156,9 @@ public class MainWindow extends JFrame {
 
         compileBtn.addActionListener(e -> triggerCompilation());
         toolBar.add(compileBtn);
+
+        executeBtn.addActionListener(e -> triggerExecution());
+        toolBar.add(executeBtn);
 
         return toolBar;
     }
@@ -280,23 +291,52 @@ public class MainWindow extends JFrame {
         statusLabel.setText("Compilando...");
         outputPanel.clearAll();
 
-        CompilerService.CompilationResult result = compilerService.compilePigSource(sourceCode, baseDir);
+        lastResult = compilerService.compilePigSource(sourceCode, baseDir);
 
-        outputPanel.setConsoleOutput(result.getConsoleLog());
-        outputPanel.setC3DOutput(result.getC3dText());
-        outputPanel.setCCodeOutput(result.getGeneratedCCode());
-        outputPanel.setErrors(result.getErrors());
+        outputPanel.setConsoleOutput(lastResult.getConsoleLog());
+        outputPanel.setC3DOutput(lastResult.getC3dText());
+        outputPanel.setCCodeOutput(lastResult.getGeneratedCCode());
+        outputPanel.setErrors(lastResult.getErrors());
 
-        if (result.isSuccess()) {
+        if (lastResult.isSuccess()) {
             statusLabel.setText("Compilacion finalizada exitosamente.");
-            JOptionPane.showMessageDialog(this,
-                    "Compilacion finalizada con exito.\nCodigo C unificado generado en: " + baseDir.resolve("salida_unificada.c"),
-                    "Compilacion Exitosa", JOptionPane.INFORMATION_MESSAGE);
+            StringBuilder msg = new StringBuilder();
+            msg.append("Compilacion finalizada con exito.\n");
+            msg.append("Codigo C unificado generado en: ").append(baseDir.resolve("salida_unificada.c")).append("\n");
+            if (lastResult.getNativeBinaryPath() != null) {
+                msg.append("Binario nativo compilado en: ").append(lastResult.getNativeBinaryPath().toAbsolutePath()).append("\n\n");
+                msg.append("Puedes ejecutarlo haciendo clic en 'Ejecutar Programa' (F6).");
+            }
+            JOptionPane.showMessageDialog(this, msg.toString(), "Compilacion Exitosa", JOptionPane.INFORMATION_MESSAGE);
         } else {
             statusLabel.setText("La compilacion finalizo con errores.");
             JOptionPane.showMessageDialog(this,
                     "Se encontraron errores durante la compilacion.\nRevisa el panel de Errores y la Consola.",
                     "Errores de Compilacion", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void triggerExecution() {
+        if (lastResult == null || !lastResult.isSuccess() || lastResult.getNativeBinaryPath() == null) {
+            triggerCompilation();
+        }
+
+        if (lastResult != null && lastResult.isSuccess() && lastResult.getNativeBinaryPath() != null) {
+            Path bin = lastResult.getNativeBinaryPath();
+            if (Files.exists(bin)) {
+                statusLabel.setText("Lanzando programa en terminal: " + bin.getFileName());
+                boolean launched = NativeCompilerService.launchInTerminal(bin);
+                if (!launched) {
+                    JOptionPane.showMessageDialog(this,
+                            "No se pudo abrir una terminal grafica para ejecutar el binario automaticamente.\n" +
+                            "Puedes ejecutarlo directamente desde tu consola con:\n" + bin.toAbsolutePath(),
+                            "Aviso de Terminal", JOptionPane.WARNING_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "El binario ejecutable no existe: " + bin.toAbsolutePath(),
+                        "Binario no encontrado", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }

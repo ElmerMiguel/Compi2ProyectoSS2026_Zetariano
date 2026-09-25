@@ -50,6 +50,8 @@ public class CompilerService {
         private List<Cuadruplo> c3dInstructions;
         private String c3dText;
         private String generatedCCode;
+        private Path nativeBinaryPath;
+        private String nativeCompileLog;
         private List<ErrorReport> errors;
     }
 
@@ -178,8 +180,18 @@ public class CompilerService {
             Path salidaC = base.resolve("salida_unificada.c");
             Files.writeString(salidaC, codigoC, StandardCharsets.UTF_8);
             log.append("Codigo C generado exitosamente en: ").append(salidaC.toAbsolutePath()).append("\n");
+
+            // 8. Compilar codigo C con GCC nativo
+            var nativeRes = NativeCompilerService.compileC(salidaC);
+            Path binaryPath = nativeRes.getBinaryPath();
+            if (nativeRes.isSuccess()) {
+                log.append("Compilador nativo (GCC): OK -> ").append(binaryPath.getFileName()).append("\n");
+            } else {
+                log.append("Compilador nativo (GCC): ").append(nativeRes.getOutputMessage()).append("\n");
+            }
+
             log.append("\n========================================\n");
-            log.append("COMPILACION EXITOSA CON C3D Y C FINAL\n");
+            log.append("COMPILACION EXITOSA CON C3D, C Y BINARIO NATIVO\n");
             log.append("========================================\n");
 
             // Construir texto legible de C3D
@@ -194,6 +206,8 @@ public class CompilerService {
                     .c3dInstructions(enlazado)
                     .c3dText(c3dText.toString())
                     .generatedCCode(codigoC)
+                    .nativeBinaryPath(binaryPath)
+                    .nativeCompileLog(nativeRes.getOutputMessage())
                     .errors(ErrorCollector.getErrors())
                     .build();
 
