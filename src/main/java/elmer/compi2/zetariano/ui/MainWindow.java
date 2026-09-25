@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import elmer.compi2.zetariano.CompilerService;
 
 /**
  * Ventana Principal del Compilador Zetariano con arquitectura desacoplada y responsiva.
@@ -107,11 +108,15 @@ public class MainWindow extends JFrame {
         return toolBar;
     }
 
+    private File activeFile = null;
+    private final CompilerService compilerService = new CompilerService();
+
     private void bindEvents() {
         fileExplorer.setOnFileDoubleClicked(file -> {
             try {
                 String content = Files.readString(file.toPath());
                 editorTabPane.openFile(file, content);
+                activeFile = file;
                 statusLabel.setText("Abierto: " + file.getName());
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, "Error al abrir archivo: " + e.getMessage());
@@ -132,6 +137,18 @@ public class MainWindow extends JFrame {
         File current = new File(".");
         fileExplorer.loadDirectory(current.toPath());
 
+        // Cargar Principal.pig si existe como ejemplo inicial
+        File demo = new File("docs/Pruebas/Principal.pig");
+        if (demo.exists()) {
+            try {
+                String content = Files.readString(demo.toPath());
+                editorTabPane.openFile(demo, content);
+                activeFile = demo;
+                statusLabel.setText("Abierto: Principal.pig");
+                return;
+            } catch (IOException ignored) {}
+        }
+
         // Tab de bienvenida por defecto
         CodeEditor defaultEditor = new CodeEditor(CodeEditor.LanguageMode.PIG_LATIN);
         defaultEditor.setText("## Compilador Zetariano (Pig Latin, Y?, Zetariano) ##\nMAIOR>\n    >> \"Listo para compilar!\";\nFINIS;\n");
@@ -139,9 +156,37 @@ public class MainWindow extends JFrame {
     }
 
     private void triggerCompilation() {
+        CodeEditor currentEditor = editorTabPane.getCurrentEditor();
+        if (currentEditor == null) {
+            JOptionPane.showMessageDialog(this, "No hay ningun editor abierto para compilar.");
+            return;
+        }
+
+        String sourceCode = currentEditor.getText();
+        Path baseDir = (activeFile != null && activeFile.getParentFile() != null)
+                ? activeFile.getParentFile().toPath()
+                : Path.of("docs/Pruebas");
+
         statusLabel.setText("Compilando...");
-        // Placeholder hasta conectar el pipeline completo
-        outputPanel.setConsoleOutput("Iniciando compilacion...\n(Se conectara al finalizar el lote de analizadores y emisores)");
-        statusLabel.setText("Listo");
+        outputPanel.clearAll();
+
+        CompilerService.CompilationResult result = compilerService.compilePigSource(sourceCode, baseDir);
+
+        outputPanel.setConsoleOutput(result.getConsoleLog());
+        outputPanel.setC3DOutput(result.getC3dText());
+        outputPanel.setCCodeOutput(result.getGeneratedCCode());
+        outputPanel.setErrors(result.getErrors());
+
+        if (result.isSuccess()) {
+            statusLabel.setText("Compilacion finalizada exitosamente.");
+            JOptionPane.showMessageDialog(this,
+                    "Compilacion finalizada con exito.\nCodigo C unificado generado en: " + baseDir.resolve("salida_unificada.c"),
+                    "Compilacion Exitosa", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            statusLabel.setText("La compilacion finalizo con errores.");
+            JOptionPane.showMessageDialog(this,
+                    "Se encontraron errores durante la compilacion.\nRevisa el panel de Errores y la Consola.",
+                    "Errores de Compilacion", JOptionPane.WARNING_MESSAGE);
+        }
     }
 }
