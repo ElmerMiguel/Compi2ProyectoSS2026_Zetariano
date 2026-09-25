@@ -32,3 +32,4 @@ MD/
 
 *.md
 src/backup_original/
+dependency-reduced-pom.xml
