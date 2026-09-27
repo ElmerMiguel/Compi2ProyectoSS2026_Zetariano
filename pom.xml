@@ -33,12 +33,24 @@
             <scope>compile</scope>
         </dependency>
         
-        <!-- JTattoo Look and Feel -->
+        <!-- FlatLaf for modern Swing UI -->
         <dependency>
-            <groupId>com.jtattoo</groupId>
-            <artifactId>JTattoo</artifactId>
-            <version>1.6.7</version>
-            <scope>compile</scope>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.6</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-extras</artifactId>
+            <version>3.6</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-intellij-themes</artifactId>
+            <version>3.6</version>
+            <type>jar</type>
         </dependency>
         
         <!-- JUnit 5 Jupiter for Unit Testing -->

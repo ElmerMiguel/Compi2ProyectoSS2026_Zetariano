@@ -1,6 +1,6 @@
 package elmer.compi2.zetariano;
 
-import com.jtattoo.plaf.hifi.HiFiLookAndFeel;
+import com.formdev.flatlaf.FlatDarculaLaf;
 import elmer.compi2.zetariano.ui.MainWindow;
 
 import javax.swing.SwingUtilities;
@@ -63,9 +63,10 @@ public class App {
         // Modo Interfaz Grafica (Swing)
         SwingUtilities.invokeLater(() -> {
             try {
-                UIManager.setLookAndFeel(new HiFiLookAndFeel());
+                // Aplicar el tema oscuro Darcula de FlatLaf
+                UIManager.setLookAndFeel(new FlatDarculaLaf());
             } catch (UnsupportedLookAndFeelException e) {
-                System.err.println("No se pudo aplicar el Look & Feel JTattoo HiFi: " + e.getMessage());
+                System.err.println("No se pudo aplicar el Look & Feel FlatLaf: " + e.getMessage());
             }
 
             MainWindow window = new MainWindow();

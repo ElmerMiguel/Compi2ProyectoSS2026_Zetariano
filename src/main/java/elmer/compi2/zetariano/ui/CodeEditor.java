@@ -37,8 +37,9 @@ public class CodeEditor extends JPanel {
         textPane.setCaretColor(MonokaiPalette.FOREGROUND);
         textPane.setSelectionColor(new java.awt.Color(73, 72, 62));
         textPane.setSelectedTextColor(MonokaiPalette.FOREGROUND);
-        textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
-
+        
+        textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
+        
         attachHighlighter(mode);
 
         JScrollPane scrollPane = new JScrollPane(textPane);
