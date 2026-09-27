@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.zeta;
 
-/**
- *
- */
+
 public class TernariaASTZ extends ExpresionASTZ {
 
     private final ExpresionASTZ condicion;

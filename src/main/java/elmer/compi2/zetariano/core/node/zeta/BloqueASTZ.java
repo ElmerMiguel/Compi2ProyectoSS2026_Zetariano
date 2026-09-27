@@ -1,13 +1,10 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.zeta;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
+
 public class BloqueASTZ extends SentenciaASTZ {
 
     private final List<SentenciaASTZ> sentencias;

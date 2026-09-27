@@ -5,7 +5,7 @@ import elmer.compi2.zetariano.antlr.piglatin.PigLatinParser;
 import elmer.compi2.zetariano.antlr.ypython.YLexer;
 import elmer.compi2.zetariano.antlr.ypython.YParser;
 import elmer.compi2.zetariano.codegen.C3DEmitter;
-import elmer.compi2.zetariano.codegen.Cuadruplo;
+import elmer.compi2.zetariano.codegen.Instruction;
 import elmer.compi2.zetariano.codegen.piglatin.PigC3DEmitter;
 import elmer.compi2.zetariano.codegen.zeta.ZC3DEmitter;
 import elmer.compi2.zetariano.codigo.unificado.GeneradorCUnificado;
@@ -43,14 +43,14 @@ public class CompilerService {
     public static class CompilationResult {
         private final boolean success;
         private final String consoleLog;
-        private final List<Cuadruplo> c3dInstructions;
+        private final List<Instruction> c3dInstructions;
         private final String c3dText;
         private final String generatedCCode;
         private final Path nativeBinaryPath;
         private final String nativeCompileLog;
         private final List<ErrorReport> errors;
 
-        public CompilationResult(boolean success, String consoleLog, List<Cuadruplo> c3dInstructions,
+        public CompilationResult(boolean success, String consoleLog, List<Instruction> c3dInstructions,
                                  String c3dText, String generatedCCode, Path nativeBinaryPath,
                                  String nativeCompileLog, List<ErrorReport> errors) {
             this.success = success;
@@ -71,7 +71,7 @@ public class CompilerService {
             return consoleLog;
         }
 
-        public List<Cuadruplo> getC3dInstructions() {
+        public List<Instruction> getC3dInstructions() {
             return c3dInstructions;
         }
 
@@ -102,7 +102,7 @@ public class CompilerService {
         public static class Builder {
             private boolean success;
             private String consoleLog;
-            private List<Cuadruplo> c3dInstructions = new ArrayList<>();
+            private List<Instruction> c3dInstructions = new ArrayList<>();
             private String c3dText;
             private String generatedCCode;
             private Path nativeBinaryPath;
@@ -119,7 +119,7 @@ public class CompilerService {
                 return this;
             }
 
-            public Builder c3dInstructions(List<Cuadruplo> c3dInstructions) {
+            public Builder c3dInstructions(List<Instruction> c3dInstructions) {
                 this.c3dInstructions = c3dInstructions;
                 return this;
             }
@@ -194,7 +194,7 @@ public class CompilerService {
             AdaptadorImportYPig adaptadorY = new AdaptadorImportYPig();
             AdaptadorImportZPig adaptadorZ = new AdaptadorImportZPig();
 
-            List<Cuadruplo> c3dY = new ArrayList<>();
+            List<Instruction> c3dY = new ArrayList<>();
             List<ProgramaASTZ> programasZ = new ArrayList<>();
 
             for (ImportASTPig imp : astPig.getImports()) {
@@ -234,7 +234,7 @@ public class CompilerService {
             }
 
             // 3. C3D de Zetariano
-            List<Cuadruplo> c3dZ = new ArrayList<>();
+            List<Instruction> c3dZ = new ArrayList<>();
             if (!programasZ.isEmpty()) {
                 c3dZ = new ZC3DEmitter().generar(programasZ);
             }
@@ -255,7 +255,7 @@ public class CompilerService {
             ConstructorMemoriaPig constructorMem = new ConstructorMemoriaPig();
             MarcoPrincipalPig marcoPig = constructorMem.construir(astPig);
             PigC3DEmitter emitterPig = new PigC3DEmitter(astPig, marcoPig, registroImports);
-            List<Cuadruplo> c3dPig = emitterPig.generar();
+            List<Instruction> c3dPig = emitterPig.generar();
             log.append("C3D Pig Latin: ").append(c3dPig.size()).append(" instrucciones.\n");
 
             // 6. Enlazador C3D
@@ -263,7 +263,7 @@ public class CompilerService {
             enlazador.agregarModuloY(c3dY);
             enlazador.agregarModuloZ(c3dZ);
             enlazador.establecerModuloPig(c3dPig);
-            List<Cuadruplo> enlazado = enlazador.enlazar();
+            List<Instruction> enlazado = enlazador.enlazar();
 
             if (enlazador.tieneErrores()) {
                 for (String err : enlazador.getErrores()) {
@@ -297,7 +297,7 @@ public class CompilerService {
 
             // Construir texto legible de C3D
             StringBuilder c3dText = new StringBuilder();
-            for (Cuadruplo q : enlazado) {
+            for (Instruction q : enlazado) {
                 c3dText.append(q.toString()).append("\n");
             }
 

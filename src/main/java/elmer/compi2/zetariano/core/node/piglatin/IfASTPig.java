@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.piglatin;
 
-/**
- *
- */
+
 public class IfASTPig
         extends SentenciaASTPig {
 

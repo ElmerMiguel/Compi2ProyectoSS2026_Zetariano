@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.codegen;
 
-/**
- *
- */
+
 public class ExprResult {
 
     private final String valor;
@@ -14,6 +11,10 @@ public class ExprResult {
     }
 
     public String getValor() {
+        return valor;
+    }
+
+    public String getValue() {
         return valor;
     }
 

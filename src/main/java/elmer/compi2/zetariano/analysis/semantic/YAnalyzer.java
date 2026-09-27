@@ -1,61 +1,59 @@
-/*
- */
+
 package elmer.compi2.zetariano.analysis.semantic;
 
-import elmer.compi2.zetariano.analysis.symbol.CategoriaSimbolo;
-import elmer.compi2.zetariano.analysis.symbol.EstructuraDef.EstructuraDef;
-import elmer.compi2.zetariano.analysis.symbol.ParametroInfo;
-import elmer.compi2.zetariano.analysis.symbol.Simbolo.Simbolo;
-import elmer.compi2.zetariano.analysis.symbol.Simbolo.TablaSimbolos;
-import elmer.compi2.zetariano.analysis.symbol.TipoDato;
+import elmer.compi2.zetariano.analysis.symbol.SymbolKind;
+import elmer.compi2.zetariano.analysis.symbol.StructDef;
+import elmer.compi2.zetariano.analysis.symbol.ParamInfo;
+import elmer.compi2.zetariano.analysis.symbol.Symbol;
+import elmer.compi2.zetariano.analysis.symbol.SymbolTable;
+import elmer.compi2.zetariano.analysis.symbol.DataType;
 
 import elmer.compi2.zetariano.antlr.ypython.YParser;
 import elmer.compi2.zetariano.antlr.ypython.YParserBaseVisitor;
-import elmer.compi2.zetariano.diagnostic.CompilerError;
-import elmer.compi2.zetariano.diagnostic.ErrorManager;
+import elmer.compi2.zetariano.diagnostic.ErrorReport;
+import elmer.compi2.zetariano.diagnostic.ErrorCollector;
+import elmer.compi2.zetariano.diagnostic.ErrorKind;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
+
 public class YAnalyzer extends YParserBaseVisitor<Void> {
 
     private int profundidadCiclos = 0;
     private int profundidadElegir = 0;
     private boolean registrandoFirmas = false;
 
-    private final TablaSimbolos tabla
-            = new TablaSimbolos();
+    private final SymbolTable tabla
+            = new SymbolTable();
 
-    private TipoDato tipoRetornoActual
-            = TipoDato.VOID;
+    private DataType tipoRetornoActual
+            = DataType.VOID;
 
     private String tipoReferenciaRetornoActual = null;
 
-    public TablaSimbolos getTabla() {
+    public SymbolTable getTabla() {
         return tabla;
     }
 
-    private final Map<String, EstructuraDef> estructuras
+    private final Map<String, StructDef> estructuras
             = new LinkedHashMap<>();
 
-    private final Deque<Map<String, EstructuraDef>> ambitosEstructuras
+    private final Deque<Map<String, StructDef>> ambitosEstructuras
             = new ArrayDeque<>();
 
     private final Map<
-        YParser.DefinicionFuncionContext, Simbolo> funcionesRegistradas
+        YParser.DefinicionFuncionContext, Symbol> funcionesRegistradas
             = new LinkedHashMap<>();
 
     private void error(
             String mensaje,
             org.antlr.v4.runtime.ParserRuleContext ctx) {
 
-        ErrorManager.addError(
-                CompilerError.Tipo.SEMANTICO,
+        ErrorCollector.addError(
+                ErrorKind.SEMANTICO,
                 mensaje,
                 ctx.getStart().getLine(),
                 ctx.getStart()
@@ -63,11 +61,11 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         );
     }
 
-    private TipoDato convertirTipo(
+    private DataType convertirTipo(
             YParser.TipoContext ctx) {
 
         if (ctx == null) {
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
         String texto
@@ -76,57 +74,57 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         return switch (texto) {
 
             case "entero" ->
-                TipoDato.ENTERO;
+                DataType.ENTERO;
 
             case "flotante" ->
-                TipoDato.DECIMAL;
+                DataType.DECIMAL;
 
             case "cadena" ->
-                TipoDato.CADENA;
+                DataType.CADENA;
 
             case "caracter" ->
-                TipoDato.CARACTER;
+                DataType.CARACTER;
 
             case "bool" ->
-                TipoDato.BOOLEANO;
+                DataType.BOOLEANO;
 
             default ->
-                TipoDato.ESTRUCTURA;
+                DataType.ESTRUCTURA;
         };
     }
 
-    private TipoDato convertirTipoPrimitivo(
+    private DataType convertirTipoPrimitivo(
             YParser.TipoPrimitivoContext ctx) {
 
         if (ctx == null) {
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
         return switch (ctx.getText()) {
 
             case "entero" ->
-                TipoDato.ENTERO;
+                DataType.ENTERO;
 
             case "flotante" ->
-                TipoDato.DECIMAL;
+                DataType.DECIMAL;
 
             case "cadena" ->
-                TipoDato.CADENA;
+                DataType.CADENA;
 
             case "caracter" ->
-                TipoDato.CARACTER;
+                DataType.CARACTER;
 
             case "bool" ->
-                TipoDato.BOOLEANO;
+                DataType.BOOLEANO;
 
             default ->
-                TipoDato.DESCONOCIDO;
+                DataType.DESCONOCIDO;
         };
     }
 
-    //--------------------------------------------------------------------------
+    
     //INICIO DE LOS VISIT
-    //--------------------------------------------------------------------------
+    
     @Override
     public Void visitDefinicionFuncion(
             YParser.DefinicionFuncionContext ctx) {
@@ -156,14 +154,14 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return null;
         }
 
-        TipoDato tipoBase = convertirTipo(ctx.tipo());
+        DataType tipoBase = convertirTipo(ctx.tipo());
 
         String nombreTipo = ctx.tipo().getText();
 
-        // --------------------------------------------------------
+        
         // VALIDAR ESTRUCTURA
-        // --------------------------------------------------------
-        if (tipoBase == TipoDato.ESTRUCTURA) {
+        
+        if (tipoBase == DataType.ESTRUCTURA) {
 
             if (!existeEstructura(nombreTipo)) {
 
@@ -182,37 +180,37 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 = ctx.dimensiones() != null
                 && !ctx.dimensiones().isEmpty();
 
-        Simbolo simbolo;
+        Symbol simbolo;
 
-        // --------------------------------------------------------
+        
         // ARREGLO
-        // --------------------------------------------------------
+        
         if (esArreglo) {
 
-            simbolo = new Simbolo(
+            simbolo = new Symbol(
                     nombre,
-                    TipoDato.ARREGLO,
-                    CategoriaSimbolo.ARREGLO,
+                    DataType.ARREGLO,
+                    SymbolKind.ARREGLO,
                     tabla.getNivelActual(),
                     tabla.getAmbitoActual()
             );
 
             simbolo.setTipoElemento(tipoBase);
 
-            if (tipoBase == TipoDato.ESTRUCTURA) {
+            if (tipoBase == DataType.ESTRUCTURA) {
                 simbolo.setTipoReferencia(nombreTipo);
             }
 
             for (YParser.DimensionesContext dimension
                     : ctx.dimensiones()) {
 
-                TipoDato tipoDimension
+                DataType tipoDimension
                         = obtenerTipoExpresion(
                                 dimension.expresion()
                         );
 
-                if (tipoDimension != TipoDato.ENTERO
-                        && tipoDimension != TipoDato.DESCONOCIDO) {
+                if (tipoDimension != DataType.ENTERO
+                        && tipoDimension != DataType.DESCONOCIDO) {
 
                     error(
                             "El tamaño de un arreglo "
@@ -251,22 +249,22 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
         } else {
 
-            simbolo = new Simbolo(
+            simbolo = new Symbol(
                     nombre,
                     tipoBase,
-                    CategoriaSimbolo.VARIABLE,
+                    SymbolKind.VARIABLE,
                     tabla.getNivelActual(),
                     tabla.getAmbitoActual()
             );
 
-            if (tipoBase == TipoDato.ESTRUCTURA) {
+            if (tipoBase == DataType.ESTRUCTURA) {
                 simbolo.setTipoReferencia(nombreTipo);
             }
         }
 
-        // --------------------------------------------------------
+        
         // INICIALIZACIÓN
-        // --------------------------------------------------------
+        
         if (ctx.inicializador() != null) {
 
             validarInicializadorVariable(
@@ -284,39 +282,39 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     public Void visitAsignacion(
             YParser.AsignacionContext ctx) {
 
-        // ============================================================
+        
         // TIPO DEL DESTINO COMPLETO
-        // ============================================================
-        TipoDato tipoDestino
+        
+        DataType tipoDestino
                 = obtenerTipoAcceso(
                         ctx.acceso()
                 );
 
         if (tipoDestino
-                == TipoDato.DESCONOCIDO) {
+                == DataType.DESCONOCIDO) {
 
             return null;
         }
 
-        // ============================================================
+        
         // TIPO DEL VALOR ASIGNADO
-        // ============================================================
-        TipoDato tipoRecibido
+        
+        DataType tipoRecibido
                 = obtenerTipoExpresion(
                         ctx.expresion()
                 );
 
         if (tipoRecibido
-                == TipoDato.DESCONOCIDO) {
+                == DataType.DESCONOCIDO) {
 
             return null;
         }
 
-        // ============================================================
+        
         // ASIGNACIÓN ENTRE ESTRUCTURAS
-        // ============================================================
-        if (tipoDestino == TipoDato.ESTRUCTURA
-                && tipoRecibido == TipoDato.ESTRUCTURA) {
+        
+        if (tipoDestino == DataType.ESTRUCTURA
+                && tipoRecibido == DataType.ESTRUCTURA) {
 
             String referenciaDestino
                     = obtenerTipoReferenciaAcceso(
@@ -346,9 +344,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             }
         }
 
-        // ============================================================
+        
         // VALIDAR COMPATIBILIDAD
-        // ============================================================
+        
         if (!compatibles(
                 tipoDestino,
                 tipoRecibido)) {
@@ -373,7 +371,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             YParser.RetornoContext ctx) {
 
         if (tipoRetornoActual
-                == TipoDato.VOID) {
+                == DataType.VOID) {
 
             error(
                     "No se puede utilizar retornar "
@@ -384,16 +382,16 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return null;
         }
 
-        TipoDato recibido
+        DataType recibido
                 = obtenerTipoExpresion(
                         ctx.expresion()
                 );
 
-        // ============================================================
+        
         // RETORNO DE ESTRUCTURAS
-        // ============================================================
-        if (tipoRetornoActual == TipoDato.ESTRUCTURA
-                && recibido == TipoDato.ESTRUCTURA) {
+        
+        if (tipoRetornoActual == DataType.ESTRUCTURA
+                && recibido == DataType.ESTRUCTURA) {
 
             String referenciaRecibida
                     = obtenerTipoReferenciaExpresion(
@@ -450,13 +448,13 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     public Void visitSentenciaSi(
             YParser.SentenciaSiContext ctx) {
 
-        TipoDato condicion
+        DataType condicion
                 = obtenerTipoExpresion(
                         ctx.expresion()
                 );
 
-        if (condicion != TipoDato.BOOLEANO
-                && condicion != TipoDato.DESCONOCIDO) {
+        if (condicion != DataType.BOOLEANO
+                && condicion != DataType.DESCONOCIDO) {
 
             error(
                     "La condición de 'si' debe ser booleana.",
@@ -473,15 +471,15 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         for (YParser.BloqueSinoContext sino
                 : ctx.bloqueSino()) {
 
-            TipoDato condicionSino
+            DataType condicionSino
                     = obtenerTipoExpresion(
                             sino.expresion()
                     );
 
             if (condicionSino
-                    != TipoDato.BOOLEANO
+                    != DataType.BOOLEANO
                     && condicionSino
-                    != TipoDato.DESCONOCIDO) {
+                    != DataType.DESCONOCIDO) {
 
                 error(
                         "La condición de 'sino' debe ser booleana.",
@@ -510,13 +508,13 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     public Void visitSentenciaMientras(
             YParser.SentenciaMientrasContext ctx) {
 
-        TipoDato condicion
+        DataType condicion
                 = obtenerTipoExpresion(
                         ctx.expresion()
                 );
 
-        if (condicion != TipoDato.BOOLEANO
-                && condicion != TipoDato.DESCONOCIDO) {
+        if (condicion != DataType.BOOLEANO
+                && condicion != DataType.DESCONOCIDO) {
 
             error(
                     "La condición de 'mientras' "
@@ -548,13 +546,13 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
         profundidadCiclos--;
 
-        TipoDato condicion
+        DataType condicion
                 = obtenerTipoExpresion(
                         ctx.expresion()
                 );
 
-        if (condicion != TipoDato.BOOLEANO
-                && condicion != TipoDato.DESCONOCIDO) {
+        if (condicion != DataType.BOOLEANO
+                && condicion != DataType.DESCONOCIDO) {
 
             error(
                     "La condición final de hacer-mientras "
@@ -581,14 +579,14 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
         if (ctx.expresion() != null) {
 
-            TipoDato condicion
+            DataType condicion
                     = obtenerTipoExpresion(
                             ctx.expresion()
                     );
 
-            if (condicion != TipoDato.BOOLEANO
+            if (condicion != DataType.BOOLEANO
                     && condicion
-                    != TipoDato.DESCONOCIDO) {
+                    != DataType.DESCONOCIDO) {
 
                 error(
                         "La condición del ciclo 'para' "
@@ -626,13 +624,13 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     public Void visitIncrementoDecremento(
             YParser.IncrementoDecrementoContext ctx) {
 
-        TipoDato tipo
+        DataType tipo
                 = obtenerTipoAcceso(
                         ctx.acceso()
                 );
 
         if (tipo
-                == TipoDato.DESCONOCIDO) {
+                == DataType.DESCONOCIDO) {
 
             return null;
         }
@@ -699,9 +697,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 = ctx.IDENTIFICADOR()
                         .getText();
 
-        // ============================================================
+        
         // EVITAR DUPLICADO EN EL MISMO ÁMBITO
-        // ============================================================
+        
         if (existeEstructuraEnAmbitoActual(nombre)) {
 
             error(
@@ -714,23 +712,23 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return null;
         }
 
-        EstructuraDef estructura
-                = new EstructuraDef(
+        StructDef estructura
+                = new StructDef(
                         nombre
                 );
 
-        // ============================================================
-        // IMPORTANTE:
+        
+
         // REGISTRAR PRIMERO PARA PERMITIR REFERENCIAS POSTERIORES
-        // ============================================================
+        
         registrarEstructuraEnAmbitoActual(
                 nombre,
                 estructura
         );
 
-        // ============================================================
+        
         // REGISTRAR ATRIBUTOS
-        // ============================================================
+        
         for (YParser.AtributoEstructuraContext atributoCtx
                 : ctx.atributoEstructura()) {
 
@@ -747,10 +745,10 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     public Void visitSeccionFunciones(
             YParser.SeccionFuncionesContext ctx) {
 
-        // ============================================================
+        
         // PASADA 1
         // Registrar todas las firmas
-        // ============================================================
+        
         registrandoFirmas = true;
 
         for (YParser.DefinicionFuncionContext funcionCtx
@@ -759,10 +757,10 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             registrarFirmaFuncion(funcionCtx);
         }
 
-        // ============================================================
+        
         // PASADA 2
         // Analizar los cuerpos
-        // ============================================================
+        
         registrandoFirmas = false;
 
         for (YParser.DefinicionFuncionContext funcionCtx
@@ -778,30 +776,30 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     public Void visitSentenciaElegir(
             YParser.SentenciaElegirContext ctx) {
 
-        // ============================================================
+        
         // TIPO DE LA EXPRESIÓN DEL ELEGIR
-        // ============================================================
-        TipoDato tipoSelector
+        
+        DataType tipoSelector
                 = obtenerTipoExpresion(
                         ctx.expresion()
                 );
 
         profundidadElegir++;
 
-        // ============================================================
+        
         // CASOS
-        // ============================================================
+        
         for (YParser.CasoElegirContext caso
                 : ctx.casoElegir()) {
 
-            TipoDato tipoCaso
+            DataType tipoCaso
                     = obtenerTipoExpresion(
                             caso.expresion()
                     );
 
-            // --------------------------------------------------------
+            
             // SELECTOR Y CASO DEBEN SER COMPARABLES
-            // --------------------------------------------------------
+            
             if (!tiposComparables(
                     tipoSelector,
                     tipoCaso)) {
@@ -822,9 +820,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             );
         }
 
-        // ============================================================
+        
         // SIEMPRE
-        // ============================================================
+        
         if (ctx.siempreElegir() != null) {
 
             visitarBloqueConAmbito(
@@ -857,10 +855,10 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         return null;
     }
 
-    //--------------------------------------------------------------------------
+    
     // FUNCIONES Y PROCEDIMIENTOS AUXILIARES A VISIT
-    //--------------------------------------------------------------------------
-    private TipoDato obtenerTipoParametro(
+    
+    private DataType obtenerTipoParametro(
             YParser.ParametroContext ctx) {
 
         if (ctx.parametroValor() != null) {
@@ -873,34 +871,34 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
         if (ctx.parametroArreglo() != null) {
 
-            return TipoDato.ARREGLO;
+            return DataType.ARREGLO;
         }
 
         if (ctx.parametroEstructura() != null) {
 
-            return TipoDato.ESTRUCTURA;
+            return DataType.ESTRUCTURA;
         }
 
-        return TipoDato.DESCONOCIDO;
+        return DataType.DESCONOCIDO;
     }
 
     private void registrarParametro(
             YParser.ParametroContext ctx) {
 
         String nombre;
-        TipoDato tipo;
+        DataType tipo;
 
         String tipoReferencia = null;
-        TipoDato tipoElemento = null;
+        DataType tipoElemento = null;
 
         boolean esArreglo = false;
 
-        // ========================================================
+        
         // 1. PARÁMETRO PRIMITIVO
         //
         // entero numero
         // flotante valor
-        // ========================================================
+        
         if (ctx.parametroValor() != null) {
 
             YParser.ParametroValorContext valor
@@ -912,12 +910,12 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             tipo = convertirTipoPrimitivo(
                     valor.tipoPrimitivo()
             );
-        } // ========================================================
+        } 
         // 2. PARÁMETRO ARREGLO POR REFERENCIA
         //
         // [] entero numeros
         // [] Persona personas
-        // ========================================================
+        
         else if (ctx.parametroArreglo() != null) {
 
             YParser.ParametroArregloContext arreglo
@@ -926,7 +924,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             nombre = arreglo.IDENTIFICADOR()
                     .getText();
 
-            tipo = TipoDato.ARREGLO;
+            tipo = DataType.ARREGLO;
             esArreglo = true;
 
             tipoElemento = convertirTipo(
@@ -936,7 +934,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             // Si es arreglo de estructuras:
             //
             // [] Persona personas
-            if (tipoElemento == TipoDato.ESTRUCTURA) {
+            if (tipoElemento == DataType.ESTRUCTURA) {
 
                 tipoReferencia = arreglo.tipo()
                         .getText();
@@ -955,11 +953,11 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 }
 
             }
-        } // ========================================================
+        } 
         // 3. PARÁMETRO ESTRUCTURA POR REFERENCIA
         //
         // {} Persona persona
-        // ========================================================
+        
         else if (ctx.parametroEstructura() != null) {
 
             YParser.ParametroEstructuraContext estructuraCtx
@@ -973,7 +971,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     = estructuraCtx.IDENTIFICADOR(1)
                             .getText();
 
-            tipo = TipoDato.ESTRUCTURA;
+            tipo = DataType.ESTRUCTURA;
 
             if (!existeEstructura(
                     tipoReferencia)) {
@@ -987,9 +985,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                         estructuraCtx
                 );
             }
-        } // ========================================================
+        } 
         // 4. ERROR INTERNO
-        // ========================================================
+        
         else {
 
             error(
@@ -1000,9 +998,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return;
         }
 
-        // ========================================================
+        
         // 5. DUPLICADO
-        // ========================================================
+        
         if (tabla.existeEnAmbitoActual(nombre)) {
 
             error(
@@ -1015,14 +1013,14 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return;
         }
 
-        // ========================================================
+        
         // 6. CREAR SÍMBOLO
-        // ========================================================
-        Simbolo simbolo
-                = new Simbolo(
+        
+        Symbol simbolo
+                = new Symbol(
                         nombre,
                         tipo,
-                        CategoriaSimbolo.PARAMETRO,
+                        SymbolKind.PARAMETRO,
                         tabla.getNivelActual(),
                         tabla.getAmbitoActual()
                 );
@@ -1035,18 +1033,12 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 tipoElemento
         );
 
-        // ========================================================
+        
         // 7. DIMENSIÓN DEL PARÁMETRO ARREGLO
-        // ========================================================
+        
         if (esArreglo) {
 
-            /*
-         * -1:
-         *
-         * sabemos que existe una dimensión,
-         * pero no conocemos su tamaño en esta función
-         * porque el arreglo llega por referencia.
-             */
+        
             simbolo.getDimensiones()
                     .add(-1);
         }
@@ -1055,13 +1047,13 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     }
 
     private boolean compatibles(
-            TipoDato esperado,
-            TipoDato recibido) {
+            DataType esperado,
+            DataType recibido) {
 
         if (esperado
-                == TipoDato.DESCONOCIDO
+                == DataType.DESCONOCIDO
                 || recibido
-                == TipoDato.DESCONOCIDO) {
+                == DataType.DESCONOCIDO) {
 
             return true;
         }
@@ -1073,16 +1065,16 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         // Promoción implícita:
         // entero -> flotante
         return esperado
-                == TipoDato.DECIMAL
+                == DataType.DECIMAL
                 && recibido
-                == TipoDato.ENTERO;
+                == DataType.ENTERO;
     }
 
-    private TipoDato obtenerTipoExpresion(
+    private DataType obtenerTipoExpresion(
             YParser.ExpresionContext ctx) {
 
         if (ctx == null) {
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
         return obtenerTipoOr(
@@ -1090,13 +1082,13 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         );
     }
 
-    // ============================================================
+    
     // OR
-    // ============================================================
-    private TipoDato obtenerTipoOr(
+    
+    private DataType obtenerTipoOr(
             YParser.ExpresionOrContext ctx) {
 
-        TipoDato tipoActual
+        DataType tipoActual
                 = obtenerTipoAnd(
                         ctx.expresionAnd(0)
                 );
@@ -1105,13 +1097,13 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 i < ctx.expresionAnd().size();
                 i++) {
 
-            TipoDato derecho
+            DataType derecho
                     = obtenerTipoAnd(
                             ctx.expresionAnd(i)
                     );
 
-            if (tipoActual != TipoDato.BOOLEANO
-                    || derecho != TipoDato.BOOLEANO) {
+            if (tipoActual != DataType.BOOLEANO
+                    || derecho != DataType.BOOLEANO) {
 
                 error(
                         "El operador || requiere operandos booleanos.",
@@ -1119,25 +1111,25 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 );
 
                 tipoActual
-                        = TipoDato.DESCONOCIDO;
+                        = DataType.DESCONOCIDO;
 
             } else {
 
                 tipoActual
-                        = TipoDato.BOOLEANO;
+                        = DataType.BOOLEANO;
             }
         }
 
         return tipoActual;
     }
 
-    // ============================================================
+    
     // AND
-    // ============================================================
-    private TipoDato obtenerTipoAnd(
+    
+    private DataType obtenerTipoAnd(
             YParser.ExpresionAndContext ctx) {
 
-        TipoDato tipoActual
+        DataType tipoActual
                 = obtenerTipoIgualdad(
                         ctx.expresionIgualdad(0)
                 );
@@ -1146,13 +1138,13 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 i < ctx.expresionIgualdad().size();
                 i++) {
 
-            TipoDato derecho
+            DataType derecho
                     = obtenerTipoIgualdad(
                             ctx.expresionIgualdad(i)
                     );
 
-            if (tipoActual != TipoDato.BOOLEANO
-                    || derecho != TipoDato.BOOLEANO) {
+            if (tipoActual != DataType.BOOLEANO
+                    || derecho != DataType.BOOLEANO) {
 
                 error(
                         "El operador && requiere operandos booleanos.",
@@ -1160,27 +1152,27 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 );
 
                 tipoActual
-                        = TipoDato.DESCONOCIDO;
+                        = DataType.DESCONOCIDO;
 
             } else {
 
                 tipoActual
-                        = TipoDato.BOOLEANO;
+                        = DataType.BOOLEANO;
             }
         }
 
         return tipoActual;
     }
 
-    // ============================================================
+    
     // IGUALDAD
     // ==
     // !=
-    // ============================================================
-    private TipoDato obtenerTipoIgualdad(
+    
+    private DataType obtenerTipoIgualdad(
             YParser.ExpresionIgualdadContext ctx) {
 
-        TipoDato tipoActual
+        DataType tipoActual
                 = obtenerTipoRelacional(
                         ctx.expresionRelacional(0)
                 );
@@ -1189,7 +1181,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 i < ctx.expresionRelacional().size();
                 i++) {
 
-            TipoDato derecho
+            DataType derecho
                     = obtenerTipoRelacional(
                             ctx.expresionRelacional(i)
                     );
@@ -1209,21 +1201,21 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             }
 
             tipoActual
-                    = TipoDato.BOOLEANO;
+                    = DataType.BOOLEANO;
         }
 
         return tipoActual;
     }
 
-    // ============================================================
+    
     // RELACIONALES
     // <
     // >
-    // ============================================================
-    private TipoDato obtenerTipoRelacional(
+    
+    private DataType obtenerTipoRelacional(
             YParser.ExpresionRelacionalContext ctx) {
 
-        TipoDato tipoActual
+        DataType tipoActual
                 = obtenerTipoAditiva(
                         ctx.expresionAditiva(0)
                 );
@@ -1232,7 +1224,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 i < ctx.expresionAditiva().size();
                 i++) {
 
-            TipoDato derecho
+            DataType derecho
                     = obtenerTipoAditiva(
                             ctx.expresionAditiva(i)
                     );
@@ -1248,21 +1240,21 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             }
 
             tipoActual
-                    = TipoDato.BOOLEANO;
+                    = DataType.BOOLEANO;
         }
 
         return tipoActual;
     }
 
-    // ============================================================
+    
     // ADITIVA
     // +
     // -
-    // ============================================================
-    private TipoDato obtenerTipoAditiva(
+    
+    private DataType obtenerTipoAditiva(
             YParser.ExpresionAditivaContext ctx) {
 
-        TipoDato tipoActual
+        DataType tipoActual
                 = obtenerTipoMultiplicativa(
                         ctx.expresionMultiplicativa(0)
                 );
@@ -1271,7 +1263,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 i < ctx.expresionMultiplicativa().size();
                 i++) {
 
-            TipoDato derecho
+            DataType derecho
                     = obtenerTipoMultiplicativa(
                             ctx.expresionMultiplicativa(i)
                     );
@@ -1305,15 +1297,15 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         return tipoActual;
     }
 
-    // ============================================================
+    
     // MULTIPLICATIVA
     // *
     // /
-    // ============================================================
-    private TipoDato obtenerTipoMultiplicativa(
+    
+    private DataType obtenerTipoMultiplicativa(
             YParser.ExpresionMultiplicativaContext ctx) {
 
-        TipoDato tipoActual
+        DataType tipoActual
                 = obtenerTipoUnaria(
                         ctx.expresionUnaria(0)
                 );
@@ -1322,7 +1314,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 i < ctx.expresionUnaria().size();
                 i++) {
 
-            TipoDato derecho
+            DataType derecho
                     = obtenerTipoUnaria(
                             ctx.expresionUnaria(i)
                     );
@@ -1344,37 +1336,37 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         return tipoActual;
     }
 
-    // ============================================================
+    
     // UNARIOS
     // !
     // -
-    // ============================================================
-    private TipoDato obtenerTipoUnaria(
+    
+    private DataType obtenerTipoUnaria(
             YParser.ExpresionUnariaContext ctx) {
 
         if (ctx.NOT() != null) {
 
-            TipoDato tipo
+            DataType tipo
                     = obtenerTipoUnaria(
                             ctx.expresionUnaria()
                     );
 
-            if (tipo != TipoDato.BOOLEANO) {
+            if (tipo != DataType.BOOLEANO) {
 
                 error(
                         "El operador ! requiere una expresión booleana.",
                         ctx
                 );
 
-                return TipoDato.DESCONOCIDO;
+                return DataType.DESCONOCIDO;
             }
 
-            return TipoDato.BOOLEANO;
+            return DataType.BOOLEANO;
         }
 
         if (ctx.MENOS() != null) {
 
-            TipoDato tipo
+            DataType tipo
                     = obtenerTipoUnaria(
                             ctx.expresionUnaria()
                     );
@@ -1387,7 +1379,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                         ctx
                 );
 
-                return TipoDato.DESCONOCIDO;
+                return DataType.DESCONOCIDO;
             }
 
             return tipo;
@@ -1398,32 +1390,32 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         );
     }
 
-    // ============================================================
+    
     // PRIMARIAS
-    // ============================================================
-    private TipoDato obtenerTipoPrimaria(
+    
+    private DataType obtenerTipoPrimaria(
             YParser.ExpresionPrimariaContext ctx) {
 
         if (ctx.ENTERO() != null) {
-            return TipoDato.ENTERO;
+            return DataType.ENTERO;
         }
 
         if (ctx.DECIMAL() != null) {
-            return TipoDato.DECIMAL;
+            return DataType.DECIMAL;
         }
 
         if (ctx.CADENA() != null) {
-            return TipoDato.CADENA;
+            return DataType.CADENA;
         }
 
         if (ctx.CARACTER() != null) {
-            return TipoDato.CARACTER;
+            return DataType.CARACTER;
         }
 
         if (ctx.VERDADERO() != null
                 || ctx.FALSO() != null) {
 
-            return TipoDato.BOOLEANO;
+            return DataType.BOOLEANO;
         }
 
         if (ctx.acceso() != null) {
@@ -1442,7 +1434,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
         if (ctx.lectura() != null) {
 
-            return TipoDato.CADENA;
+            return DataType.CADENA;
         }
 
         if (ctx.expresion() != null) {
@@ -1452,20 +1444,20 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             );
         }
 
-        return TipoDato.DESCONOCIDO;
+        return DataType.DESCONOCIDO;
     }
 
-    // ============================================================
+    
     // ACCESOS
-    // ============================================================
-    private TipoDato obtenerTipoAcceso(
+    
+    private DataType obtenerTipoAcceso(
             YParser.AccesoContext ctx) {
 
         String nombreBase
                 = ctx.IDENTIFICADOR()
                         .getText();
 
-        Simbolo actual
+        Symbol actual
                 = tabla.buscar(nombreBase);
 
         if (actual == null) {
@@ -1477,10 +1469,10 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     ctx
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        TipoDato tipoActual
+        DataType tipoActual
                 = actual.getTipo();
 
         String estructuraActual
@@ -1488,11 +1480,11 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
         int dimensionesRestantes = 0;
 
-        if (tipoActual == TipoDato.ARREGLO) {
+        if (tipoActual == DataType.ARREGLO) {
 
             boolean parametroRangoDinamico
                     = actual.getCategoria()
-                    == CategoriaSimbolo.PARAMETRO
+                    == SymbolKind.PARAMETRO
                     && actual.getDimensiones().size() == 1
                     && actual.getDimensiones().get(0) == -1;
 
@@ -1523,7 +1515,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             // ====================================================
             if (sufijo.expresion() != null) {
 
-                if (tipoActual != TipoDato.ARREGLO
+                if (tipoActual != DataType.ARREGLO
                         || dimensionesRestantes <= 0) {
 
                     error(
@@ -1533,16 +1525,16 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                             sufijo
                     );
 
-                    return TipoDato.DESCONOCIDO;
+                    return DataType.DESCONOCIDO;
                 }
 
-                TipoDato indice
+                DataType indice
                         = obtenerTipoExpresion(
                                 sufijo.expresion()
                         );
 
-                if (indice != TipoDato.ENTERO
-                        && indice != TipoDato.DESCONOCIDO) {
+                if (indice != DataType.ENTERO
+                        && indice != DataType.DESCONOCIDO) {
 
                     error(
                             "El índice de un arreglo "
@@ -1556,7 +1548,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 if (dimensionesRestantes > 0) {
 
                     tipoActual
-                            = TipoDato.ARREGLO;
+                            = DataType.ARREGLO;
 
                 } else {
 
@@ -1580,7 +1572,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     = sufijo.IDENTIFICADOR()
                             .getText();
 
-            if (tipoActual == TipoDato.ARREGLO) {
+            if (tipoActual == DataType.ARREGLO) {
 
                 error(
                         "No se puede acceder al atributo '"
@@ -1590,10 +1582,10 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                         sufijo
                 );
 
-                return TipoDato.DESCONOCIDO;
+                return DataType.DESCONOCIDO;
             }
 
-            if (tipoActual != TipoDato.ESTRUCTURA) {
+            if (tipoActual != DataType.ESTRUCTURA) {
 
                 error(
                         "No se puede acceder al atributo '"
@@ -1603,10 +1595,10 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                         sufijo
                 );
 
-                return TipoDato.DESCONOCIDO;
+                return DataType.DESCONOCIDO;
             }
 
-            EstructuraDef estructura
+            StructDef estructura
                     = buscarEstructura(
                             estructuraActual
                     );
@@ -1620,10 +1612,10 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                         sufijo
                 );
 
-                return TipoDato.DESCONOCIDO;
+                return DataType.DESCONOCIDO;
             }
 
-            Simbolo atributo
+            Symbol atributo
                     = estructura.buscarAtributo(
                             nombreAtributo
                     );
@@ -1639,7 +1631,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                         sufijo
                 );
 
-                return TipoDato.DESCONOCIDO;
+                return DataType.DESCONOCIDO;
             }
 
             actual = atributo;
@@ -1647,7 +1639,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             estructuraActual = atributo.getTipoReferencia();
 
             dimensionesRestantes
-                    = tipoActual == TipoDato.ARREGLO
+                    = tipoActual == DataType.ARREGLO
                             ? atributo.getDimensiones().size()
                             : 0;
         }
@@ -1655,17 +1647,17 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         return tipoActual;
     }
 
-    // ============================================================
+    
     // LLAMADAS A FUNCIONES
-    // ============================================================
-    private TipoDato obtenerTipoLlamada(
+    
+    private DataType obtenerTipoLlamada(
             YParser.LlamadaFuncionContext ctx) {
 
         String nombre
                 = ctx.IDENTIFICADOR()
                         .getText();
 
-        Simbolo funcion
+        Symbol funcion
                 = tabla.buscar(nombre);
 
         if (funcion == null) {
@@ -1677,11 +1669,11 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     ctx
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
         if (funcion.getCategoria()
-                != CategoriaSimbolo.FUNCION) {
+                != SymbolKind.FUNCION) {
 
             error(
                     "'"
@@ -1690,7 +1682,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     ctx
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
         int cantidadArgumentos
@@ -1704,9 +1696,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 = funcion.getParametrosInfo()
                         .size();
 
-        // ============================================================
+        
         // CONSISTENCIA INTERNA DE LA FIRMA
-        // ============================================================
+        
         if (funcion.getParametros().size()
                 != funcion.getParametrosInfo().size()) {
 
@@ -1721,9 +1713,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return funcion.getTipo();
         }
 
-        // ============================================================
+        
         // CANTIDAD DE ARGUMENTOS
-        // ============================================================
+        
         if (cantidadArgumentos
                 != cantidadParametros) {
 
@@ -1741,9 +1733,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return funcion.getTipo();
         }
 
-        // ============================================================
+        
         // VALIDAR CADA ARGUMENTO
-        // ============================================================
+        
         if (ctx.argumentos() != null) {
 
             for (int i = 0;
@@ -1754,7 +1746,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                         = ctx.argumentos()
                                 .expresion(i);
 
-                ParametroInfo esperado
+                ParamInfo esperado
                         = funcion.getParametrosInfo()
                                 .get(i);
 
@@ -1766,13 +1758,13 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
                 if (!valido) {
 
-                    // ========================================================
+                    
                     // PARÁMETRO POR REFERENCIA
-                    // ========================================================
+                    
                     if (esperado.isPorReferencia()) {
 
-                        Simbolo simboloArgumento
-                                = obtenerSimboloArgumento(
+                        Symbol simboloArgumento
+                                = obtenerSymbolArgumento(
                                         argumento
                                 );
 
@@ -1791,10 +1783,10 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                         }
                     }
 
-                    // ========================================================
+                    
                     // INCOMPATIBILIDAD DE TIPOS
-                    // ========================================================
-                    TipoDato recibido
+                    
+                    DataType recibido
                             = obtenerTipoExpresion(
                                     argumento
                             );
@@ -1818,32 +1810,32 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         return funcion.getTipo();
     }
 
-    // ============================================================
+    
     // SUMA
-    // ============================================================
-    private TipoDato resolverSuma(
-            TipoDato izquierdo,
-            TipoDato derecho,
+    
+    private DataType resolverSuma(
+            DataType izquierdo,
+            DataType derecho,
             org.antlr.v4.runtime.ParserRuleContext ctx) {
 
         // entero + entero
-        if (izquierdo == TipoDato.ENTERO
-                && derecho == TipoDato.ENTERO) {
+        if (izquierdo == DataType.ENTERO
+                && derecho == DataType.ENTERO) {
 
-            return TipoDato.ENTERO;
+            return DataType.ENTERO;
         }
 
         // combinación de entero y flotante
         if (esNumerico(izquierdo)
                 && esNumerico(derecho)) {
 
-            return TipoDato.DECIMAL;
+            return DataType.DECIMAL;
         }
 
-        if (izquierdo == TipoDato.CADENA
-                && derecho == TipoDato.CADENA) {
+        if (izquierdo == DataType.CADENA
+                && derecho == DataType.CADENA) {
 
-            return TipoDato.CADENA;
+            return DataType.CADENA;
         }
 
         error(
@@ -1856,15 +1848,15 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 ctx
         );
 
-        return TipoDato.DESCONOCIDO;
+        return DataType.DESCONOCIDO;
     }
 
-// ============================================================
+
 // OPERACIONES NUMÉRICAS
-// ============================================================
-    private TipoDato resolverOperacionNumerica(
-            TipoDato izquierdo,
-            TipoDato derecho,
+
+    private DataType resolverOperacionNumerica(
+            DataType izquierdo,
+            DataType derecho,
             String operador,
             org.antlr.v4.runtime.ParserRuleContext ctx) {
 
@@ -1883,34 +1875,34 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     ctx
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        if (izquierdo == TipoDato.DECIMAL
-                || derecho == TipoDato.DECIMAL) {
+        if (izquierdo == DataType.DECIMAL
+                || derecho == DataType.DECIMAL) {
 
-            return TipoDato.DECIMAL;
+            return DataType.DECIMAL;
         }
 
-        return TipoDato.ENTERO;
+        return DataType.ENTERO;
     }
 
-// ============================================================
-// UTILIDADES DE TIPOS
-// ============================================================
-    private boolean esNumerico(
-            TipoDato tipo) {
 
-        return tipo == TipoDato.ENTERO
-                || tipo == TipoDato.DECIMAL;
+// UTILIDADES DE TIPOS
+
+    private boolean esNumerico(
+            DataType tipo) {
+
+        return tipo == DataType.ENTERO
+                || tipo == DataType.DECIMAL;
     }
 
     private boolean tiposComparables(
-            TipoDato izquierdo,
-            TipoDato derecho) {
+            DataType izquierdo,
+            DataType derecho) {
 
-        if (izquierdo == TipoDato.DESCONOCIDO
-                || derecho == TipoDato.DESCONOCIDO) {
+        if (izquierdo == DataType.DESCONOCIDO
+                || derecho == DataType.DESCONOCIDO) {
 
             return true;
         }
@@ -1934,7 +1926,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     }
 
     private void registrarAtributoEstructura(
-            EstructuraDef estructura,
+            StructDef estructura,
             YParser.AtributoEstructuraContext ctx) {
 
         String nombre
@@ -1955,12 +1947,12 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return;
         }
 
-        TipoDato tipoBase
+        DataType tipoBase
                 = convertirTipo(
                         ctx.tipo()
                 );
 
-        if (tipoBase == TipoDato.ESTRUCTURA) {
+        if (tipoBase == DataType.ESTRUCTURA) {
 
             String nombreTipo
                     = ctx.tipo()
@@ -1984,14 +1976,14 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 = !ctx.dimensionConstante()
                         .isEmpty();
 
-        Simbolo atributo;
+        Symbol atributo;
 
         if (esArreglo) {
 
-            atributo = new Simbolo(
+            atributo = new Symbol(
                     nombre,
-                    TipoDato.ARREGLO,
-                    CategoriaSimbolo.ATRIBUTO,
+                    DataType.ARREGLO,
+                    SymbolKind.ATRIBUTO,
                     0,
                     0
             );
@@ -2001,7 +1993,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             );
 
             if (tipoBase
-                    == TipoDato.ESTRUCTURA) {
+                    == DataType.ESTRUCTURA) {
 
                 atributo.setTipoReferencia(
                         ctx.tipo()
@@ -2032,16 +2024,16 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
         } else {
 
-            atributo = new Simbolo(
+            atributo = new Symbol(
                     nombre,
                     tipoBase,
-                    CategoriaSimbolo.ATRIBUTO,
+                    SymbolKind.ATRIBUTO,
                     0,
                     0
             );
 
             if (tipoBase
-                    == TipoDato.ESTRUCTURA) {
+                    == DataType.ESTRUCTURA) {
 
                 atributo.setTipoReferencia(
                         ctx.tipo()
@@ -2055,17 +2047,17 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         );
     }
 
-    public Map<String, EstructuraDef> getEstructuras() {
+    public Map<String, StructDef> getEstructuras() {
         return estructuras;
     }
 
-    private ParametroInfo construirParametroInfo(
+    private ParamInfo construirParamInfo(
             YParser.ParametroContext ctx) {
 
-        // ========================================================
+        
         // PRIMITIVO POR VALOR
         // entero x
-        // ========================================================
+        
         if (ctx.parametroValor() != null) {
 
             YParser.ParametroValorContext valor
@@ -2075,12 +2067,12 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     = valor.IDENTIFICADOR()
                             .getText();
 
-            TipoDato tipo
+            DataType tipo
                     = convertirTipoPrimitivo(
                             valor.tipoPrimitivo()
                     );
 
-            return new ParametroInfo(
+            return new ParamInfo(
                     nombre,
                     tipo,
                     null,
@@ -2089,11 +2081,11 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             );
         }
 
-        // ========================================================
+        
         // ARREGLO POR REFERENCIA
         // [] entero numeros
         // [] Persona personas
-        // ========================================================
+        
         if (ctx.parametroArreglo() != null) {
 
             YParser.ParametroArregloContext arreglo
@@ -2103,33 +2095,33 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     = arreglo.IDENTIFICADOR()
                             .getText();
 
-            TipoDato tipoElemento
+            DataType tipoElemento
                     = convertirTipo(
                             arreglo.tipo()
                     );
 
             String tipoReferencia = null;
 
-            if (tipoElemento == TipoDato.ESTRUCTURA) {
+            if (tipoElemento == DataType.ESTRUCTURA) {
 
                 tipoReferencia
                         = arreglo.tipo()
                                 .getText();
             }
 
-            return new ParametroInfo(
+            return new ParamInfo(
                     nombre,
-                    TipoDato.ARREGLO,
+                    DataType.ARREGLO,
                     tipoElemento,
                     tipoReferencia,
                     true
             );
         }
 
-        // ========================================================
+        
         // ESTRUCTURA POR REFERENCIA
         // {} Persona persona
-        // ========================================================
+        
         if (ctx.parametroEstructura() != null) {
 
             YParser.ParametroEstructuraContext estructura
@@ -2143,25 +2135,25 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     = estructura.IDENTIFICADOR(1)
                             .getText();
 
-            return new ParametroInfo(
+            return new ParamInfo(
                     nombre,
-                    TipoDato.ESTRUCTURA,
+                    DataType.ESTRUCTURA,
                     null,
                     tipoReferencia,
                     true
             );
         }
 
-        return new ParametroInfo(
+        return new ParamInfo(
                 "?",
-                TipoDato.DESCONOCIDO,
+                DataType.DESCONOCIDO,
                 null,
                 null,
                 false
         );
     }
 
-    private Simbolo obtenerSimboloArgumento(
+    private Symbol obtenerSymbolArgumento(
             YParser.ExpresionContext expresion) {
 
         try {
@@ -2177,9 +2169,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                             .expresionUnaria(0)
                             .expresionPrimaria();
 
-            // ============================================================
+            
             // PARA PASO POR REFERENCIA SOLO ACEPTAMOS UN ACCESO
-            // ============================================================
+            
             if (primaria == null
                     || primaria.acceso() == null) {
 
@@ -2189,12 +2181,12 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             YParser.AccesoContext acceso
                     = primaria.acceso();
 
-            // ============================================================
+            
             // VARIABLE DIRECTA
             //
             // persona
             // personas
-            // ============================================================
+            
             if (acceso.sufijoAcceso().isEmpty()) {
 
                 return tabla.buscar(
@@ -2203,38 +2195,38 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 );
             }
 
-            // ============================================================
+            
             // ACCESO COMPLEJO
             //
             // persona.direccion
             // personas[0]
             // personas[0].direccion
-            // ============================================================
-            TipoDato tipoFinal
+            
+            DataType tipoFinal
                     = obtenerTipoAcceso(
                             acceso
                     );
 
             if (tipoFinal
-                    == TipoDato.DESCONOCIDO) {
+                    == DataType.DESCONOCIDO) {
 
                 return null;
             }
 
-            Simbolo simboloTemporal
-                    = new Simbolo(
+            Symbol simboloTemporal
+                    = new Symbol(
                             acceso.getText(),
                             tipoFinal,
-                            CategoriaSimbolo.VARIABLE,
+                            SymbolKind.VARIABLE,
                             tabla.getNivelActual(),
                             tabla.getAmbitoActual()
                     );
 
-            // ============================================================
+            
             // SI EL RESULTADO FINAL ES UNA ESTRUCTURA
-            // ============================================================
+            
             if (tipoFinal
-                    == TipoDato.ESTRUCTURA) {
+                    == DataType.ESTRUCTURA) {
 
                 String tipoReferencia
                         = obtenerTipoReferenciaAcceso(
@@ -2255,17 +2247,17 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     }
 
     private boolean validarParametro(
-            ParametroInfo esperado,
+            ParamInfo esperado,
             YParser.ExpresionContext argumento) {
 
-        TipoDato recibido
+        DataType recibido
                 = obtenerTipoExpresion(
                         argumento
                 );
 
-        // ========================================================
+        
         // PRIMITIVO POR VALOR
-        // ========================================================
+        
         if (!esperado.isPorReferencia()) {
 
             return compatibles(
@@ -2274,11 +2266,11 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             );
         }
 
-        // ========================================================
+        
         // POR REFERENCIA
-        // ========================================================
-        Simbolo simboloArgumento
-                = obtenerSimboloArgumento(
+        
+        Symbol simboloArgumento
+                = obtenerSymbolArgumento(
                         argumento
                 );
 
@@ -2286,14 +2278,14 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return false;
         }
 
-        // ========================================================
+        
         // ESTRUCTURA
-        // ========================================================
+        
         if (esperado.getTipo()
-                == TipoDato.ESTRUCTURA) {
+                == DataType.ESTRUCTURA) {
 
             if (simboloArgumento.getTipo()
-                    != TipoDato.ESTRUCTURA) {
+                    != DataType.ESTRUCTURA) {
 
                 return false;
             }
@@ -2305,14 +2297,14 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     );
         }
 
-        // ========================================================
+        
         // ARREGLO
-        // ========================================================
+        
         if (esperado.getTipo()
-                == TipoDato.ARREGLO) {
+                == DataType.ARREGLO) {
 
             if (simboloArgumento.getTipo()
-                    != TipoDato.ARREGLO) {
+                    != DataType.ARREGLO) {
 
                 return false;
             }
@@ -2332,7 +2324,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
          * también comparamos Persona.
              */
             if (esperado.getTipoElemento()
-                    == TipoDato.ESTRUCTURA) {
+                    == DataType.ESTRUCTURA) {
 
                 return esperado.getTipoReferencia()
                         .equals(
@@ -2348,20 +2340,20 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     }
 
     private String describirParametro(
-            ParametroInfo parametro) {
+            ParamInfo parametro) {
 
         if (parametro.getTipo()
-                == TipoDato.ESTRUCTURA) {
+                == DataType.ESTRUCTURA) {
 
             return "ESTRUCTURA "
                     + parametro.getTipoReferencia();
         }
 
         if (parametro.getTipo()
-                == TipoDato.ARREGLO) {
+                == DataType.ARREGLO) {
 
             if (parametro.getTipoElemento()
-                    == TipoDato.ESTRUCTURA) {
+                    == DataType.ESTRUCTURA) {
 
                 return "ARREGLO DE "
                         + parametro.getTipoReferencia();
@@ -2382,21 +2374,21 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 = ctx.IDENTIFICADOR()
                         .getText();
 
-        TipoDato retorno
+        DataType retorno
                 = ctx.retornoFuncion() != null
                 ? convertirTipo(
                         ctx.retornoFuncion()
                                 .tipo()
                 )
-                : TipoDato.VOID;
+                : DataType.VOID;
 
         String tipoReferenciaRetorno = null;
 
-        // ============================================================
+        
         // VALIDAR TIPO DE RETORNO ESTRUCTURA
-        // ============================================================
+        
         if (ctx.retornoFuncion() != null
-                && retorno == TipoDato.ESTRUCTURA) {
+                && retorno == DataType.ESTRUCTURA) {
 
             tipoReferenciaRetorno
                     = ctx.retornoFuncion()
@@ -2418,9 +2410,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             }
         }
 
-        // ============================================================
+        
         // FUNCIÓN DUPLICADA
-        // ============================================================
+        
         if (tabla.existeEnAmbitoActual(nombre)) {
 
             error(
@@ -2433,28 +2425,28 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return;
         }
 
-        // ============================================================
+        
         // CREAR FUNCIÓN
-        // ============================================================
-        Simbolo funcion
-                = new Simbolo(
+        
+        Symbol funcion
+                = new Symbol(
                         nombre,
                         retorno,
-                        CategoriaSimbolo.FUNCION,
+                        SymbolKind.FUNCION,
                         tabla.getNivelActual(),
                         tabla.getAmbitoActual()
                 );
 
-        if (retorno == TipoDato.ESTRUCTURA) {
+        if (retorno == DataType.ESTRUCTURA) {
 
             funcion.setTipoReferencia(
                     tipoReferenciaRetorno
             );
         }
 
-        // ============================================================
+        
         // REGISTRAR FIRMA
-        // ============================================================
+        
         if (ctx.parametros() != null) {
 
             for (YParser.ParametroContext parametro
@@ -2468,7 +2460,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 );
 
                 funcion.getParametrosInfo().add(
-                        construirParametroInfo(
+                        construirParamInfo(
                                 parametro
                         )
                 );
@@ -2490,7 +2482,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 = ctx.IDENTIFICADOR()
                         .getText();
 
-        Simbolo funcion
+        Symbol funcion
                 = funcionesRegistradas.get(ctx);
 
         if (funcion == null) {
@@ -2503,27 +2495,27 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 new LinkedHashMap<>()
         );
 
-        // ============================================================
+        
         // GUARDAR CONTEXTO DE RETORNO ANTERIOR
-        // ============================================================
-        TipoDato retornoAnterior
+        
+        DataType retornoAnterior
                 = tipoRetornoActual;
 
         String referenciaRetornoAnterior
                 = tipoReferenciaRetornoActual;
 
-        // ============================================================
+        
         // ESTABLECER RETORNO DE LA FUNCIÓN ACTUAL
-        // ============================================================
+        
         tipoRetornoActual
                 = funcion.getTipo();
 
         tipoReferenciaRetornoActual
                 = funcion.getTipoReferencia();
 
-        // ============================================================
+        
         // REGISTRAR PARÁMETROS DEL ÁMBITO LOCAL
-        // ============================================================
+        
         if (ctx.parametros() != null) {
 
             for (YParser.ParametroContext parametro
@@ -2535,16 +2527,16 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             }
         }
 
-        // ============================================================
+        
         // ANALIZAR CUERPO
-        // ============================================================
+        
         visit(
                 ctx.bloqueFuncion()
         );
 
-        // ============================================================
+        
         // RESTAURAR CONTEXTO ANTERIOR
-        // ============================================================
+        
         tipoRetornoActual
                 = retornoAnterior;
 
@@ -2557,25 +2549,25 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     }
 
     private void validarInicializadorVariable(
-            Simbolo simbolo,
+            Symbol simbolo,
             YParser.InicializadorContext ctx,
             String nombre) {
 
-        // ============================================================
+        
         // INICIALIZACIÓN NORMAL MEDIANTE EXPRESIÓN
-        // ============================================================
+        
         if (ctx.expresion() != null) {
 
-            TipoDato recibido
+            DataType recibido
                     = obtenerTipoExpresion(
                             ctx.expresion()
                     );
 
-            // ============================================================
+            
             // INICIALIZACIÓN ENTRE ESTRUCTURAS
-            // ============================================================
-            if (simbolo.getTipo() == TipoDato.ESTRUCTURA
-                    && recibido == TipoDato.ESTRUCTURA) {
+            
+            if (simbolo.getTipo() == DataType.ESTRUCTURA
+                    && recibido == DataType.ESTRUCTURA) {
 
                 String referenciaEsperada
                         = simbolo.getTipoReferencia();
@@ -2605,7 +2597,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 }
             }
 
-            if (simbolo.getTipo() == TipoDato.ARREGLO) {
+            if (simbolo.getTipo() == DataType.ARREGLO) {
 
                 error(
                         "El arreglo '"
@@ -2637,12 +2629,12 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return;
         }
 
-        // ============================================================
+        
         // INICIALIZACIÓN CON { ... }
-        // ============================================================
+        
         if (ctx.inicializadorLista() != null) {
 
-            if (simbolo.getTipo() == TipoDato.ARREGLO) {
+            if (simbolo.getTipo() == DataType.ARREGLO) {
 
                 validarInicializacionArreglo(
                         simbolo,
@@ -2653,7 +2645,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 return;
             }
 
-            if (simbolo.getTipo() == TipoDato.ESTRUCTURA) {
+            if (simbolo.getTipo() == DataType.ESTRUCTURA) {
 
                 validarInicializacionEstructuraLista(
                         simbolo,
@@ -2676,7 +2668,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     }
 
     private void validarInicializacionArreglo(
-            Simbolo simbolo,
+            Symbol simbolo,
             YParser.InicializadorListaContext ctx,
             String nombre) {
 
@@ -2698,7 +2690,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     }
 
     private void validarNivelArreglo(
-            Simbolo simbolo,
+            Symbol simbolo,
             List<YParser.InicializadorContext> valores,
             String nombre,
             int dimension,
@@ -2737,11 +2729,11 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
             if (ultimaDimension) {
 
-                // ============================================================
+                
                 // ARREGLO DE ESTRUCTURAS
-                // ============================================================
+                
                 if (simbolo.getTipoElemento()
-                        == TipoDato.ESTRUCTURA) {
+                        == DataType.ESTRUCTURA) {
 
                     if (valor.inicializadorLista() != null) {
 
@@ -2761,11 +2753,11 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                             continue;
                         }
 
-                        Simbolo simboloTemporal
-                                = new Simbolo(
+                        Symbol simboloTemporal
+                                = new Symbol(
                                         nombre,
-                                        TipoDato.ESTRUCTURA,
-                                        CategoriaSimbolo.VARIABLE,
+                                        DataType.ESTRUCTURA,
+                                        SymbolKind.VARIABLE,
                                         0,
                                         0
                                 );
@@ -2783,18 +2775,18 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                         continue;
                     }
 
-                    // ========================================================
+                    
                     // También puede recibirse una expresión que ya sea
                     // una estructura, por ejemplo otra variable Persona.
-                    // ========================================================
+                    
                     if (valor.expresion() != null) {
 
-                        TipoDato recibido
+                        DataType recibido
                                 = obtenerTipoExpresion(
                                         valor.expresion()
                                 );
 
-                        if (recibido != TipoDato.ESTRUCTURA) {
+                        if (recibido != DataType.ESTRUCTURA) {
 
                             error(
                                     "Elemento incompatible en el arreglo '"
@@ -2847,9 +2839,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     continue;
                 }
 
-                // ============================================================
+                
                 // ARREGLO DE TIPOS NORMALES
-                // ============================================================
+                
                 if (valor.expresion() == null) {
 
                     error(
@@ -2864,7 +2856,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                     continue;
                 }
 
-                TipoDato recibido
+                DataType recibido
                         = obtenerTipoExpresion(
                                 valor.expresion()
                         );
@@ -2914,7 +2906,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
     }
 
     private void validarInicializacionEstructuraLista(
-            Simbolo simbolo,
+            Symbol simbolo,
             YParser.InicializadorListaContext ctx,
             String nombre) {
 
@@ -2934,7 +2926,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return;
         }
 
-        EstructuraDef estructura
+        StructDef estructura
                 = buscarEstructura(
                         tipoReferencia
                 );
@@ -2951,15 +2943,15 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return;
         }
 
-        List<Simbolo> atributos
+        List<Symbol> atributos
                 = estructura.getAtributosOrdenados();
 
         List<YParser.InicializadorContext> valores
                 = ctx.inicializador();
 
-        // ============================================================
+        
         // CANTIDAD DE VALORES
-        // ============================================================
+        
         if (valores.size()
                 != atributos.size()) {
 
@@ -2991,7 +2983,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 i < cantidad;
                 i++) {
 
-            Simbolo atributo
+            Symbol atributo
                     = atributos.get(i);
 
             YParser.InicializadorContext valor
@@ -3008,17 +3000,17 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
     private void validarValorAtributoEstructura(
             String nombreEstructura,
-            Simbolo atributo,
+            Symbol atributo,
             YParser.InicializadorContext valor,
             int posicion) {
 
-        // ============================================================
+        
         // ATRIBUTO NORMAL
-        // ============================================================
+        
         if (atributo.getTipo()
-                != TipoDato.ARREGLO
+                != DataType.ARREGLO
                 && atributo.getTipo()
-                != TipoDato.ESTRUCTURA) {
+                != DataType.ESTRUCTURA) {
 
             if (valor.expresion() == null) {
 
@@ -3036,7 +3028,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 return;
             }
 
-            TipoDato recibido
+            DataType recibido
                     = obtenerTipoExpresion(
                             valor.expresion()
                     );
@@ -3062,11 +3054,11 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return;
         }
 
-        // ============================================================
+        
         // ATRIBUTO QUE ES OTRA ESTRUCTURA
-        // ============================================================
+        
         if (atributo.getTipo()
-                == TipoDato.ESTRUCTURA) {
+                == DataType.ESTRUCTURA) {
 
             if (valor.inicializadorLista() == null) {
 
@@ -3082,11 +3074,11 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 return;
             }
 
-            Simbolo simboloTemporal
-                    = new Simbolo(
+            Symbol simboloTemporal
+                    = new Symbol(
                             atributo.getNombre(),
-                            TipoDato.ESTRUCTURA,
-                            CategoriaSimbolo.VARIABLE,
+                            DataType.ESTRUCTURA,
+                            SymbolKind.VARIABLE,
                             0,
                             0
                     );
@@ -3104,11 +3096,11 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             return;
         }
 
-        // ============================================================
+        
         // ATRIBUTO ARREGLO
-        // ============================================================
+        
         if (atributo.getTipo()
-                == TipoDato.ARREGLO) {
+                == DataType.ARREGLO) {
 
             if (valor.inicializadorLista() == null) {
 
@@ -3137,33 +3129,33 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 = ctx.IDENTIFICADOR()
                         .getText();
 
-        Simbolo actual
+        Symbol actual
                 = tabla.buscar(nombreBase);
 
         if (actual == null) {
             return null;
         }
 
-        TipoDato tipoActual
+        DataType tipoActual
                 = actual.getTipo();
 
         String estructuraActual
                 = actual.getTipoReferencia();
 
         int dimensionesRestantes
-                = tipoActual == TipoDato.ARREGLO
+                = tipoActual == DataType.ARREGLO
                         ? actual.getDimensiones().size()
                         : 0;
 
         for (YParser.SufijoAccesoContext sufijo
                 : ctx.sufijoAcceso()) {
 
-            // ========================================================
+            
             // ACCESO POR ÍNDICE [...]
-            // ========================================================
+            
             if (sufijo.expresion() != null) {
 
-                if (tipoActual != TipoDato.ARREGLO) {
+                if (tipoActual != DataType.ARREGLO) {
                     return null;
                 }
 
@@ -3175,7 +3167,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
                 if (dimensionesRestantes > 0) {
 
-                    tipoActual = TipoDato.ARREGLO;
+                    tipoActual = DataType.ARREGLO;
 
                 } else {
 
@@ -3189,20 +3181,20 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 continue;
             }
 
-            // ========================================================
+            
             // ACCESO A ATRIBUTO .nombre
-            // ========================================================
+            
             if (sufijo.IDENTIFICADOR() != null) {
 
-                if (tipoActual == TipoDato.ARREGLO) {
+                if (tipoActual == DataType.ARREGLO) {
                     return null;
                 }
 
-                if (tipoActual != TipoDato.ESTRUCTURA) {
+                if (tipoActual != DataType.ESTRUCTURA) {
                     return null;
                 }
 
-                EstructuraDef estructura
+                StructDef estructura
                         = buscarEstructura(
                                 estructuraActual
                         );
@@ -3215,7 +3207,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                         = sufijo.IDENTIFICADOR()
                                 .getText();
 
-                Simbolo atributo
+                Symbol atributo
                         = estructura.buscarAtributo(
                                 nombreAtributo
                         );
@@ -3233,13 +3225,13 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                         = atributo.getTipoReferencia();
 
                 dimensionesRestantes
-                        = tipoActual == TipoDato.ARREGLO
+                        = tipoActual == DataType.ARREGLO
                                 ? atributo.getDimensiones().size()
                                 : 0;
             }
         }
 
-        if (tipoActual == TipoDato.ESTRUCTURA) {
+        if (tipoActual == DataType.ESTRUCTURA) {
             return estructuraActual;
         }
 
@@ -3270,9 +3262,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 );
             }
 
-            // ============================================================
+            
             // LLAMADA A FUNCIÓN QUE RETORNA ESTRUCTURA
-            // ============================================================
+            
             if (primaria != null
                     && primaria.llamadaFuncion() != null) {
 
@@ -3281,7 +3273,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                                 .IDENTIFICADOR()
                                 .getText();
 
-                Simbolo funcion
+                Symbol funcion
                         = tabla.buscar(
                                 nombreFuncion
                         );
@@ -3291,12 +3283,12 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
                 }
 
                 if (funcion.getCategoria()
-                        != CategoriaSimbolo.FUNCION) {
+                        != SymbolKind.FUNCION) {
                     return null;
                 }
 
                 if (funcion.getTipo()
-                        != TipoDato.ESTRUCTURA) {
+                        != DataType.ESTRUCTURA) {
                     return null;
                 }
 
@@ -3311,16 +3303,16 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
         return null;
     }
 
-    private EstructuraDef buscarEstructura(
+    private StructDef buscarEstructura(
             String nombre) {
 
-        // ============================================================
+        
         // PRIMERO BUSCAR EN ÁMBITOS LOCALES
-        // ============================================================
-        for (Map<String, EstructuraDef> ambito
+        
+        for (Map<String, StructDef> ambito
                 : ambitosEstructuras) {
 
-            EstructuraDef encontrada
+            StructDef encontrada
                     = ambito.get(nombre);
 
             if (encontrada != null) {
@@ -3328,9 +3320,9 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
             }
         }
 
-        // ============================================================
+        
         // DESPUÉS BUSCAR GLOBALMENTE
-        // ============================================================
+        
         return estructuras.get(nombre);
     }
 
@@ -3355,7 +3347,7 @@ public class YAnalyzer extends YParserBaseVisitor<Void> {
 
     private void registrarEstructuraEnAmbitoActual(
             String nombre,
-            EstructuraDef estructura) {
+            StructDef estructura) {
 
         if (!ambitosEstructuras.isEmpty()) {
 

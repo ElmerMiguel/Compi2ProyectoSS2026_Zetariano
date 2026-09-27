@@ -1,329 +1,155 @@
-/*
- */
 package elmer.compi2.zetariano.imports;
 
-import elmer.compi2.zetariano.analysis.symbol.CategoriaSimbolo;
-import elmer.compi2.zetariano.analysis.symbol.EstructuraDef.EstructuraDef;
-import elmer.compi2.zetariano.analysis.symbol.ParametroInfo;
-import elmer.compi2.zetariano.analysis.symbol.Simbolo.Simbolo;
-import elmer.compi2.zetariano.analysis.symbol.TipoDato;
-import elmer.compi2.zetariano.analysis.semantic.SemanticoY;
+import elmer.compi2.zetariano.analysis.symbol.SymbolKind;
+import elmer.compi2.zetariano.analysis.symbol.StructDef;
+import elmer.compi2.zetariano.analysis.symbol.ParamInfo;
+import elmer.compi2.zetariano.analysis.symbol.Symbol;
+import elmer.compi2.zetariano.analysis.symbol.DataType;
+import elmer.compi2.zetariano.analysis.semantic.YAnalyzer;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * Adaptador para importar estructuras y funciones de Y hacia Pig Latin.
  */
 public class AdaptadorImportYPig {
 
-    public void importar(
-            SemanticoY semanticoY,
-            RegistroImportsPig registro) {
-
-        if (semanticoY == null
-                || registro == null) {
-
+    public void importar(YAnalyzer semanticoY, RegistroImportsPig registro) {
+        if (semanticoY == null || registro == null) {
             return;
         }
 
-        // =====================================================
         // 1. IMPORTAR ESTRUCTURAS
-        // =====================================================
-        for (Map.Entry<String, EstructuraDef> entrada
-                : semanticoY.getEstructuras().entrySet()) {
+        for (Map.Entry<String, StructDef> entrada : semanticoY.getEstructuras().entrySet()) {
+            StructDef estructuraY = entrada.getValue();
+            ClaseImportadaPig clasePig = new ClaseImportadaPig(
+                    estructuraY.getNombre(),
+                    TipoImportPig.Y
+            );
 
-            EstructuraDef estructuraY
-                    = entrada.getValue();
-
-            ClaseImportadaPig clasePig
-                    = new ClaseImportadaPig(
-                            estructuraY.getNombre(),
-                            TipoImportPig.Y
-                    );
-
-            for (Simbolo atributoY
-                    : estructuraY.getAtributosOrdenados()) {
-
-                String tipo
-                        = describirTipoAtributo(
-                                atributoY
-                        );
-
-                int dimensiones
-                        = atributoY.getDimensiones().size();
-
-                AtributoImportadoPig atributoPig
-                        = new AtributoImportadoPig(
-                                atributoY.getNombre(),
-                                tipo,
-                                dimensiones
-                        );
-
-                clasePig.registrarAtributo(
-                        atributoPig
+            for (Symbol atributoY : estructuraY.getAtributosOrdenados()) {
+                String tipo = describirTipoAtributo(atributoY);
+                int dimensiones = atributoY.getDimensiones().size();
+                AtributoImportadoPig atributoPig = new AtributoImportadoPig(
+                        atributoY.getNombre(),
+                        tipo,
+                        dimensiones
                 );
+                clasePig.registrarAtributo(atributoPig);
             }
 
-            registro.registrarClase(
-                    clasePig
-            );
+            registro.registrarClase(clasePig);
         }
 
-        // =====================================================
         // 2. IMPORTAR FUNCIONES
-        // =====================================================
-        for (Simbolo simbolo
-                : semanticoY.getTabla().getSimbolos()) {
-
-            if (simbolo.getCategoria()
-                    != CategoriaSimbolo.FUNCION) {
-
+        for (Symbol simbolo : semanticoY.getTabla().getSimbolos()) {
+            if (simbolo.getCategoria() != SymbolKind.FUNCION) {
                 continue;
             }
 
-            String nombre
-                    = simbolo.getNombre();
+            String nombre = simbolo.getNombre();
+            String retorno = describirTipoSimbolo(simbolo);
+            List<String> tiposParametros = new ArrayList<>();
 
-            String retorno
-                    = describirTipoSimbolo(
-                            simbolo
-                    );
-
-            List<String> tiposParametros
-                    = new ArrayList<>();
-
-            for (ParametroInfo parametro
-                    : simbolo.getParametrosInfo()) {
-
-                tiposParametros.add(
-                        describirParametro(
-                                parametro
-                        )
-                );
+            for (ParamInfo parametro : simbolo.getParametrosInfo()) {
+                tiposParametros.add(describirParametro(parametro));
             }
 
-            String firma
-                    = construirFirma(
-                            nombre,
-                            tiposParametros
-                    );
-
-            ClaseImportadaPig contenedor
-                    = registro.buscarClase(
-                            "$Y_GLOBAL"
-                    );
+            String firma = construirFirma(nombre, tiposParametros);
+            ClaseImportadaPig contenedor = registro.buscarClase("$Y_GLOBAL");
 
             if (contenedor == null) {
-
-                contenedor
-                        = new ClaseImportadaPig(
-                                "$Y_GLOBAL",
-                                TipoImportPig.Y
-                        );
-
-                registro.registrarClase(
-                        contenedor
-                );
+                contenedor = new ClaseImportadaPig("$Y_GLOBAL", TipoImportPig.Y);
+                registro.registrarClase(contenedor);
             }
 
-            MetodoImportadoPig funcionPig
-                    = new MetodoImportadoPig(
-                            nombre,
-                            firma,
-                            retorno,
-                            tiposParametros,
-                            false
-                    );
-
-            contenedor.registrarMetodo(
-                    funcionPig
+            MetodoImportadoPig funcionPig = new MetodoImportadoPig(
+                    nombre,
+                    firma,
+                    retorno,
+                    tiposParametros,
+                    false
             );
+
+            contenedor.registrarMetodo(funcionPig);
         }
     }
 
-    // =========================================================
-    // CONVERTIR TIPO Y -> TIPO COMUN PIG
-    // =========================================================
-    private String describirTipoAtributo(
-            Simbolo simbolo) {
+    private String describirTipoAtributo(Symbol simbolo) {
+        DataType tipo = (simbolo.getTipo() == DataType.ARREGLO)
+                ? simbolo.getTipoElemento()
+                : simbolo.getTipo();
 
-        TipoDato tipo;
-
-        if (simbolo.getTipo()
-                == TipoDato.ARREGLO) {
-
-            tipo = simbolo.getTipoElemento();
-
-        } else {
-
-            tipo = simbolo.getTipo();
+        if (tipo == DataType.ESTRUCTURA) {
+            String referencia = simbolo.getTipoReferencia();
+            return (referencia == null) ? "any" : referencia;
         }
 
-        // Estructura definida por el usuario
-        if (tipo == TipoDato.ESTRUCTURA) {
-
-            String referencia
-                    = simbolo.getTipoReferencia();
-
-            return referencia == null
-                    ? "any"
-                    : referencia;
-        }
-
-        return convertirTipo(
-                tipo
-        );
+        return convertirTipo(tipo);
     }
 
-    // =========================================================
-    // TIPOS Y -> TIPOS DE IMPORTACION PIG
-    // =========================================================
-    private String convertirTipo(
-            TipoDato tipo) {
-
+    private String convertirTipo(DataType tipo) {
         if (tipo == null) {
             return "any";
         }
 
         return switch (tipo) {
-
-            case ENTERO ->
-                "int";
-
-            case DECIMAL ->
-                "float";
-
-            case CADENA ->
-                "string";
-
-            case CARACTER ->
-                "char";
-
-            case BOOLEANO ->
-                "bool";
-
-            case VOID ->
-                "void";
-
-            default ->
-                "any";
+            case ENTERO -> "int";
+            case DECIMAL -> "float";
+            case CADENA -> "string";
+            case CARACTER -> "char";
+            case BOOLEANO -> "bool";
+            case VOID -> "void";
+            default -> "any";
         };
     }
 
-    // =========================================================
-    // TIPO COMPLETO DE UN SIMBOLO
-    // =========================================================
-    private String describirTipoSimbolo(
-            Simbolo simbolo) {
-
+    private String describirTipoSimbolo(Symbol simbolo) {
         if (simbolo == null) {
             return "any";
         }
 
-        if (simbolo.getTipo()
-                == TipoDato.ESTRUCTURA) {
-
-            return simbolo.getTipoReferencia() == null
-                    ? "any"
-                    : simbolo.getTipoReferencia();
+        if (simbolo.getTipo() == DataType.ESTRUCTURA) {
+            return (simbolo.getTipoReferencia() == null) ? "any" : simbolo.getTipoReferencia();
         }
 
-        if (simbolo.getTipo()
-                == TipoDato.ARREGLO) {
+        if (simbolo.getTipo() == DataType.ARREGLO) {
+            String base = (simbolo.getTipoElemento() == DataType.ESTRUCTURA)
+                    ? (simbolo.getTipoReferencia() == null ? "any" : simbolo.getTipoReferencia())
+                    : convertirTipo(simbolo.getTipoElemento());
 
-            String base;
-
-            if (simbolo.getTipoElemento()
-                    == TipoDato.ESTRUCTURA) {
-
-                base = simbolo.getTipoReferencia() == null
-                        ? "any"
-                        : simbolo.getTipoReferencia();
-
-            } else {
-
-                base = convertirTipo(
-                        simbolo.getTipoElemento()
-                );
-            }
-
-            StringBuilder resultado
-                    = new StringBuilder(base);
-
-            for (int i = 0;
-                    i < simbolo.getDimensiones().size();
-                    i++) {
-
+            StringBuilder resultado = new StringBuilder(base);
+            for (int i = 0; i < simbolo.getDimensiones().size(); i++) {
                 resultado.append("[]");
             }
-
             return resultado.toString();
         }
 
-        return convertirTipo(
-                simbolo.getTipo()
-        );
+        return convertirTipo(simbolo.getTipo());
     }
 
-    // =========================================================
-    // TIPO DE PARAMETRO
-    // =========================================================
-    private String describirParametro(
-            ParametroInfo parametro) {
-
+    private String describirParametro(ParamInfo parametro) {
         if (parametro == null) {
             return "any";
         }
 
-        if (parametro.getTipo()
-                == TipoDato.ESTRUCTURA) {
-
-            return parametro.getTipoReferencia() == null
-                    ? "any"
-                    : parametro.getTipoReferencia();
+        if (parametro.getTipo() == DataType.ESTRUCTURA) {
+            return (parametro.getTipoReferencia() == null) ? "any" : parametro.getTipoReferencia();
         }
 
-        if (parametro.getTipo()
-                == TipoDato.ARREGLO) {
-
-            String base;
-
-            if (parametro.getTipoElemento()
-                    == TipoDato.ESTRUCTURA) {
-
-                base = parametro.getTipoReferencia() == null
-                        ? "any"
-                        : parametro.getTipoReferencia();
-
-            } else {
-
-                base = convertirTipo(
-                        parametro.getTipoElemento()
-                );
-            }
-
+        if (parametro.getTipo() == DataType.ARREGLO) {
+            String base = (parametro.getTipoElemento() == DataType.ESTRUCTURA)
+                    ? (parametro.getTipoReferencia() == null ? "any" : parametro.getTipoReferencia())
+                    : convertirTipo(parametro.getTipoElemento());
             return base + "[]";
         }
 
-        return convertirTipo(
-                parametro.getTipo()
-        );
+        return convertirTipo(parametro.getTipo());
     }
 
-    // =========================================================
-    // CONSTRUIR FIRMA
-    // =========================================================
-    private String construirFirma(
-            String nombre,
-            List<String> parametros) {
-
-        return nombre
-                + "("
-                + String.join(
-                        ",",
-                        parametros
-                )
-                + ")";
+    private String construirFirma(String nombre, List<String> parametros) {
+        return nombre + "(" + String.join(",", parametros) + ")";
     }
 }

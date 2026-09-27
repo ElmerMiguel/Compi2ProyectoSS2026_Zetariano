@@ -1,14 +1,11 @@
-/*
- */
+
 package elmer.compi2.zetariano.runtime.zeta;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- *
- */
+
 public class ClaseMemoriaZ {
 
     private final String nombre;

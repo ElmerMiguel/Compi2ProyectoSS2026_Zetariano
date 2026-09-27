@@ -1,13 +1,10 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.zeta;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
+
 public class NuevoArregloASTZ extends ExpresionASTZ {
 
     private final String tipoBase;

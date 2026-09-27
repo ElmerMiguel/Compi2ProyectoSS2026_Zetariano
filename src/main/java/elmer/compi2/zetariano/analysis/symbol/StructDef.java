@@ -41,6 +41,13 @@ public class StructDef {
         return fields.get(fieldName);
     }
 
+    public String getNombre() { return name; }
+    public Map<String, Symbol> getAtributos() { return fields; }
+    public List<Symbol> getAtributosOrdenados() { return getOrderedFields(); }
+    public boolean existeAtributo(String nombre) { return hasField(nombre); }
+    public void agregarAtributo(Symbol atributo) { addField(atributo); }
+    public Symbol buscarAtributo(String nombre) { return findField(nombre); }
+
     @Override
     public String toString() {
         return "StructDef{" +

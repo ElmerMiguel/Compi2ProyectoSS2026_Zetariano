@@ -1,14 +1,11 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.piglatin;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- */
+
 public class PasoAccesoASTPig {
 
     public enum TipoPaso {
@@ -38,9 +35,9 @@ public class PasoAccesoASTPig {
                         : new ArrayList<>(argumentos);
     }
 
-    // =========================================================
+    // --------------------
     // ATRIBUTO
-    // =========================================================
+    // --------------------
     public static PasoAccesoASTPig atributo(
             String nombre) {
 
@@ -52,9 +49,9 @@ public class PasoAccesoASTPig {
         );
     }
 
-    // =========================================================
+    // --------------------
     // INDICE
-    // =========================================================
+    // --------------------
     public static PasoAccesoASTPig indice(
             ExpresionASTPig indice) {
 
@@ -66,9 +63,9 @@ public class PasoAccesoASTPig {
         );
     }
 
-    // =========================================================
+    // --------------------
     // LLAMADA
-    // =========================================================
+    // --------------------
     public static PasoAccesoASTPig llamada(
             String nombre,
             List<ExpresionASTPig> argumentos) {

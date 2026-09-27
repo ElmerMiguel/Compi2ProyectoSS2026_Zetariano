@@ -1,23 +1,20 @@
-/*
- */
+
 package elmer.compi2.zetariano.enlace;
 
-import elmer.compi2.zetariano.codegen.Cuadruplo;
+import elmer.compi2.zetariano.codegen.Instruction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- */
+
 public class EnlazadorC3D {
 
-    private final List<List<Cuadruplo>> modulosY;
-    private final List<List<Cuadruplo>> modulosZ;
+    private final List<List<Instruction>> modulosY;
+    private final List<List<Instruction>> modulosZ;
 
-    private List<Cuadruplo> moduloPig;
+    private List<Instruction> moduloPig;
 
     private final List<String> errores;
 
@@ -31,11 +28,11 @@ public class EnlazadorC3D {
         this.errores = new ArrayList<>();
     }
 
-    // =========================================================
+    // --------------------
     // AGREGAR MODULO Y
-    // =========================================================
+    // --------------------
     public void agregarModuloY(
-            List<Cuadruplo> modulo) {
+            List<Instruction> modulo) {
 
         if (modulo == null) {
             return;
@@ -46,11 +43,11 @@ public class EnlazadorC3D {
         );
     }
 
-    // =========================================================
+    // --------------------
     // AGREGAR MODULO Z
-    // =========================================================
+    // --------------------
     public void agregarModuloZ(
-            List<Cuadruplo> modulo) {
+            List<Instruction> modulo) {
 
         if (modulo == null) {
             return;
@@ -61,11 +58,11 @@ public class EnlazadorC3D {
         );
     }
 
-    // =========================================================
+    // --------------------
     // ESTABLECER PIG
-    // =========================================================
+    // --------------------
     public void establecerModuloPig(
-            List<Cuadruplo> modulo) {
+            List<Instruction> modulo) {
 
         this.moduloPig
                 = modulo == null
@@ -73,20 +70,20 @@ public class EnlazadorC3D {
                         : new ArrayList<>(modulo);
     }
 
-    // =========================================================
+    // --------------------
     // ENLAZAR
-    // =========================================================
-    public List<Cuadruplo> enlazar() {
+    // --------------------
+    public List<Instruction> enlazar() {
 
         errores.clear();
 
-        List<Cuadruplo> combinado
+        List<Instruction> combinado
                 = new ArrayList<>();
 
-        // =====================================================
+        
         // 1. Y
-        // =====================================================
-        for (List<Cuadruplo> modulo
+        
+        for (List<Instruction> modulo
                 : modulosY) {
 
             copiarModulo(
@@ -95,10 +92,10 @@ public class EnlazadorC3D {
             );
         }
 
-        // =====================================================
+        
         // 2. Z
-        // =====================================================
-        for (List<Cuadruplo> modulo
+        
+        for (List<Instruction> modulo
                 : modulosZ) {
 
             copiarModulo(
@@ -107,20 +104,19 @@ public class EnlazadorC3D {
             );
         }
 
-        // =====================================================
+        
         // 3. PIG
         //
-        // Lo dejamos al final porque main_pig será
-        // nuestro punto de entrada final.
-        // =====================================================
+        // main_ping ptEntrada final
+        
         copiarModulo(
                 moduloPig,
                 combinado
         );
 
-        // =====================================================
+        
         // 4. VALIDAR FUNCIONES
-        // =====================================================
+        
         validarFunciones(
                 combinado
         );
@@ -128,18 +124,18 @@ public class EnlazadorC3D {
         return combinado;
     }
 
-    // =========================================================
+    // --------------------
     // COPIAR Y NORMALIZAR MODULO
-    // =========================================================
+    // --------------------
     private void copiarModulo(
-            List<Cuadruplo> origen,
-            List<Cuadruplo> destino) {
+            List<Instruction> origen,
+            List<Instruction> destino) {
 
         if (origen == null) {
             return;
         }
 
-        for (Cuadruplo cuadruplo
+        for (Instruction cuadruplo
                 : origen) {
 
             if (cuadruplo == null) {
@@ -147,18 +143,18 @@ public class EnlazadorC3D {
             }
 
             destino.add(
-                    normalizarCuadruplo(
+                    normalizarInstruction(
                             cuadruplo
                     )
             );
         }
     }
 
-    // =========================================================
+    // --------------------
     // NORMALIZAR CUADRUPLO
-    // =========================================================
-    private Cuadruplo normalizarCuadruplo(
-            Cuadruplo original) {
+    // --------------------
+    private Instruction normalizarInstruction(
+            Instruction original) {
 
         String operador
                 = original.getOperador();
@@ -180,7 +176,7 @@ public class EnlazadorC3D {
                             argumento1
                     );
 
-            return new Cuadruplo(
+            return new Instruction(
                     "LABEL",
                     null,
                     null,
@@ -196,7 +192,7 @@ public class EnlazadorC3D {
                             argumento1
                     );
 
-            return new Cuadruplo(
+            return new Instruction(
                     "GOTO",
                     null,
                     null,
@@ -217,7 +213,7 @@ public class EnlazadorC3D {
                 argumento2 = null;
             }
 
-            return new Cuadruplo(
+            return new Instruction(
                     operador,
                     argumento1,
                     null,
@@ -225,10 +221,10 @@ public class EnlazadorC3D {
             );
         }
 
-        // =====================================================
+        
         // RESTO
-        // =====================================================
-        return new Cuadruplo(
+        
+        return new Instruction(
                 operador,
                 argumento1,
                 argumento2,
@@ -236,11 +232,11 @@ public class EnlazadorC3D {
         );
     }
 
-    // =========================================================
+    // --------------------
     // VALIDACION DE FUNCIONES
-    // =========================================================
+    // --------------------
     private void validarFunciones(
-            List<Cuadruplo> cuadruplos) {
+            List<Instruction> cuadruplos) {
 
         Set<String> funciones
                 = new LinkedHashSet<>();
@@ -248,10 +244,10 @@ public class EnlazadorC3D {
         Set<String> llamadas
                 = new LinkedHashSet<>();
 
-        // =====================================================
+        
         // RECOLECTAR
-        // =====================================================
-        for (Cuadruplo cuadruplo
+        
+        for (Instruction cuadruplo
                 : cuadruplos) {
 
             if (cuadruplo == null) {
@@ -297,9 +293,9 @@ public class EnlazadorC3D {
             }
         }
 
-        // =====================================================
+        
         // VERIFICAR CALLS
-        // =====================================================
+        
         for (String llamada
                 : llamadas) {
 
@@ -313,9 +309,9 @@ public class EnlazadorC3D {
             }
         }
 
-        // =====================================================
+        
         // VERIFICAR MAIN PIG
-        // =====================================================
+        
         if (!funciones.contains(
                 "main_pig")) {
 
@@ -325,9 +321,9 @@ public class EnlazadorC3D {
         }
     }
 
-    // =========================================================
+    // --------------------
     // UTILIDADES
-    // =========================================================
+    // --------------------
     private String primerValorValido(
             String primero,
             String segundo) {
@@ -354,9 +350,9 @@ public class EnlazadorC3D {
         );
     }
 
-    // =========================================================
+    // --------------------
     // ERRORES
-    // =========================================================
+    // --------------------
     public boolean tieneErrores() {
         return !errores.isEmpty();
     }

@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.runtime;
 
-/**
- *
- */
+
 public class VariableMemoria {
 
     private final String nombre;

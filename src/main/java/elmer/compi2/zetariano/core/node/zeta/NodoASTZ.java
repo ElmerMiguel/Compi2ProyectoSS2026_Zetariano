@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.zeta;
 
-/**
- *
- */
+
 public abstract class NodoASTZ {
 
     private final int linea;

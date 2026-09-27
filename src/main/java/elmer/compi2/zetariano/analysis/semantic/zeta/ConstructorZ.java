@@ -1,14 +1,11 @@
-/*
- */
+
 package elmer.compi2.zetariano.analysis.semantic.zeta;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- */
+
 public class ConstructorZ {
 
     private final String nombre;

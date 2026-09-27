@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.zeta;
 
-/**
- *
- */
+
 public class ReturnASTZ extends SentenciaASTZ {
 
     private final ExpresionASTZ expresion;

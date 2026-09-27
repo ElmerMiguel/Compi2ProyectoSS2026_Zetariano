@@ -1,12 +1,11 @@
-/*
- */
+
 package elmer.compi2.zetariano.imports;
 
 import elmer.compi2.zetariano.parser.zeta.ZTreeBuilder;
 import elmer.compi2.zetariano.core.node.zeta.ProgramaASTZ;
 import elmer.compi2.zetariano.runtime.zeta.ConstructorMarcosZ;
 import elmer.compi2.zetariano.runtime.zeta.TablaMemoriaZ;
-import elmer.compi2.zetariano.analysis.semantic.SemanticoZ;
+import elmer.compi2.zetariano.analysis.semantic.ZAnalyzer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,17 +23,15 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
 import elmer.compi2.zetariano.antlr.zeta.ZLexer;
 import elmer.compi2.zetariano.antlr.zeta.ZParser;
 
-/**
- *
- */
+
 public class CargadorImportZPig {
 
     /*
      * Una misma instancia conserva las clases Z cargadas anteriormente.
      * De esta forma Pila.z puede utilizar la clase declarada en Nodo.z.
      */
-    private final SemanticoZ semanticoCompartido
-            = new SemanticoZ();
+    private final ZAnalyzer semanticoCompartido
+            = new ZAnalyzer();
 
     private ProgramaASTZ ultimoProgramaAST;
 
@@ -45,16 +42,16 @@ public class CargadorImportZPig {
     public TablaMemoriaZ cargarTabla(String rutaArchivo)
             throws IOException {
 
-        // ==========================================
+        
         // 1. LEER ARCHIVO .z
-        // ==========================================
+        
         String codigo = Files.readString(
                 Path.of(rutaArchivo)
         );
 
-        // ==========================================
+        
         // 2. LEXER
-        // ==========================================
+        
         CharStream input
                 = CharStreams.fromString(codigo);
 
@@ -122,9 +119,9 @@ public class CargadorImportZPig {
 
         tokens.seek(0);
 
-        // ==========================================
+        
         // 3. PARSER
-        // ==========================================
+        
         ZParser parser
                 = new ZParser(tokens);
 
@@ -172,9 +169,9 @@ public class CargadorImportZPig {
             );
         }
 
-        // ==========================================
+        
         // VALIDAR NOMBRE DEL ARCHIVO Y DE LA CLASE
-        // ==========================================
+        
         String nombreArchivo
                 = Path.of(rutaArchivo)
                         .getFileName()
@@ -209,9 +206,9 @@ public class CargadorImportZPig {
             );
         }
 
-        // ==========================================
+        
         // 4. ANALISIS SEMANTICO Z
-        // ==========================================
+        
         semanticoCompartido.analizarAcumulando(
                 arbol
         );
@@ -241,9 +238,9 @@ public class CargadorImportZPig {
             );
         }
 
-        // ==========================================
+        
         // 4. AST Z
-        // ==========================================
+        
         ZTreeBuilder builder
                 = new ZTreeBuilder();
 
@@ -261,9 +258,9 @@ public class CargadorImportZPig {
 
         ultimoProgramaAST = programaAST;
 
-        // ==========================================
+        
         // 5. TABLA DE MEMORIA Z
-        // ==========================================
+        
         ConstructorMarcosZ constructorMarcos
                 = new ConstructorMarcosZ();
 

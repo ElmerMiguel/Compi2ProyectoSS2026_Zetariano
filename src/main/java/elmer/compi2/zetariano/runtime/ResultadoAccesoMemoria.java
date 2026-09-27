@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.runtime;
 
-/**
- *
- */
+
 public class ResultadoAccesoMemoria {
 
     private final String direccion;

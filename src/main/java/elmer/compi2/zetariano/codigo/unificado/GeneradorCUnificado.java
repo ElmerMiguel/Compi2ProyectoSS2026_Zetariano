@@ -1,8 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.codigo.unificado;
 
-import elmer.compi2.zetariano.codegen.Cuadruplo;
+import elmer.compi2.zetariano.codegen.Instruction;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -10,12 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- */
+
 public class GeneradorCUnificado {
 
-    private final List<Cuadruplo> cuadruplos;
+    private final List<Instruction> cuadruplos;
 
     private final StringBuilder salida;
 
@@ -27,7 +24,7 @@ public class GeneradorCUnificado {
     private final Set<String> funciones;
 
     public GeneradorCUnificado(
-            List<Cuadruplo> cuadruplos) {
+            List<Instruction> cuadruplos) {
 
         this.cuadruplos
                 = cuadruplos == null
@@ -44,9 +41,9 @@ public class GeneradorCUnificado {
                 = new LinkedHashSet<>();
     }
 
-    // =========================================================
+    // --------------------
     // GENERAR
-    // =========================================================
+    // --------------------
     public String generar() {
 
         salida.setLength(0);
@@ -69,14 +66,14 @@ public class GeneradorCUnificado {
         return salida.toString();
     }
 
-    // =========================================================
+    // --------------------
     // RECOLECCION
-    // =========================================================
+    // --------------------
     private void recolectar() {
 
         String funcionActual = null;
 
-        for (Cuadruplo cuadruplo
+        for (Instruction cuadruplo
                 : cuadruplos) {
 
             if (cuadruplo == null) {
@@ -159,9 +156,9 @@ public class GeneradorCUnificado {
                 .add(valor);
     }
 
-    // =========================================================
+    // --------------------
     // ENCABEZADO
-    // =========================================================
+    // --------------------
     private void generarEncabezado() {
 
         salida.append(
@@ -211,9 +208,9 @@ public class GeneradorCUnificado {
         );
     }
 
-    // =========================================================
+    // --------------------
     // RUNTIME
-    // =========================================================
+    // --------------------
     private void generarRuntime() {
 
         generarRuntimePrintString();
@@ -598,9 +595,9 @@ public class GeneradorCUnificado {
         );
     }
 
-    // =========================================================
+    // --------------------
     // PROTOTIPOS
-    // =========================================================
+    // --------------------
     private void generarPrototipos() {
 
         for (String funcion
@@ -624,16 +621,16 @@ public class GeneradorCUnificado {
         salida.append("\n");
     }
 
-    // =========================================================
+    // --------------------
     // FUNCIONES
-    // =========================================================
+    // --------------------
     private void generarFunciones() {
 
         String funcionActual = null;
 
         boolean dentroFuncion = false;
 
-        for (Cuadruplo cuadruplo
+        for (Instruction cuadruplo
                 : cuadruplos) {
 
             if (cuadruplo == null) {
@@ -750,11 +747,11 @@ public class GeneradorCUnificado {
         );
     }
 
-    // =========================================================
+    // --------------------
     // TRADUCCION
-    // =========================================================
+    // --------------------
     private void traducir(
-            Cuadruplo cuadruplo) {
+            Instruction cuadruplo) {
 
         String operador
                 = cuadruplo.getOperador();
@@ -776,16 +773,16 @@ public class GeneradorCUnificado {
 
         switch (operador) {
 
-            // =================================================
+            
             // METADATA
-            // =================================================
+            
             case "DECL", "PARAM" -> {
                 return;
             }
 
-            // =================================================
+            
             // ASIGNACION
-            // =================================================
+            
             case "=" -> {
 
                 linea(
@@ -796,9 +793,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // BINARIOS
-            // =================================================
+            
             case "+", "*", "/", "<", ">", "<=", ">=", "==", "!=", "&&", "||" -> {
 
                 linea(
@@ -845,9 +842,9 @@ public class GeneradorCUnificado {
                 }
             }
 
-            // =================================================
+            
             // MODULO
-            // =================================================
+            
             case "%" -> {
 
                 linea(
@@ -860,9 +857,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // NOT
-            // =================================================
+            
             case "!" -> {
 
                 linea(
@@ -873,9 +870,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // STACK
-            // =================================================
+            
             case "STACK_GET" -> {
 
                 linea(
@@ -897,9 +894,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // HEAP
-            // =================================================
+            
             case "HEAP_GET" -> {
 
                 linea(
@@ -921,9 +918,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // LABEL
-            // =================================================
+            
             case "LABEL" -> {
 
                 salida.append(
@@ -938,9 +935,9 @@ public class GeneradorCUnificado {
                         "    ;\n"
                 );
             }
-            // =================================================
+            
             // GOTO
-            // =================================================
+            
             case "GOTO" -> {
 
                 linea(
@@ -950,9 +947,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // IF FALSE
-            // =================================================
+            
             case "IF_FALSE" -> {
 
                 linea(
@@ -964,9 +961,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // IF TRUE
-            // =================================================
+            
             case "IF_TRUE" -> {
 
                 linea(
@@ -978,9 +975,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // CALL
-            // =================================================
+            
             case "CALL" -> {
 
                 linea(
@@ -991,9 +988,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // RETURN
-            // =================================================
+            
             case "RETURN" -> {
 
                 linea(
@@ -1001,9 +998,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // PRINT
-            // =================================================
+            
             case "PRINT" -> {
 
                 linea(
@@ -1062,9 +1059,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // INPUT
-            // =================================================
+            
             case "READ", "READLN" -> {
 
                 linea(
@@ -1107,9 +1104,9 @@ public class GeneradorCUnificado {
                 linea(resultado + " = runtime_read_bool();");
             }
 
-            // =================================================
+            
             // CONVERSIONES
-            // =================================================
+            
             case "INT_TO_STRING" -> {
 
                 linea(
@@ -1150,9 +1147,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            // =================================================
+            
             // DESCONOCIDO
-            // =================================================
+            
             default -> {
 
                 salida.append(
@@ -1170,9 +1167,9 @@ public class GeneradorCUnificado {
         }
     }
 
-    // =========================================================
+    // --------------------
     // MAIN
-    // =========================================================
+    // --------------------
     private void generarMain() {
 
         salida.append(
@@ -1204,9 +1201,9 @@ public class GeneradorCUnificado {
         );
     }
 
-    // =========================================================
+    // --------------------
     // UTILIDADES
-    // =========================================================
+    // --------------------
     private void linea(
             String texto) {
 

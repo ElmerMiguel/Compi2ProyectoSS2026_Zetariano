@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.runtime.zeta;
 
-/**
- *
- */
+
 public class AtributoMemoriaZ {
 
     private final String nombre;

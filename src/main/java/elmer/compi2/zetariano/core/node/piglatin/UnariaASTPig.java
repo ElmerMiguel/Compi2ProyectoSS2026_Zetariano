@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.piglatin;
 
-/**
- *
- */
+
 public class UnariaASTPig extends ExpresionASTPig {
 
     private final String operador;

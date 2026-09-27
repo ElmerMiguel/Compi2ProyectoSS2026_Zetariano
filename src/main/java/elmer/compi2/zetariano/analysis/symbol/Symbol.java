@@ -22,6 +22,31 @@ public class Symbol {
     public Symbol() {
     }
 
+    public Symbol(String name, DataType type, SymbolKind kind, int scopeLevel, int scopeId) {
+        this(name, type, kind, scopeLevel, scopeId, null, null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+    }
+
+    public String getNombre() { return name; }
+    public void setNombre(String nombre) { this.name = nombre; }
+    public DataType getTipo() { return type; }
+    public void setTipo(DataType tipo) { this.type = tipo; }
+    public SymbolKind getCategoria() { return kind; }
+    public void setCategoria(SymbolKind categoria) { this.kind = categoria; }
+    public int getNivelAmbito() { return scopeLevel; }
+    public void setNivelAmbito(int nivelAmbito) { this.scopeLevel = nivelAmbito; }
+    public int getIdAmbito() { return scopeId; }
+    public void setIdAmbito(int idAmbito) { this.scopeId = idAmbito; }
+    public String getTipoReferencia() { return referenceType; }
+    public void setTipoReferencia(String tipoReferencia) { this.referenceType = tipoReferencia; }
+    public DataType getTipoElemento() { return elementType; }
+    public void setTipoElemento(DataType tipoElemento) { this.elementType = tipoElemento; }
+    public List<Integer> getDimensiones() { return getDimensions(); }
+    public void setDimensiones(List<Integer> dimensiones) { this.dimensions = dimensiones; }
+    public List<DataType> getParametros() { return getParameters(); }
+    public void setParametros(List<DataType> parametros) { this.parameters = parametros; }
+    public List<ParamInfo> getParametrosInfo() { return getParametersInfo(); }
+    public void setParametrosInfo(List<ParamInfo> parametrosInfo) { this.parametersInfo = parametrosInfo; }
+
     public Symbol(String name, DataType type, SymbolKind kind, int scopeLevel, int scopeId,
                   String referenceType, DataType elementType, List<Integer> dimensions,
                   List<DataType> parameters, List<ParamInfo> parametersInfo) {

@@ -1,14 +1,11 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.piglatin;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- */
+
 public class LlamadaASTPig extends ExpresionASTPig {
 
     private final ExpresionASTPig receptor;

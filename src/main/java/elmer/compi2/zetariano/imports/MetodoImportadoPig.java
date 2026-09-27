@@ -1,14 +1,11 @@
-/*
- */
+
 package elmer.compi2.zetariano.imports;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- */
+
 public class MetodoImportadoPig {
 
     private final String nombre;

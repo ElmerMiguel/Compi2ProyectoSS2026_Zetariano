@@ -1,5 +1,4 @@
-/*
- */
+
 package elmer.compi2.zetariano.runtime.piglatin;
 
 import elmer.compi2.zetariano.core.node.piglatin.BloqueASTPig;
@@ -11,9 +10,7 @@ import elmer.compi2.zetariano.core.node.piglatin.ProgramaASTPig;
 import elmer.compi2.zetariano.core.node.piglatin.SentenciaASTPig;
 import elmer.compi2.zetariano.core.node.piglatin.WhileASTPig;
 
-/**
- *
- */
+
 public class ConstructorMemoriaPig {
 
     private final MarcoPrincipalPig marco;
@@ -31,9 +28,9 @@ public class ConstructorMemoriaPig {
             return marco;
         }
 
-        // =====================================================
+        
         // VARIABLES GLOBALES
-        // =====================================================
+        
         for (SentenciaASTPig sentencia
                 : programa.getVariablesGlobales()) {
 
@@ -42,9 +39,9 @@ public class ConstructorMemoriaPig {
             );
         }
 
-        // =====================================================
+        
         // MAIOR
-        // =====================================================
+        
         for (SentenciaASTPig sentencia
                 : programa.getPrincipal()) {
 
@@ -56,9 +53,9 @@ public class ConstructorMemoriaPig {
         return marco;
     }
 
-    // =========================================================
+    // --------------------
     // RECORRIDO
-    // =========================================================
+    // --------------------
     private void procesarSentencia(
             SentenciaASTPig sentencia) {
 

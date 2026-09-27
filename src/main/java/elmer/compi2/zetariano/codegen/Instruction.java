@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.codegen;
 
-/**
- *
- */
+
 public class Instruction {
 
     private final String operador;
@@ -28,7 +25,15 @@ public class Instruction {
         return operador;
     }
 
+    public String getOp() {
+        return operador;
+    }
+
     public String getArgumento1() {
+        return argumento1;
+    }
+
+    public String getArg1() {
         return argumento1;
     }
 
@@ -36,7 +41,15 @@ public class Instruction {
         return argumento2;
     }
 
+    public String getArg2() {
+        return argumento2;
+    }
+
     public String getResultado() {
+        return resultado;
+    }
+
+    public String getResult() {
         return resultado;
     }
 

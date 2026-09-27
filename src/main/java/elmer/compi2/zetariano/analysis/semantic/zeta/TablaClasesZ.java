@@ -1,14 +1,11 @@
-/*
- */
+
 package elmer.compi2.zetariano.analysis.semantic.zeta;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- *
- */
+
 public class TablaClasesZ {
 
     private final Map<String, ClaseZ> clases

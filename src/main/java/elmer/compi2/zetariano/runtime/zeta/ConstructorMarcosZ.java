@@ -1,12 +1,9 @@
-/*
- */
+
 package elmer.compi2.zetariano.runtime.zeta;
 
 import elmer.compi2.zetariano.core.node.zeta.*;
 
-/**
- *
- */
+
 public class ConstructorMarcosZ {
 
     private final TablaMemoriaZ tabla;
@@ -74,9 +71,9 @@ public class ConstructorMarcosZ {
         return tabla;
     }
 
-    // =========================================================
+    // --------------------
     // CONSTRUCTOR
-    // =========================================================
+    // --------------------
     private void procesarConstructor(
             ConstructorASTZ constructor) {
 
@@ -106,9 +103,9 @@ public class ConstructorMarcosZ {
         marcoActual = null;
     }
 
-    // =========================================================
+    // --------------------
     // METODO
-    // =========================================================
+    // --------------------
     private void procesarMetodo(
             MetodoASTZ metodo) {
 
@@ -139,9 +136,9 @@ public class ConstructorMarcosZ {
         marcoActual = null;
     }
 
-    // =========================================================
+    // --------------------
     // PARAMETROS
-    // =========================================================
+    // --------------------
     private void registrarParametros(
             java.util.List<ParametroASTZ> parametros) {
 
@@ -156,9 +153,9 @@ public class ConstructorMarcosZ {
         }
     }
 
-    // =========================================================
+    // --------------------
     // SENTENCIAS
-    // =========================================================
+    // --------------------
     private void procesarSentencia(
             SentenciaASTZ sentencia) {
 
@@ -289,9 +286,9 @@ public class ConstructorMarcosZ {
         }
     }
 
-    // =========================================================
+    // --------------------
     // DECLARACION
-    // =========================================================
+    // --------------------
     private void registrarDeclaracion(
             DeclaracionASTZ declaracion) {
 
@@ -306,9 +303,9 @@ public class ConstructorMarcosZ {
         );
     }
 
-    // =========================================================
+    // --------------------
     // FIRMA
-    // =========================================================
+    // --------------------
     private String construirFirma(
             String nombre,
             java.util.List<ParametroASTZ> parametros) {

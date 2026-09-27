@@ -1,14 +1,11 @@
-/*
- */
+
 package elmer.compi2.zetariano.runtime.piglatin;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- */
+
 public class VariableMemoriaPig {
 
     public enum Categoria {

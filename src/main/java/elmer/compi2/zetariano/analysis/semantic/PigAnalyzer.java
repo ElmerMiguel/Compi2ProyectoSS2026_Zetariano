@@ -1,11 +1,10 @@
-/*
- */
+
 package elmer.compi2.zetariano.analysis.semantic;
 
-import elmer.compi2.zetariano.analysis.symbol.CategoriaSimbolo;
-import elmer.compi2.zetariano.analysis.symbol.Simbolo.Simbolo;
-import elmer.compi2.zetariano.analysis.symbol.Simbolo.TablaSimbolos;
-import elmer.compi2.zetariano.analysis.symbol.TipoDato;
+import elmer.compi2.zetariano.analysis.symbol.SymbolKind;
+import elmer.compi2.zetariano.analysis.symbol.Symbol;
+import elmer.compi2.zetariano.analysis.symbol.SymbolTable;
+import elmer.compi2.zetariano.analysis.symbol.DataType;
 import elmer.compi2.zetariano.runtime.zeta.TablaMemoriaZ;
 import elmer.compi2.zetariano.imports.AdaptadorImportZPig;
 import elmer.compi2.zetariano.imports.AtributoImportadoPig;
@@ -24,13 +23,11 @@ import elmer.compi2.zetariano.imports.AdaptadorImportYPig;
 import elmer.compi2.zetariano.imports.CargadorImportYPig;
 import elmer.compi2.zetariano.analysis.semantic.YAnalyzer;
 
-/**
- *
- */
-public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
-    private final TablaSimbolos tabla
-            = new TablaSimbolos();
+public class PigAnalyzer extends PigLatinParserBaseVisitor<DataType> {
+
+    private final SymbolTable tabla
+            = new SymbolTable();
 
     private final List<String> errores
             = new ArrayList<>();
@@ -46,10 +43,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
     private final CargadorImportZPig cargadorZ
             = new CargadorImportZPig();
 
-    // =========================================================
+    
     // RESULTADOS
-    // =========================================================
-    public TablaSimbolos getTabla() {
+    
+    public SymbolTable getTabla() {
         return tabla;
     }
 
@@ -86,7 +83,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         }
 
         System.out.println(
-                "============================================"
+                ""
         );
     }
 
@@ -124,11 +121,11 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         );
     }
 
-    // =========================================================
+    
     // IMPORTACIONES
-    // =========================================================
+    
     @Override
-    public TipoDato visitImportacion(
+    public DataType visitImportacion(
             PigLatinParser.ImportacionContext ctx) {
 
         int linea = ctx.getStart().getLine();
@@ -142,12 +139,12 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     "Importacion vacia."
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        // ==========================================
+        
         // LIMPIAR IMPORT
-        // ==========================================
+        
         if (texto.startsWith("import")) {
 
             texto = texto.substring(
@@ -175,9 +172,9 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             );
         }
 
-        // ==========================================
+        
         // DETERMINAR LENGUAJE
-        // ==========================================
+        
         String textoMinuscula
                 = texto.toLowerCase();
 
@@ -195,12 +192,12 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     + texto
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        // ==========================================
+        
         // RESOLVER RUTA
-        // ==========================================
+        
         String rutaRelativa
                 = convertirImportARuta(
                         texto
@@ -219,19 +216,19 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     + archivo
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        // ==========================================
+        
         // IMPORTAR SEGUN LENGUAJE
-        // ==========================================
+        
         try {
 
             if (esZ) {
 
-                // ==================================
+                
                 // ARCHIVO Z
-                // ==================================
+                
                 TablaMemoriaZ tablaZ
                         = cargadorZ.cargarTabla(
                                 archivo.toString()
@@ -247,13 +244,13 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
             } else {
 
-                // ==================================
+                
                 // ARCHIVO Y
-                // ==================================
+                
                 CargadorImportYPig cargador
                         = new CargadorImportYPig();
 
-                SemanticoY semanticoY
+                YAnalyzer semanticoY
                         = cargador.cargarSemantico(
                                 archivo.toString()
                         );
@@ -277,17 +274,17 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     + ex.getMessage()
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        return TipoDato.VOID;
+        return DataType.VOID;
     }
 
-    // =========================================================
+    
     // VARIABLES
-    // =========================================================
+    
     @Override
-    public TipoDato visitDeclaracionVariable(
+    public DataType visitDeclaracionVariable(
             PigLatinParser.DeclaracionVariableContext ctx) {
 
         String nombre
@@ -305,10 +302,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     + "' ya fue declarada en este ambito."
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        TipoDato tipoDeclarado
+        DataType tipoDeclarado
                 = obtenerTipo(ctx.tipo());
 
         if (ctx.tipo().IDENTIFICADOR() != null) {
@@ -328,20 +325,20 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 );
 
                 tipoDeclarado
-                        = TipoDato.DESCONOCIDO;
+                        = DataType.DESCONOCIDO;
             }
         }
 
-        Simbolo simbolo
-                = new Simbolo(
+        Symbol simbolo
+                = new Symbol(
                         nombre,
                         tipoDeclarado,
-                        CategoriaSimbolo.VARIABLE,
+                        SymbolKind.VARIABLE,
                         tabla.getNivelActual(),
                         tabla.getAmbitoActual()
                 );
 
-        if (tipoDeclarado == TipoDato.OBJETO
+        if (tipoDeclarado == DataType.OBJETO
                 && ctx.tipo().IDENTIFICADOR() != null) {
 
             simbolo.setTipoReferencia(
@@ -358,12 +355,12 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             PigLatinParser.InicializacionVariableContext inicializacion
                     = ctx.inicializacionVariable();
 
-            // =====================================================
+
             // INICIALIZADOR POSICIONAL DE ESTRUCTURA: { ... }
-            // =====================================================
+
             if (inicializacion.inicializadorEstructura() != null) {
 
-                if (tipoDeclarado != TipoDato.OBJETO
+                if (tipoDeclarado != DataType.OBJETO
                         || simbolo.getTipoReferencia() == null) {
 
                     error(
@@ -409,10 +406,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
             } else {
 
-                // =================================================
+
                 // INICIALIZACION NORMAL MEDIANTE EXPRESION
-                // =================================================
-                TipoDato tipoValor
+
+                DataType tipoValor
                         = visit(
                                 inicializacion.expresion()
                         );
@@ -438,11 +435,11 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         return tipoDeclarado;
     }
 
-    // =========================================================
+    
     // ARREGLOS
-    // =========================================================
+    
     @Override
-    public TipoDato visitDeclaracionArreglo(
+    public DataType visitDeclaracionArreglo(
             PigLatinParser.DeclaracionArregloContext ctx) {
 
         String nombre
@@ -460,10 +457,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     + "' ya fue declarado en este ambito."
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        TipoDato tipoElemento
+        DataType tipoElemento
                 = obtenerTipo(ctx.tipo());
 
         if (ctx.tipo().IDENTIFICADOR() != null) {
@@ -483,22 +480,22 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 );
 
                 tipoElemento
-                        = TipoDato.DESCONOCIDO;
+                        = DataType.DESCONOCIDO;
             }
         }
 
-        Simbolo simbolo
-                = new Simbolo(
+        Symbol simbolo
+                = new Symbol(
                         nombre,
-                        TipoDato.ARREGLO,
-                        CategoriaSimbolo.ARREGLO,
+                        DataType.ARREGLO,
+                        SymbolKind.ARREGLO,
                         tabla.getNivelActual(),
                         tabla.getAmbitoActual()
                 );
 
         simbolo.setTipoElemento(tipoElemento);
 
-        if (tipoElemento == TipoDato.OBJETO
+        if (tipoElemento == DataType.OBJETO
                 && ctx.tipo().IDENTIFICADOR() != null) {
 
             simbolo.setTipoReferencia(
@@ -552,14 +549,14 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             );
         }
 
-        return TipoDato.ARREGLO;
+        return DataType.ARREGLO;
     }
 
-    // =========================================================
+    
     // BLOQUES / SCOPES
-    // =========================================================
+    
     @Override
-    public TipoDato visitBloque(
+    public DataType visitBloque(
             PigLatinParser.BloqueContext ctx) {
 
         tabla.entrarAmbito();
@@ -572,20 +569,20 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
         tabla.salirAmbito();
 
-        return TipoDato.VOID;
+        return DataType.VOID;
     }
 
-    // =========================================================
+    
     // ASIGNACIONES
-    // =========================================================
+    
     @Override
-    public TipoDato visitAsignacion(
+    public DataType visitAsignacion(
             PigLatinParser.AsignacionContext ctx) {
 
-        TipoDato tipoDestino
+        DataType tipoDestino
                 = visit(ctx.acceso());
 
-        TipoDato tipoValor
+        DataType tipoValor
                 = visit(ctx.expresion());
 
         if (!sonCompatibles(
@@ -605,11 +602,11 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         return tipoDestino;
     }
 
-    // =========================================================
+    
     // ACCESOS
-    // =========================================================
+    
     @Override
-    public TipoDato visitAcceso(
+    public DataType visitAcceso(
             PigLatinParser.AccesoContext ctx) {
 
         String nombreBase
@@ -619,7 +616,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         int linea
                 = ctx.getStart().getLine();
 
-        Simbolo simbolo
+        Symbol simbolo
                 = tabla.buscar(
                         nombreBase
                 );
@@ -633,10 +630,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     + "' no ha sido declarado."
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        TipoDato tipoActual
+        DataType tipoActual
                 = simbolo.getTipo();
 
         String referenciaActual
@@ -645,7 +642,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         int dimensionesRestantes
                 = simbolo.getDimensiones().size();
 
-        if (tipoActual == TipoDato.ARREGLO) {
+        if (tipoActual == DataType.ARREGLO) {
 
             tipoActual
                     = simbolo.getTipoElemento();
@@ -654,9 +651,9 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         for (PigLatinParser.SufijoAccesoContext sufijo
                 : ctx.sufijoAcceso()) {
 
-            // =====================================================
+            
             // INDICE
-            // =====================================================
+            
             if (sufijo.CORCHETE_IZQ() != null) {
 
                 if (dimensionesRestantes <= 0) {
@@ -666,18 +663,18 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                             "Se intento indexar un valor que no es un arreglo."
                     );
 
-                    return TipoDato.DESCONOCIDO;
+                    return DataType.DESCONOCIDO;
                 }
 
-                TipoDato tipoIndice
+                DataType tipoIndice
                         = visit(
                                 sufijo.expresion()
                         );
 
                 if (tipoIndice
-                        != TipoDato.ENTERO
+                        != DataType.ENTERO
                         && tipoIndice
-                        != TipoDato.DESCONOCIDO) {
+                        != DataType.DESCONOCIDO) {
 
                     error(
                             sufijo.getStart().getLine(),
@@ -697,10 +694,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                         "Debe completar los indices del arreglo antes de acceder a sus miembros."
                 );
 
-                return TipoDato.DESCONOCIDO;
+                return DataType.DESCONOCIDO;
             }
 
-            if (tipoActual != TipoDato.OBJETO
+            if (tipoActual != DataType.OBJETO
                     || referenciaActual == null) {
 
                 error(
@@ -708,7 +705,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                         "Se intento acceder a un miembro de un valor que no es un objeto."
                 );
 
-                return TipoDato.DESCONOCIDO;
+                return DataType.DESCONOCIDO;
             }
 
             ClaseImportadaPig clase
@@ -725,16 +722,16 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                         + "'."
                 );
 
-                return TipoDato.DESCONOCIDO;
+                return DataType.DESCONOCIDO;
             }
 
             String nombreMiembro
                     = sufijo.IDENTIFICADOR()
                             .getText();
 
-            // =====================================================
+            
             // LLAMADA A METODO
-            // =====================================================
+            
             if (sufijo.PARENTESIS_IZQ() != null) {
 
                 List<String> argumentos
@@ -746,7 +743,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                             : sufijo.listaArgumentos()
                                     .expresion()) {
 
-                        TipoDato tipoArgumento
+                        DataType tipoArgumento
                                 = visit(argumento);
 
                         argumentos.add(
@@ -781,7 +778,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                             + "'."
                     );
 
-                    return TipoDato.DESCONOCIDO;
+                    return DataType.DESCONOCIDO;
                 }
 
                 String retorno
@@ -792,7 +789,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                                 retorno
                         );
 
-                if (tipoActual == TipoDato.OBJETO) {
+                if (tipoActual == DataType.OBJETO) {
 
                     referenciaActual
                             = retorno;
@@ -808,9 +805,9 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 continue;
             }
 
-            // =====================================================
+            
             // ATRIBUTO
-            // =====================================================
+            
             AtributoImportadoPig atributo
                     = clase.buscarAtributo(
                             nombreMiembro
@@ -827,7 +824,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                         + "'."
                 );
 
-                return TipoDato.DESCONOCIDO;
+                return DataType.DESCONOCIDO;
             }
 
             tipoActual
@@ -838,7 +835,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             dimensionesRestantes
                     = atributo.getDimensiones();
 
-            if (tipoActual == TipoDato.OBJETO) {
+            if (tipoActual == DataType.OBJETO) {
 
                 referenciaActual
                         = atributo.getTipo();
@@ -851,24 +848,24 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         }
 
         if (dimensionesRestantes > 0) {
-            return TipoDato.ARREGLO;
+            return DataType.ARREGLO;
         }
 
         return tipoActual;
     }
 
-    // =========================================================
+    
     // INCREMENTO / DECREMENTO
-    // =========================================================
+    
     @Override
-    public TipoDato visitIncrementoDecremento(
+    public DataType visitIncrementoDecremento(
             PigLatinParser.IncrementoDecrementoContext ctx) {
 
-        TipoDato tipo
+        DataType tipo
                 = visit(ctx.acceso());
 
         if (!esNumerico(tipo)
-                && tipo != TipoDato.DESCONOCIDO) {
+                && tipo != DataType.DESCONOCIDO) {
 
             error(
                     ctx.getStart().getLine(),
@@ -879,32 +876,32 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         return tipo;
     }
 
-    // =========================================================
+    
 // LECTURA
-// =========================================================
+
     @Override
-    public TipoDato visitLectura(
+    public DataType visitLectura(
             PigLatinParser.LecturaContext ctx) {
 
         if (ctx == null) {
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
         // <<;
         // La lectura se realiza, pero su resultado se descarta.
         if (ctx.acceso() == null) {
-            return TipoDato.VOID;
+            return DataType.VOID;
         }
 
-        TipoDato tipoDestino
+        DataType tipoDestino
                 = visit(
                         ctx.acceso()
                 );
 
-        if (tipoDestino == TipoDato.ARREGLO
-                || tipoDestino == TipoDato.OBJETO
-                || tipoDestino == TipoDato.ESTRUCTURA
-                || tipoDestino == TipoDato.VOID) {
+        if (tipoDestino == DataType.ARREGLO
+                || tipoDestino == DataType.OBJETO
+                || tipoDestino == DataType.ESTRUCTURA
+                || tipoDestino == DataType.VOID) {
 
             error(
                     ctx.getStart().getLine(),
@@ -915,20 +912,20 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             );
         }
 
-        return TipoDato.VOID;
+        return DataType.VOID;
     }
 
-    // =========================================================
+    
     // IF
-    // =========================================================
+    
     @Override
-    public TipoDato visitSentenciaSi(
+    public DataType visitSentenciaSi(
             PigLatinParser.SentenciaSiContext ctx) {
 
         for (PigLatinParser.ExpresionContext condicion
                 : ctx.expresion()) {
 
-            TipoDato tipoCondicion
+            DataType tipoCondicion
                     = visit(condicion);
 
             validarCondicion(
@@ -943,17 +940,17 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             visit(bloque);
         }
 
-        return TipoDato.VOID;
+        return DataType.VOID;
     }
 
-    // =========================================================
+    
     // WHILE
-    // =========================================================
+    
     @Override
-    public TipoDato visitSentenciaDum(
+    public DataType visitSentenciaDum(
             PigLatinParser.SentenciaDumContext ctx) {
 
-        TipoDato condicion
+        DataType condicion
                 = visit(ctx.expresion());
 
         validarCondicion(
@@ -969,14 +966,14 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
         profundidadCiclo--;
 
-        return TipoDato.VOID;
+        return DataType.VOID;
     }
 
-    // =========================================================
+    
     // DO-WHILE
-    // =========================================================
+    
     @Override
-    public TipoDato visitSentenciaFacere(
+    public DataType visitSentenciaFacere(
             PigLatinParser.SentenciaFacereContext ctx) {
 
         profundidadCiclo++;
@@ -985,7 +982,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
         profundidadCiclo--;
 
-        TipoDato condicion
+        DataType condicion
                 = visit(ctx.expresion());
 
         validarCondicion(
@@ -995,21 +992,21 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 condicion
         );
 
-        return TipoDato.VOID;
+        return DataType.VOID;
     }
 
-    // =========================================================
+    
     // FOR
-    // =========================================================
+    
     @Override
-    public TipoDato visitSentenciaPer(
+    public DataType visitSentenciaPer(
             PigLatinParser.SentenciaPerContext ctx) {
 
         tabla.entrarAmbito();
 
         visit(ctx.inicializacionPer());
 
-        TipoDato condicion
+        DataType condicion
                 = visit(ctx.expresion());
 
         validarCondicion(
@@ -1029,11 +1026,11 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
         tabla.salirAmbito();
 
-        return TipoDato.VOID;
+        return DataType.VOID;
     }
 
     @Override
-    public TipoDato visitSentencia(
+    public DataType visitSentencia(
             PigLatinParser.SentenciaContext ctx) {
 
         if (ctx.PERGE() != null) {
@@ -1046,7 +1043,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 );
             }
 
-            return TipoDato.VOID;
+            return DataType.VOID;
         }
 
         if (ctx.INTERRUMPE() != null) {
@@ -1059,17 +1056,17 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 );
             }
 
-            return TipoDato.VOID;
+            return DataType.VOID;
         }
 
         return visitChildren(ctx);
     }
 
-    // =========================================================
+    
     // INICIALIZACION DEL FOR
-    // =========================================================
+    
     @Override
-    public TipoDato visitInicializacionPer(
+    public DataType visitInicializacionPer(
             PigLatinParser.InicializacionPerContext ctx) {
 
         if (ctx.ESTO() != null) {
@@ -1078,7 +1075,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     = ctx.IDENTIFICADOR()
                             .getText();
 
-            TipoDato declarado
+            DataType declarado
                     = obtenerTipo(ctx.tipo());
 
             if (tabla.existeEnAmbitoActual(nombre)) {
@@ -1090,21 +1087,21 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                         + "' ya fue declarada en este ambito."
                 );
 
-                return TipoDato.DESCONOCIDO;
+                return DataType.DESCONOCIDO;
             }
 
-            Simbolo simbolo
-                    = new Simbolo(
+            Symbol simbolo
+                    = new Symbol(
                             nombre,
                             declarado,
-                            CategoriaSimbolo.VARIABLE,
+                            SymbolKind.VARIABLE,
                             tabla.getNivelActual(),
                             tabla.getAmbitoActual()
                     );
 
             tabla.agregar(simbolo);
 
-            TipoDato valor
+            DataType valor
                     = visit(ctx.expresion());
 
             if (!sonCompatibles(
@@ -1122,10 +1119,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             return declarado;
         }
 
-        TipoDato destino
+        DataType destino
                 = visit(ctx.acceso());
 
-        TipoDato valor
+        DataType valor
                 = visit(ctx.expresion());
 
         if (!sonCompatibles(
@@ -1141,14 +1138,14 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         return destino;
     }
 
-    // =========================================================
+    
     // ACTUALIZACION DEL FOR
-    // =========================================================
+    
     @Override
-    public TipoDato visitActualizacionPer(
+    public DataType visitActualizacionPer(
             PigLatinParser.ActualizacionPerContext ctx) {
 
-        TipoDato destino
+        DataType destino
                 = visit(ctx.acceso());
 
         if (ctx.INCREMENTO() != null
@@ -1156,7 +1153,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
             if (!esNumerico(destino)
                     && destino
-                    != TipoDato.DESCONOCIDO) {
+                    != DataType.DESCONOCIDO) {
 
                 error(
                         ctx.getStart().getLine(),
@@ -1169,7 +1166,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
         if (ctx.expresion() != null) {
 
-            TipoDato valor
+            DataType valor
                     = visit(ctx.expresion());
 
             if (!sonCompatibles(
@@ -1186,28 +1183,28 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         return destino;
     }
 
-    // =========================================================
+    
     // EXPRESIONES
-    // =========================================================
+    
     @Override
-    public TipoDato visitExpresion(
+    public DataType visitExpresion(
             PigLatinParser.ExpresionContext ctx) {
 
         return visit(ctx.expresionOr());
     }
 
     @Override
-    public TipoDato visitExpresionOr(
+    public DataType visitExpresionOr(
             PigLatinParser.ExpresionOrContext ctx) {
 
         if (ctx.expresionOr() == null) {
             return visit(ctx.expresionAnd());
         }
 
-        TipoDato izquierda
+        DataType izquierda
                 = visit(ctx.expresionOr());
 
-        TipoDato derecha
+        DataType derecha
                 = visit(ctx.expresionAnd());
 
         return validarLogico(
@@ -1219,17 +1216,17 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
     }
 
     @Override
-    public TipoDato visitExpresionAnd(
+    public DataType visitExpresionAnd(
             PigLatinParser.ExpresionAndContext ctx) {
 
         if (ctx.expresionAnd() == null) {
             return visit(ctx.expresionIgualdad());
         }
 
-        TipoDato izquierda
+        DataType izquierda
                 = visit(ctx.expresionAnd());
 
-        TipoDato derecha
+        DataType derecha
                 = visit(ctx.expresionIgualdad());
 
         return validarLogico(
@@ -1241,17 +1238,17 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
     }
 
     @Override
-    public TipoDato visitExpresionIgualdad(
+    public DataType visitExpresionIgualdad(
             PigLatinParser.ExpresionIgualdadContext ctx) {
 
         if (ctx.expresionIgualdad() == null) {
             return visit(ctx.expresionRelacional());
         }
 
-        TipoDato izquierda
+        DataType izquierda
                 = visit(ctx.expresionIgualdad());
 
-        TipoDato derecha
+        DataType derecha
                 = visit(ctx.expresionRelacional());
 
         if (!sonComparables(
@@ -1268,29 +1265,29 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             );
         }
 
-        return TipoDato.BOOLEANO;
+        return DataType.BOOLEANO;
     }
 
     @Override
-    public TipoDato visitExpresionRelacional(
+    public DataType visitExpresionRelacional(
             PigLatinParser.ExpresionRelacionalContext ctx) {
 
         if (ctx.expresionRelacional() == null) {
             return visit(ctx.expresionAditiva());
         }
 
-        TipoDato izquierda
+        DataType izquierda
                 = visit(ctx.expresionRelacional());
 
-        TipoDato derecha
+        DataType derecha
                 = visit(ctx.expresionAditiva());
 
         if ((!esNumerico(izquierda)
                 || !esNumerico(derecha))
                 && izquierda
-                != TipoDato.DESCONOCIDO
+                != DataType.DESCONOCIDO
                 && derecha
-                != TipoDato.DESCONOCIDO) {
+                != DataType.DESCONOCIDO) {
 
             error(
                     ctx.getStart().getLine(),
@@ -1298,11 +1295,11 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             );
         }
 
-        return TipoDato.BOOLEANO;
+        return DataType.BOOLEANO;
     }
 
     @Override
-    public TipoDato visitExpresionAditiva(
+    public DataType visitExpresionAditiva(
             PigLatinParser.ExpresionAditivaContext ctx) {
 
         if (ctx.expresionAditiva() == null) {
@@ -1311,19 +1308,19 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             );
         }
 
-        TipoDato izquierda
+        DataType izquierda
                 = visit(ctx.expresionAditiva());
 
-        TipoDato derecha
+        DataType derecha
                 = visit(
                         ctx.expresionMultiplicativa()
                 );
 
         if (ctx.MAS() != null
-                && (izquierda == TipoDato.CADENA
-                || derecha == TipoDato.CADENA)) {
+                && (izquierda == DataType.CADENA
+                || derecha == DataType.CADENA)) {
 
-            return TipoDato.CADENA;
+            return DataType.CADENA;
         }
 
         return validarAritmetico(
@@ -1334,19 +1331,19 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
     }
 
     @Override
-    public TipoDato visitExpresionMultiplicativa(
+    public DataType visitExpresionMultiplicativa(
             PigLatinParser.ExpresionMultiplicativaContext ctx) {
 
         if (ctx.expresionMultiplicativa() == null) {
             return visit(ctx.expresionUnaria());
         }
 
-        TipoDato izquierda
+        DataType izquierda
                 = visit(
                         ctx.expresionMultiplicativa()
                 );
 
-        TipoDato derecha
+        DataType derecha
                 = visit(ctx.expresionUnaria());
 
         return validarAritmetico(
@@ -1357,22 +1354,22 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
     }
 
     @Override
-    public TipoDato visitExpresionUnaria(
+    public DataType visitExpresionUnaria(
             PigLatinParser.ExpresionUnariaContext ctx) {
 
         if (ctx.primario() != null) {
             return visit(ctx.primario());
         }
 
-        TipoDato tipo
+        DataType tipo
                 = visit(ctx.expresionUnaria());
 
         if (ctx.NOT() != null
                 || ctx.NON() != null) {
 
-            if (tipo != TipoDato.BOOLEANO
+            if (tipo != DataType.BOOLEANO
                     && tipo
-                    != TipoDato.DESCONOCIDO) {
+                    != DataType.DESCONOCIDO) {
 
                 error(
                         ctx.getStart().getLine(),
@@ -1380,12 +1377,12 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 );
             }
 
-            return TipoDato.BOOLEANO;
+            return DataType.BOOLEANO;
         }
 
         if (!esNumerico(tipo)
                 && tipo
-                != TipoDato.DESCONOCIDO) {
+                != DataType.DESCONOCIDO) {
 
             error(
                     ctx.getStart().getLine(),
@@ -1396,11 +1393,11 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         return tipo;
     }
 
-    // =========================================================
+    
     // PRIMARIOS
-    // =========================================================
+    
     @Override
-    public TipoDato visitPrimario(
+    public DataType visitPrimario(
             PigLatinParser.PrimarioContext ctx) {
 
         if (ctx.literal() != null) {
@@ -1423,14 +1420,14 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             return visit(ctx.expresion());
         }
 
-        return TipoDato.DESCONOCIDO;
+        return DataType.DESCONOCIDO;
     }
 
-    // =========================================================
+    
 // CREACION DE OBJETOS IMPORTADOS
-// =========================================================
+
     @Override
-    public TipoDato visitCreacionObjeto(
+    public DataType visitCreacionObjeto(
             PigLatinParser.CreacionObjetoContext ctx) {
 
         String nombreClase
@@ -1458,10 +1455,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 visit(ctx.listaArgumentos());
             }
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        List<TipoDato> tiposArgumentos
+        List<DataType> tiposArgumentos
                 = new ArrayList<>();
 
         if (ctx.listaArgumentos() != null) {
@@ -1497,57 +1494,57 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     + "'."
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        return TipoDato.OBJETO;
+        return DataType.OBJETO;
     }
 
-    // =========================================================
+    
     // LITERALES
-    // =========================================================
+    
     @Override
-    public TipoDato visitLiteral(
+    public DataType visitLiteral(
             PigLatinParser.LiteralContext ctx) {
 
         if (ctx.ENTERO() != null) {
-            return TipoDato.ENTERO;
+            return DataType.ENTERO;
         }
 
         if (ctx.DECIMAL() != null) {
-            return TipoDato.DECIMAL;
+            return DataType.DECIMAL;
         }
 
         if (ctx.CADENA() != null) {
-            return TipoDato.CADENA;
+            return DataType.CADENA;
         }
 
         if (ctx.CARACTER() != null) {
-            return TipoDato.CARACTER;
+            return DataType.CARACTER;
         }
 
         if (ctx.VERUM() != null
                 || ctx.FALSUS() != null) {
 
-            return TipoDato.BOOLEANO;
+            return DataType.BOOLEANO;
         }
 
-        return TipoDato.DESCONOCIDO;
+        return DataType.DESCONOCIDO;
     }
 
-    // =========================================================
+    
     // LLAMADAS
-    // =========================================================
+    
     @Override
-    public TipoDato visitLlamada(
+    public DataType visitLlamada(
             PigLatinParser.LlamadaContext ctx) {
 
         int linea
                 = ctx.getStart().getLine();
 
-        // =====================================================
+        
         // 1. LLAMADA BASADA EN ACCESO
-        // =====================================================
+        
         if (ctx.acceso() != null) {
 
             return visit(
@@ -1555,9 +1552,9 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             );
         }
 
-        // =====================================================
+        
         // 2. LLAMADA GLOBAL
-        // =====================================================
+        
         String nombre
                 = ctx.IDENTIFICADOR() != null
                 ? ctx.IDENTIFICADOR().getText()
@@ -1571,12 +1568,12 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     "No fue posible determinar el nombre de la funcion."
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        // =====================================================
+        
         // 3. OBTENER TIPOS DE ARGUMENTOS
-        // =====================================================
+        
         List<String> tiposArgumentos
                 = new ArrayList<>();
 
@@ -1586,7 +1583,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     : ctx.listaArgumentos()
                             .expresion()) {
 
-                TipoDato tipoArgumento
+                DataType tipoArgumento
                         = visit(argumento);
 
                 tiposArgumentos.add(
@@ -1598,18 +1595,18 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             }
         }
 
-        // =====================================================
+        
         // 4. CONSTRUIR FIRMA
-        // =====================================================
+        
         String firma
                 = construirFirmaImportadaY(
                         nombre,
                         tiposArgumentos
                 );
 
-        // =====================================================
+        
         // 5. BUSCAR CONTENEDOR DE FUNCIONES Y
-        // =====================================================
+        
         ClaseImportadaPig funcionesY
                 = registroImports.buscarClase(
                         "$Y_GLOBAL"
@@ -1624,12 +1621,12 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     + "' no ha sido importada."
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        // =====================================================
+        
         // 6. BUSCAR FIRMA
-        // =====================================================
+        
         MetodoImportadoPig funcion
                 = funcionesY.buscarMetodoPorFirma(
                         firma
@@ -1644,19 +1641,19 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     + "'."
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        // =====================================================
+        
         // 7. OBTENER TIPO DE RETORNO
-        // =====================================================
+        
         return tipoExternoATipoPig(
                 funcion.getTipoRetorno()
         );
     }
 
     @Override
-    public TipoDato visitListaArgumentos(
+    public DataType visitListaArgumentos(
             PigLatinParser.ListaArgumentosContext ctx) {
 
         for (PigLatinParser.ExpresionContext expresion
@@ -1665,14 +1662,14 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             visit(expresion);
         }
 
-        return TipoDato.DESCONOCIDO;
+        return DataType.DESCONOCIDO;
     }
 
-    // =========================================================
+    
     // INICIALIZACION VARIABLE
-    // =========================================================
+    
     @Override
-    public TipoDato visitInicializacionVariable(
+    public DataType visitInicializacionVariable(
             PigLatinParser.InicializacionVariableContext ctx) {
 
         if (ctx.expresion() != null) {
@@ -1683,46 +1680,46 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
             visit(ctx.inicializadorEstructura());
 
-            return TipoDato.OBJETO;
+            return DataType.OBJETO;
         }
 
-        return TipoDato.DESCONOCIDO;
+        return DataType.DESCONOCIDO;
     }
 
-    // =========================================================
+    
     // TIPOS
-    // =========================================================
-    private TipoDato obtenerTipo(
+    
+    private DataType obtenerTipo(
             PigLatinParser.TipoContext ctx) {
 
         if (ctx.NUMERUS() != null) {
-            return TipoDato.ENTERO;
+            return DataType.ENTERO;
         }
 
         if (ctx.TEXTUM() != null) {
-            return TipoDato.CADENA;
+            return DataType.CADENA;
         }
 
         if (ctx.DECIMALIS() != null) {
-            return TipoDato.DECIMAL;
+            return DataType.DECIMAL;
         }
 
         if (ctx.LITTERA() != null) {
-            return TipoDato.CARACTER;
+            return DataType.CARACTER;
         }
 
         if (ctx.VERUM() != null
                 || ctx.FALSUS() != null) {
 
-            return TipoDato.BOOLEANO;
+            return DataType.BOOLEANO;
         }
 
         if (ctx.IDENTIFICADOR() != null) {
 
-            return TipoDato.OBJETO;
+            return DataType.OBJETO;
         }
 
-        return TipoDato.DESCONOCIDO;
+        return DataType.DESCONOCIDO;
     }
 
     private void validarInicializadorEstructura(
@@ -1817,13 +1814,13 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 return;
             }
 
-            TipoDato tipoValor
+            DataType tipoValor
                     = visit(
                             valor.expresion()
                     );
 
-            if (tipoValor != TipoDato.ARREGLO
-                    && tipoValor != TipoDato.DESCONOCIDO) {
+            if (tipoValor != DataType.ARREGLO
+                    && tipoValor != DataType.DESCONOCIDO) {
 
                 error(
                         linea,
@@ -1836,15 +1833,15 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             return;
         }
 
-        TipoDato tipoEsperado
+        DataType tipoEsperado
                 = tipoExternoATipoPig(
                         atributo.getTipo()
                 );
 
-        // =====================================================
+        
         // ATRIBUTO QUE ES OTRA ESTRUCTURA
-        // =====================================================
-        if (tipoEsperado == TipoDato.OBJETO) {
+        
+        if (tipoEsperado == DataType.OBJETO) {
 
             ClaseImportadaPig claseAnidada
                     = registroImports.buscarClase(
@@ -1889,13 +1886,13 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 return;
             }
 
-            TipoDato tipoRecibido
+            DataType tipoRecibido
                     = visit(
                             valor.expresion()
                     );
 
-            if (tipoRecibido != TipoDato.OBJETO
-                    && tipoRecibido != TipoDato.DESCONOCIDO) {
+            if (tipoRecibido != DataType.OBJETO
+                    && tipoRecibido != DataType.DESCONOCIDO) {
 
                 error(
                         linea,
@@ -1912,9 +1909,9 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             return;
         }
 
-        // =====================================================
+        
         // ATRIBUTO PRIMITIVO
-        // =====================================================
+        
         if (valor.inicializadorLista() != null) {
 
             error(
@@ -1929,10 +1926,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             return;
         }
 
-        TipoDato tipoRecibido
+        DataType tipoRecibido
                 = valor.expresion() != null
                 ? visit(valor.expresion())
-                : TipoDato.DESCONOCIDO;
+                : DataType.DESCONOCIDO;
 
         if (!sonCompatibles(
                 tipoEsperado,
@@ -1953,16 +1950,16 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         }
     }
 
-    // =========================================================
+    
     // VALIDACIONES AUXILIARES
-    // =========================================================
+    
     private void validarCondicion(
             int linea,
-            TipoDato tipo) {
+            DataType tipo) {
 
-        if (tipo != TipoDato.BOOLEANO
+        if (tipo != DataType.BOOLEANO
                 && tipo
-                != TipoDato.DESCONOCIDO) {
+                != DataType.DESCONOCIDO) {
 
             error(
                     linea,
@@ -1973,18 +1970,18 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         }
     }
 
-    private TipoDato validarLogico(
+    private DataType validarLogico(
             int linea,
-            TipoDato izquierda,
-            TipoDato derecha,
+            DataType izquierda,
+            DataType derecha,
             String operador) {
 
-        if ((izquierda != TipoDato.BOOLEANO
-                || derecha != TipoDato.BOOLEANO)
+        if ((izquierda != DataType.BOOLEANO
+                || derecha != DataType.BOOLEANO)
                 && izquierda
-                != TipoDato.DESCONOCIDO
+                != DataType.DESCONOCIDO
                 && derecha
-                != TipoDato.DESCONOCIDO) {
+                != DataType.DESCONOCIDO) {
 
             error(
                     linea,
@@ -1994,18 +1991,18 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             );
         }
 
-        return TipoDato.BOOLEANO;
+        return DataType.BOOLEANO;
     }
 
-    private TipoDato validarAritmetico(
+    private DataType validarAritmetico(
             int linea,
-            TipoDato izquierda,
-            TipoDato derecha) {
+            DataType izquierda,
+            DataType derecha) {
 
-        if (izquierda == TipoDato.DESCONOCIDO
-                || derecha == TipoDato.DESCONOCIDO) {
+        if (izquierda == DataType.DESCONOCIDO
+                || derecha == DataType.DESCONOCIDO) {
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
         if (!esNumerico(izquierda)
@@ -2020,31 +2017,31 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     + "."
             );
 
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
-        if (izquierda == TipoDato.DECIMAL
-                || derecha == TipoDato.DECIMAL) {
+        if (izquierda == DataType.DECIMAL
+                || derecha == DataType.DECIMAL) {
 
-            return TipoDato.DECIMAL;
+            return DataType.DECIMAL;
         }
 
-        return TipoDato.ENTERO;
+        return DataType.ENTERO;
     }
 
     private boolean esNumerico(
-            TipoDato tipo) {
+            DataType tipo) {
 
-        return tipo == TipoDato.ENTERO
-                || tipo == TipoDato.DECIMAL;
+        return tipo == DataType.ENTERO
+                || tipo == DataType.DECIMAL;
     }
 
     private boolean sonCompatibles(
-            TipoDato destino,
-            TipoDato origen) {
+            DataType destino,
+            DataType origen) {
 
-        if (destino == TipoDato.DESCONOCIDO
-                || origen == TipoDato.DESCONOCIDO) {
+        if (destino == DataType.DESCONOCIDO
+                || origen == DataType.DESCONOCIDO) {
 
             /*
              * Evitamos errores en cascada.
@@ -2056,16 +2053,16 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             return true;
         }
 
-        return destino == TipoDato.DECIMAL
-                && origen == TipoDato.ENTERO;
+        return destino == DataType.DECIMAL
+                && origen == DataType.ENTERO;
     }
 
     private boolean sonComparables(
-            TipoDato izquierda,
-            TipoDato derecha) {
+            DataType izquierda,
+            DataType derecha) {
 
-        if (izquierda == TipoDato.DESCONOCIDO
-                || derecha == TipoDato.DESCONOCIDO) {
+        if (izquierda == DataType.DESCONOCIDO
+                || derecha == DataType.DESCONOCIDO) {
 
             return true;
         }
@@ -2080,7 +2077,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
     private void validarInicializadorArreglo(
             PigLatinParser.InicializadorListaContext ctx,
-            Simbolo simbolo,
+            Symbol simbolo,
             int dimensionActual) {
 
         if (ctx == null
@@ -2151,7 +2148,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
                 if (valor.expresion() != null) {
 
-                    TipoDato tipoValor
+                    DataType tipoValor
                             = visit(
                                     valor.expresion()
                             );
@@ -2239,7 +2236,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
     private String construirFirmaExterna(
             String nombre,
-            List<TipoDato> parametros) {
+            List<DataType> parametros) {
 
         StringBuilder sb
                 = new StringBuilder();
@@ -2268,7 +2265,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
     }
 
     private String tipoPigATipoZ(
-            TipoDato tipo) {
+            DataType tipo) {
 
         if (tipo == null) {
             return "any";
@@ -2296,11 +2293,11 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         };
     }
 
-    private TipoDato tipoExternoATipoPig(
+    private DataType tipoExternoATipoPig(
             String tipo) {
 
         if (tipo == null) {
-            return TipoDato.DESCONOCIDO;
+            return DataType.DESCONOCIDO;
         }
 
         String normalizado
@@ -2309,35 +2306,35 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         return switch (normalizado) {
 
             case "int", "entero", "numerus" ->
-                TipoDato.ENTERO;
+                DataType.ENTERO;
 
             case "double", "float", "decimal", "flotante", "decimalis" ->
-                TipoDato.DECIMAL;
+                DataType.DECIMAL;
 
             case "String", "string", "cadena", "textum" ->
-                TipoDato.CADENA;
+                DataType.CADENA;
 
             case "char", "caracter", "littera" ->
-                TipoDato.CARACTER;
+                DataType.CARACTER;
 
             case "boolean", "bool", "booleano", "verum", "falsus" ->
-                TipoDato.BOOLEANO;
+                DataType.BOOLEANO;
 
             case "void" ->
-                TipoDato.VOID;
+                DataType.VOID;
 
             case "any" ->
-                TipoDato.DESCONOCIDO;
+                DataType.DESCONOCIDO;
 
             default -> {
 
                 if (registroImports.existeClase(
                         normalizado)) {
 
-                    yield TipoDato.OBJETO;
+                    yield DataType.OBJETO;
                 }
 
-                yield TipoDato.DESCONOCIDO;
+                yield DataType.DESCONOCIDO;
             }
         };
     }
@@ -2372,9 +2369,9 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
     private String describirArgumentoImportadoZ(
             PigLatinParser.ExpresionContext argumento,
-            TipoDato tipoArgumento) {
+            DataType tipoArgumento) {
 
-        if (tipoArgumento != TipoDato.ARREGLO) {
+        if (tipoArgumento != DataType.ARREGLO) {
 
             return tipoPigATipoZ(
                     tipoArgumento
@@ -2398,14 +2395,14 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             return "any";
         }
 
-        Simbolo simbolo
+        Symbol simbolo
                 = tabla.buscar(
                         nombre
                 );
 
         if (simbolo == null
                 || simbolo.getTipo()
-                != TipoDato.ARREGLO) {
+                != DataType.ARREGLO) {
 
             return "any";
         }
@@ -2413,7 +2410,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         String tipoBase;
 
         if (simbolo.getTipoElemento()
-                == TipoDato.OBJETO) {
+                == DataType.OBJETO) {
 
             tipoBase
                     = simbolo.getTipoReferencia();
@@ -2457,7 +2454,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
     private String describirArgumentoImportadoY(
             PigLatinParser.ExpresionContext argumento,
-            TipoDato tipoArgumento) {
+            DataType tipoArgumento) {
 
         if (argumento == null) {
             return "any";
@@ -2466,10 +2463,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         String nombre
                 = argumento.getText();
 
-        // =========================================================
+        
         // ESTRUCTURA INDIVIDUAL ENVIADA A Y POR REFERENCIA
-        // =========================================================
-        if (tipoArgumento == TipoDato.OBJETO) {
+        
+        if (tipoArgumento == DataType.OBJETO) {
 
             if (nombre == null
                     || !nombre.matches(
@@ -2479,14 +2476,14 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 return "any";
             }
 
-            Simbolo simboloObjeto
+            Symbol simboloObjeto
                     = tabla.buscar(
                             nombre
                     );
 
             if (simboloObjeto == null
                     || simboloObjeto.getTipo()
-                    != TipoDato.OBJETO
+                    != DataType.OBJETO
                     || simboloObjeto.getTipoReferencia()
                     == null
                     || simboloObjeto.getTipoReferencia()
@@ -2498,10 +2495,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             return simboloObjeto.getTipoReferencia();
         }
 
-        // =========================================================
+        
         // TIPOS PRIMITIVOS
-        // =========================================================
-        if (tipoArgumento != TipoDato.ARREGLO) {
+        
+        if (tipoArgumento != DataType.ARREGLO) {
 
             return tipoPigATipoY(
                     tipoArgumento
@@ -2516,14 +2513,14 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             return "any";
         }
 
-        Simbolo simbolo
+        Symbol simbolo
                 = tabla.buscar(
                         nombre
                 );
 
         if (simbolo == null
                 || simbolo.getTipo()
-                != TipoDato.ARREGLO) {
+                != DataType.ARREGLO) {
 
             return "any";
         }
@@ -2531,7 +2528,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         String tipoBase;
 
         if (simbolo.getTipoElemento()
-                == TipoDato.OBJETO) {
+                == DataType.OBJETO) {
 
             tipoBase
                     = simbolo.getTipoReferencia();
@@ -2555,7 +2552,7 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
     }
 
     private String tipoPigATipoY(
-            TipoDato tipo) {
+            DataType tipo) {
 
         if (tipo == null) {
             return "any";

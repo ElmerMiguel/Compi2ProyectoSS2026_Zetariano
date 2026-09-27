@@ -1,14 +1,11 @@
-/*
- */
+
 package elmer.compi2.zetariano.runtime;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Collection;
 
-/**
- *
- */
+
 public class TablaMemoria {
 
     private final Map<String, MarcoFuncion> funciones;

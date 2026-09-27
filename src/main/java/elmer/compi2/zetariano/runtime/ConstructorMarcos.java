@@ -1,13 +1,10 @@
-/*
- */
+
 package elmer.compi2.zetariano.runtime;
 
 import elmer.compi2.zetariano.core.node.NodoAST;
 import elmer.compi2.zetariano.core.node.TipoNodoAST;
 
-/**
- *
- */
+
 public class ConstructorMarcos {
 
     private final TablaMemoria tabla;

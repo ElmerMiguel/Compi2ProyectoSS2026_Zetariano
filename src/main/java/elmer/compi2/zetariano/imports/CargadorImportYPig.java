@@ -1,12 +1,11 @@
-/*
- */
+
 package elmer.compi2.zetariano.imports;
 
 import elmer.compi2.zetariano.antlr.ypython.YLexer;
 import elmer.compi2.zetariano.antlr.ypython.YParser;
-import elmer.compi2.zetariano.diagnostic.CompilerError;
-import elmer.compi2.zetariano.diagnostic.ErrorManager;
-import elmer.compi2.zetariano.analysis.semantic.SemanticoY;
+import elmer.compi2.zetariano.diagnostic.ErrorReport;
+import elmer.compi2.zetariano.diagnostic.ErrorCollector;
+import elmer.compi2.zetariano.analysis.semantic.YAnalyzer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,25 +22,25 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 /**
- *
+ * Cargador de archivos importados en lenguaje Y?.
  */
 public class CargadorImportYPig {
 
-    public SemanticoY cargarSemantico(
+    public YAnalyzer cargarSemantico(
             String rutaArchivo)
             throws IOException {
 
-        // ==========================================
+        
         // 1. LEER ARCHIVO .y
-        // ==========================================
+        
         String codigo
                 = Files.readString(
                         Path.of(rutaArchivo)
                 );
 
-        // ==========================================
+        
         // 2. LEXER
-        // ==========================================
+        
         CharStream input
                 = CharStreams.fromString(
                         codigo
@@ -133,9 +132,9 @@ public class CargadorImportYPig {
 
         tokens.seek(0);
 
-        // ==========================================
+        
         // 3. PARSER
-        // ==========================================
+        
         YParser parser
                 = new YParser(
                         tokens
@@ -184,34 +183,17 @@ public class CargadorImportYPig {
             );
         }
 
-        ErrorManager.clear();
+        ErrorCollector.clear();
 
-        SemanticoY semantico
-                = new SemanticoY();
+        YAnalyzer semantico = new YAnalyzer();
+        semantico.visit(arbol);
 
-        semantico.visit(
-                arbol
-        );
-
-        if (ErrorManager.hasErrors()) {
-
-            StringBuilder detalle
-                    = new StringBuilder();
-
-            for (CompilerError error
-                    : ErrorManager.getErrors()) {
-
-                detalle.append(
-                        System.lineSeparator()
-                );
-
-                detalle.append(
-                        error
-                );
+        if (ErrorCollector.hasErrors()) {
+            StringBuilder detalle = new StringBuilder();
+            for (ErrorReport error : ErrorCollector.getErrors()) {
+                detalle.append(System.lineSeparator()).append(error);
             }
-
-            ErrorManager.clear();
-
+            ErrorCollector.clear();
             throw new IllegalStateException(
                     "El archivo Y importado '"
                     + rutaArchivo
@@ -220,8 +202,7 @@ public class CargadorImportYPig {
             );
         }
 
-        ErrorManager.clear();
-
+        ErrorCollector.clear();
         return semantico;
     }
 }

@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.zeta;
 
-/**
- *
- */
+
 public class ForASTZ extends SentenciaASTZ {
 
     private final NodoASTZ inicializacion;

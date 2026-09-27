@@ -1,5 +1,4 @@
-/*
- */
+
 package elmer.compi2.zetariano.runtime.piglatin;
 
 import elmer.compi2.zetariano.core.node.piglatin.DeclaracionASTPig;
@@ -10,17 +9,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
+
 public class MarcoPrincipalPig {
 
     private final Map<String, VariableMemoriaPig> variablesBase;
     private final List<VariableMemoriaPig> variables;
 
-    // =========================================================
+    // --------------------
     // DECLARACION AST -> VARIABLE FISICA
-    // =========================================================
+    // --------------------
     private final IdentityHashMap<
             DeclaracionASTPig, VariableMemoriaPig> variablesPorDeclaracion;
 
@@ -40,9 +37,9 @@ public class MarcoPrincipalPig {
         this.siguienteOffset = 0;
     }
 
-    // =========================================================
+    // --------------------
     // REGISTRAR DECLARACION
-    // =========================================================
+    // --------------------
     public VariableMemoriaPig registrar(
             DeclaracionASTPig declaracion) {
 
@@ -100,9 +97,9 @@ public class MarcoPrincipalPig {
         return variable;
     }
 
-    // =========================================================
+    // --------------------
     // BUSQUEDA POR NOMBRE
-    // =========================================================
+    // --------------------
     public VariableMemoriaPig buscar(
             String nombre) {
 
@@ -115,9 +112,9 @@ public class MarcoPrincipalPig {
         );
     }
 
-    // =========================================================
+    // --------------------
     // BUSQUEDA POR DECLARACION EXACTA
-    // =========================================================
+    // --------------------
     public VariableMemoriaPig buscar(
             DeclaracionASTPig declaracion) {
 
@@ -130,9 +127,9 @@ public class MarcoPrincipalPig {
         );
     }
 
-    // =========================================================
+    // --------------------
     // INFORMACION DEL MARCO
-    // =========================================================
+    // --------------------
     public int getTamano() {
         return siguienteOffset;
     }
@@ -144,9 +141,9 @@ public class MarcoPrincipalPig {
         );
     }
 
-    // =========================================================
+    // --------------------
     // CATEGORIA
-    // =========================================================
+    // --------------------
     private VariableMemoriaPig.Categoria determinarCategoria(
             DeclaracionASTPig declaracion) {
 
@@ -164,9 +161,9 @@ public class MarcoPrincipalPig {
         return VariableMemoriaPig.Categoria.VARIABLE;
     }
 
-    // =========================================================
+    // --------------------
     // DEBUG
-    // =========================================================
+    // --------------------
     public void imprimir() {
 
         System.out.println();

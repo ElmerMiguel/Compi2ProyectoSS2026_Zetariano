@@ -1,5 +1,4 @@
-/*
- */
+
 package elmer.compi2.zetariano.runtime;
 
 import elmer.compi2.zetariano.core.node.NodoAST;
@@ -10,9 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
+
 public class MarcoFuncion {
 
     private final String nombre;
@@ -40,9 +37,9 @@ public class MarcoFuncion {
         this.siguienteOffset = 1;
     }
 
-    // ============================================================
+    // --------------------===
     // REGISTRAR VARIABLE / PARAMETRO
-    // ============================================================
+    // --------------------===
     public VariableMemoria agregarVariable(
             NodoAST nodoDeclaracion,
             String nombre,
@@ -84,9 +81,9 @@ public class MarcoFuncion {
         return variable;
     }
 
-    // ============================================================
+    // --------------------===
     // BUSCAR POR NODO AST
-    // ============================================================
+    // --------------------===
     public VariableMemoria buscarVariablePorNodo(
             NodoAST nodo) {
 
@@ -113,9 +110,9 @@ public class MarcoFuncion {
         return null;
     }
 
-    // ============================================================
+    // --------------------===
     // TODAS LAS VARIABLES
-    // ============================================================
+    // --------------------===
     public Collection<VariableMemoria> getVariables() {
 
         return variables;

@@ -15,7 +15,7 @@ public class YAnalyzerTest {
         assertTrue(archivoY.exists(), "El archivo docs/Pruebas/Utilidades.y debe existir");
 
         CargadorImportYPig cargador = new CargadorImportYPig();
-        SemanticoY semantico = cargador.cargarSemantico(archivoY.getAbsolutePath());
+        YAnalyzer semantico = cargador.cargarSemantico(archivoY.getAbsolutePath());
 
         assertNotNull(semantico, "El analizador semántico no debe ser nulo");
         assertNotNull(semantico.getTabla(), "La tabla de símbolos no debe ser nula");

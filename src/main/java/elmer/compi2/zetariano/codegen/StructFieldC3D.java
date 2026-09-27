@@ -1,14 +1,11 @@
-/*
- */
+
 package elmer.compi2.zetariano.codegen;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- */
+
 public class StructFieldC3D {
 
     private final String nombre;

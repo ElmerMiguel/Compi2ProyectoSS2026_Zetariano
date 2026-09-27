@@ -38,7 +38,7 @@ public class UnifiedCGeneratorTest {
         TablaMemoriaZ tablaZ = cargadorZ.cargarTabla(baseDir.resolve("Prueba.z").toString());
         assertNotNull(tablaZ);
         ZC3DEmitter emitterZ = new ZC3DEmitter();
-        List<Cuadruplo> c3dZ = emitterZ.generar(cargadorZ.getUltimoProgramaAST());
+        List<Instruction> c3dZ = emitterZ.generar(cargadorZ.getUltimoProgramaAST());
         assertNotNull(c3dZ);
         assertFalse(c3dZ.isEmpty());
 
@@ -49,7 +49,7 @@ public class UnifiedCGeneratorTest {
         YParser parserY = new YParser(new CommonTokenStream(lexerY));
         NodoAST astY = new YTreeBuilder().visit(parserY.programa());
         C3DEmitter emitterY = new C3DEmitter();
-        List<Cuadruplo> c3dY = emitterY.generar(astY);
+        List<Instruction> c3dY = emitterY.generar(astY);
         assertNotNull(c3dY);
         assertFalse(c3dY.isEmpty());
 
@@ -65,7 +65,7 @@ public class UnifiedCGeneratorTest {
 
         MarcoPrincipalPig marcoPig = new ConstructorMemoriaPig().construir(astPig);
         PigC3DEmitter emitterPig = new PigC3DEmitter(astPig, marcoPig, registro);
-        List<Cuadruplo> c3dPig = emitterPig.generar();
+        List<Instruction> c3dPig = emitterPig.generar();
         assertNotNull(c3dPig);
         assertFalse(c3dPig.isEmpty());
 
@@ -74,7 +74,7 @@ public class UnifiedCGeneratorTest {
         enlazador.agregarModuloY(c3dY);
         enlazador.agregarModuloZ(c3dZ);
         enlazador.establecerModuloPig(c3dPig);
-        List<Cuadruplo> enlazado = enlazador.enlazar();
+        List<Instruction> enlazado = enlazador.enlazar();
         assertFalse(enlazador.tieneErrores(), "No deben haber errores de enlace: " + enlazador.getErrores());
         assertTrue(enlazado.size() > 50);
 

@@ -39,6 +39,12 @@ public class ParamInfo {
         return byReference;
     }
 
+    public String getNombre() { return name; }
+    public DataType getTipo() { return type; }
+    public DataType getTipoElemento() { return elementType; }
+    public String getTipoReferencia() { return referenceType; }
+    public boolean isPorReferencia() { return byReference; }
+
     @Override
     public String toString() {
         return String.format("ParamInfo{name='%s', type=%s, elem=%s, ref='%s', byRef=%s}",

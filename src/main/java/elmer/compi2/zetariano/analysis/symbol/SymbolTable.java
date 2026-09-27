@@ -71,4 +71,14 @@ public class SymbolTable {
         }
         System.out.println("========================================");
     }
+
+    public void entrarAmbito() { enterScope(); }
+    public void salirAmbito() { exitScope(); }
+    public int getAmbitoActual() { return getCurrentScopeId(); }
+    public int getNivelActual() { return getCurrentScopeLevel(); }
+    public boolean existeEnAmbitoActual(String nombre) { return existsInCurrentScope(nombre); }
+    public void agregar(Symbol simbolo) { add(simbolo); }
+    public Symbol buscar(String nombre) { return lookup(nombre); }
+    public List<Symbol> getSimbolos() { return symbols; }
+    public void imprimir() { print(); }
 }

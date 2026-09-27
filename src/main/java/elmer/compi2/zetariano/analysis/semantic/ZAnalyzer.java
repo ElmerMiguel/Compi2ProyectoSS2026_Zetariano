@@ -1,5 +1,4 @@
-/*
- */
+
 package elmer.compi2.zetariano.analysis.semantic;
 
 import elmer.compi2.zetariano.analysis.semantic.zeta.AtributoZ;
@@ -22,9 +21,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import elmer.compi2.zetariano.antlr.zeta.ZParser;
 import elmer.compi2.zetariano.antlr.zeta.ZParserBaseVisitor;
 
-/**
- *
- */
+
 public class ZAnalyzer extends ZParserBaseVisitor<Void> {
 
     private ClaseZ claseActual;
@@ -50,9 +47,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
     private int profundidadCiclo = 0;
     private int profundidadSwitch = 0;
 
-    // =========================================================
+    // --------------------
     // ANALISIS PRINCIPAL
-    // =========================================================
+    // --------------------
     public void analizar(ZParser.ProgramaContext ctx) {
 
         errores.clear();
@@ -117,9 +114,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         );
     }
 
-    // =========================================================
+    // --------------------
     // CLASE
-    // =========================================================
+    // --------------------
     @Override
     public Void visitDefinicionClase(
             ZParser.DefinicionClaseContext ctx) {
@@ -195,9 +192,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         return null;
     }
 
-    // =========================================================
+    // --------------------
     // ATRIBUTOS
-    // =========================================================
+    // --------------------
     @Override
     public Void visitAtributo(
             ZParser.AtributoContext ctx) {
@@ -207,9 +204,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         return null;
     }
 
-    // =========================================================
+    // --------------------
     // CONSTRUCTORES
-    // =========================================================
+    // --------------------
     @Override
     public Void visitConstructor(
             ZParser.ConstructorContext ctx) {
@@ -219,9 +216,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         return null;
     }
 
-    // =========================================================
+    // --------------------
     // METODOS
-    // =========================================================
+    // --------------------
     @Override
     public Void visitMetodo(
             ZParser.MetodoContext ctx) {
@@ -317,16 +314,16 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return null;
         }
 
-        // =========================================================
+        // --------------------
         // SIN INICIALIZADOR
-        // =========================================================
+        // --------------------
         if (ctx.inicializador() == null) {
             return null;
         }
 
-        // =========================================================
+        // --------------------
         // INICIALIZADOR CON LISTA
-        // =========================================================
+        // --------------------
         if (ctx.inicializador()
                 .inicializadorLista() != null) {
 
@@ -354,9 +351,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return null;
         }
 
-        // =========================================================
+        // --------------------
         // INICIALIZADOR CON EXPRESION
-        // =========================================================
+        // --------------------
         if (ctx.inicializador()
                 .expresion() == null) {
 
@@ -376,10 +373,10 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return null;
         }
 
-        // =========================================================
+        // --------------------
         // VALIDACION COMPLETA:
         // tipo + dimensiones
-        // =========================================================
+        // --------------------
         if (!tiposCompatiblesCompletos(
                 tipo,
                 dimensiones,
@@ -462,9 +459,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         boolean tieneExpresion
                 = ctx.expresion() != null;
 
-        // =========================================================
+        // --------------------
         // CONSTRUCTOR
-        // =========================================================
+        // --------------------
         if (tipoRetornoActual.equals("constructor")) {
 
             if (tieneExpresion) {
@@ -479,9 +476,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return null;
         }
 
-        // =========================================================
+        // --------------------
         // VOID
-        // =========================================================
+        // --------------------
         if (tipoRetornoActual.equals("void")) {
 
             if (tieneExpresion) {
@@ -498,9 +495,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return null;
         }
 
-        // =========================================================
+        // --------------------
         // METODO CON RETORNO
-        // =========================================================
+        // --------------------
         if (!tieneExpresion) {
 
             agregarError(
@@ -771,9 +768,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return null;
         }
 
-        // =========================================================
+        // --------------------
         // ++
-        // =========================================================
+        // --------------------
         if (ctx.INCREMENTO() != null) {
 
             validarIncrementoDecrementoFor(
@@ -784,9 +781,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return null;
         }
 
-        // =========================================================
+        // --------------------
         // --
-        // =========================================================
+        // --------------------
         if (ctx.DECREMENTO() != null) {
 
             validarIncrementoDecrementoFor(
@@ -797,9 +794,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return null;
         }
 
-        // =========================================================
+        // --------------------
         // += -= *=
-        // =========================================================
+        // --------------------
         if (ctx.operadorAsignacion() != null) {
 
             validarAsignacionAcceso(
@@ -887,9 +884,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             }
         }
 
-        // =========================================================
+        // --------------------
         // DEFAULT
-        // =========================================================
+        // --------------------
         if (ctx.bloqueDefault() != null) {
 
             for (ZParser.SentenciaContext sentencia
@@ -948,9 +945,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
     public Void visitLlamadaMetodoObjeto(
             ZParser.LlamadaMetodoObjetoContext ctx) {
 
-        // =========================================================
+        // --------------------
         // 1. RESOLVER OBJETO BASE
-        // =========================================================
+        // --------------------
         String nombreBase
                 = ctx.IDENTIFICADOR(0).getText();
 
@@ -976,9 +973,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         int dimensionesActuales
                 = base.getDimensiones();
 
-        // =========================================================
+        // --------------------
         // 2. RECORRER SUFIJOS PREVIOS AL METODO
-        // =========================================================
+        // --------------------
         for (ZParser.SufijoObjetoContext sufijo
                 : ctx.sufijoObjeto()) {
 
@@ -1089,9 +1086,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             }
         }
 
-        // =========================================================
+        // --------------------
         // 3. DESPUES DE LOS SUFIJOS DEBE QUEDAR UN OBJETO
-        // =========================================================
+        // --------------------
         if (dimensionesActuales > 0) {
 
             agregarError(
@@ -1121,17 +1118,17 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return null;
         }
 
-        // =========================================================
+        // --------------------
         // 4. METODO FINAL
-        // =========================================================
+        // --------------------
         String nombreMetodo
                 = ctx.IDENTIFICADOR(
                         ctx.IDENTIFICADOR().size() - 1
                 ).getText();
 
-        // =========================================================
+        // --------------------
         // 5. ARGUMENTOS
-        // =========================================================
+        // --------------------
         List<ResultadoAccesoZ> argumentos
                 = obtenerArgumentosCompletos(
                         ctx.listaArgumentos()
@@ -1198,9 +1195,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         return null;
     }
 
-    // =========================================================
+    // --------------------
     // PARAMETROS
-    // =========================================================
+    // --------------------
     private List<ParametroZ> obtenerParametros(
             ZParser.ListaParametrosContext ctx,
             String propietario) {
@@ -1257,9 +1254,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         return parametros;
     }
 
-    // =========================================================
+    // --------------------
     // TIPOS
-    // =========================================================
+    // --------------------
     private String obtenerTipo(
             ZParser.TipoContext ctx) {
 
@@ -1288,9 +1285,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         return "desconocido";
     }
 
-    // =========================================================
+    // --------------------
     // REPORTE
-    // =========================================================
+    // --------------------
     public void imprimirResultado() {
 
         System.out.println();
@@ -1537,9 +1534,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return "desconocido";
         }
 
-        // =========================================================
+        // --------------------
         // PARTE PRINCIPAL
-        // =========================================================
+        // --------------------
         String tipoCondicion
                 = obtenerTipoExpresionOr(
                         ctx.expresionOr()
@@ -1549,9 +1546,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return tipoCondicion;
         }
 
-        // =========================================================
+        // --------------------
         // OPERADOR TERNARIO
-        // =========================================================
+        // --------------------
         if (!tipoCondicion.equals("desconocido")
                 && !tipoCondicion.equals("boolean")) {
 
@@ -1588,27 +1585,27 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return "desconocido";
         }
 
-        // =========================================================
+        // --------------------
         // MISMO TIPO
-        // =========================================================
+        // --------------------
         if (tipoVerdadero.equals(
                 tipoFalso)) {
 
             return tipoVerdadero;
         }
 
-        // =========================================================
+        // --------------------
         // PROMOCION NUMERICA
-        // =========================================================
+        // --------------------
         if (esNumerico(tipoVerdadero)
                 && esNumerico(tipoFalso)) {
 
             return "double";
         }
 
-        // =========================================================
+        // --------------------
         // NULL + REFERENCIA
-        // =========================================================
+        // --------------------
         if (tipoVerdadero.equals("null")
                 && (tipoFalso.equals("String")
                 || esTipoObjeto(tipoFalso))) {
@@ -1623,9 +1620,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return tipoVerdadero;
         }
 
-        // =========================================================
+        // --------------------
         // TIPOS INCOMPATIBLES
-        // =========================================================
+        // --------------------
         agregarError(
                 ctx.getStart().getLine(),
                 ctx.getStart()
@@ -2195,9 +2192,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             }
         }
 
-        // =========================================================
+        // --------------------
         // CONSTRUCTOR IMPLICITO VACIO
-        // =========================================================
+        // --------------------
         if (argumentos.isEmpty()
                 && clase.getConstructores().isEmpty()) {
 
@@ -2608,9 +2605,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return false;
         }
 
-        // =========================================================
+        // --------------------
         // NULL
-        // =========================================================
+        // --------------------
         if (tipoOrigen.equals("null")) {
 
             /*
@@ -2626,18 +2623,18 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             );
         }
 
-        // =========================================================
+        // --------------------
         // DIMENSIONES
-        // =========================================================
+        // --------------------
         if (dimensionesDestino
                 != dimensionesOrigen) {
 
             return false;
         }
 
-        // =========================================================
+        // --------------------
         // ARREGLOS
-        // =========================================================
+        // --------------------
         if (dimensionesDestino > 0) {
 
             return tipoDestino.equals(
@@ -2645,9 +2642,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             );
         }
 
-        // =========================================================
+        // --------------------
         // ESCALARES
-        // =========================================================
+        // --------------------
         return tiposCompatibles(
                 tipoDestino,
                 tipoOrigen
@@ -2762,9 +2759,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // ATRIBUTO SIN INICIALIZADOR
-        // =========================================================
+        // --------------------
         if (ctx.inicializador() == null) {
             return;
         }
@@ -2781,9 +2778,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
                 = ctx.dimensionesParametro().size()
                 + ctx.dimensiones().size();
 
-        // =========================================================
+        // --------------------
         // INICIALIZADOR MEDIANTE LISTA
-        // =========================================================
+        // --------------------
         if (ctx.inicializador()
                 .inicializadorLista() != null) {
 
@@ -2811,9 +2808,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // INICIALIZADOR MEDIANTE EXPRESION
-        // =========================================================
+        // --------------------
         if (ctx.inicializador()
                 .expresion() == null) {
 
@@ -2830,9 +2827,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // VALIDAR TIPO + DIMENSIONES
-        // =========================================================
+        // --------------------
         if (!tiposCompatiblesCompletos(
                 tipo,
                 dimensiones,
@@ -2882,9 +2879,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
                 parametros
         );
 
-        // =========================================================
+        // --------------------
         // NOMBRE DEL CONSTRUCTOR
-        // =========================================================
+        // --------------------
         if (!nombreConstructor.equals(
                 claseActual.getNombre())) {
 
@@ -3089,9 +3086,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
                 ctx.bloque()
         );
 
-        // =========================================================
+        // --------------------
         // RETORNO GARANTIZADO
-        // =========================================================
+        // --------------------
         if (!tipoRetorno.equals("void")
                 && !bloqueGarantizaRetorno(
                         ctx.bloque())) {
@@ -3124,16 +3121,16 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return false;
         }
 
-        // =========================================================
+        // --------------------
         // RETURN
-        // =========================================================
+        // --------------------
         if (ctx.sentenciaReturn() != null) {
             return true;
         }
 
-        // =========================================================
+        // --------------------
         // IF / ELSE IF / ELSE
-        // =========================================================
+        // --------------------
         if (ctx.sentenciaIf() != null) {
 
             return ifGarantizaRetorno(
@@ -3141,9 +3138,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             );
         }
 
-        // =========================================================
+        // --------------------
         // BLOQUE ANIDADO
-        // =========================================================
+        // --------------------
         if (ctx.bloque() != null) {
 
             return bloqueGarantizaRetorno(
@@ -3288,9 +3285,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // BLOQUE
-        // =========================================================
+        // --------------------
         if (ctx.bloque() != null) {
 
             validarCodigoInalcanzableBloque(
@@ -3300,9 +3297,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // IF
-        // =========================================================
+        // --------------------
         if (ctx.sentenciaIf() != null) {
 
             for (ZParser.CuerpoControlContext cuerpo
@@ -3317,9 +3314,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // WHILE
-        // =========================================================
+        // --------------------
         if (ctx.sentenciaWhile() != null) {
 
             validarCodigoInalcanzableCuerpo(
@@ -3330,9 +3327,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // DO-WHILE
-        // =========================================================
+        // --------------------
         if (ctx.sentenciaDoWhile() != null) {
 
             validarCodigoInalcanzableCuerpo(
@@ -3343,9 +3340,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // FOR
-        // =========================================================
+        // --------------------
         if (ctx.sentenciaFor() != null) {
 
             validarCodigoInalcanzableCuerpo(
@@ -3413,9 +3410,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         int dimensionesOrigen
                 = origen.getDimensiones();
 
-        // =========================================================
+        // --------------------
         // =
-        // =========================================================
+        // --------------------
         if (operador.ASIGNACION() != null) {
 
             if (!tiposCompatiblesCompletos(
@@ -3442,9 +3439,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // OPERACIONES COMPUESTAS SOBRE ARREGLOS
-        // =========================================================
+        // --------------------
         if (dimensionesDestino > 0) {
 
             agregarError(
@@ -3467,9 +3464,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // +=
-        // =========================================================
+        // --------------------
         if (operador.MAS_IGUAL() != null) {
 
             if (tipoDestino.equals("String")) {
@@ -3505,9 +3502,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // -= y *=
-        // =========================================================
+        // --------------------
         if (operador.MENOS_IGUAL() != null
                 || operador.POR_IGUAL() != null) {
 
@@ -3657,9 +3654,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
-        // =========================================================
+        // --------------------
         // VALIDAR QUE LAS LISTAS HERMANAS TENGAN LA MISMA FORMA
-        // =========================================================
+        // --------------------
         if (dimensionesEsperadas > 1) {
 
             List<Integer> formaEsperada = null;
@@ -3985,9 +3982,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return ResultadoAccesoZ.error();
         }
 
-        // =========================================================
+        // --------------------
         // NEW ARREGLO
-        // =========================================================
+        // --------------------
         ZParser.CreacionArregloContext creacion
                 = buscarCreacionArreglo(ctx);
 
@@ -4012,9 +4009,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             );
         }
 
-        // =========================================================
+        // --------------------
         // EXPRESION ESCALAR NORMAL
-        // =========================================================
+        // --------------------
         String tipo
                 = obtenerTipoExpresion(ctx);
 
@@ -4056,9 +4053,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return -1;
         }
 
-        // =========================================================
+        // --------------------
         // NULL
-        // =========================================================
+        // --------------------
         if (tipoArgumento.equals("null")) {
 
             // null puede enviarse a cualquier arreglo.
@@ -4076,18 +4073,18 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return -1;
         }
 
-        // =========================================================
+        // --------------------
         // DIMENSIONES
-        // =========================================================
+        // --------------------
         if (dimensionesParametro
                 != dimensionesArgumento) {
 
             return -1;
         }
 
-        // =========================================================
+        // --------------------
         // ARREGLOS
-        // =========================================================
+        // --------------------
         if (dimensionesParametro > 0) {
 
             if (tipoParametro.equals(tipoArgumento)) {
@@ -4097,16 +4094,16 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return -1;
         }
 
-        // =========================================================
+        // --------------------
         // ESCALAR EXACTO
-        // =========================================================
+        // --------------------
         if (tipoParametro.equals(tipoArgumento)) {
             return 0;
         }
 
-        // =========================================================
+        // --------------------
         // PROMOCION int -> double
-        // =========================================================
+        // --------------------
         if (tipoParametro.equals("double")
                 && tipoArgumento.equals("int")) {
 

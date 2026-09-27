@@ -41,8 +41,8 @@ public class C3DEmitterTest {
         NodoAST ast = new YTreeBuilder().visit(tree);
         assertNotNull(ast, "El AST de Y no debe ser nulo");
 
-        GeneradorC3D generadorY = new GeneradorC3D();
-        List<Cuadruplo> c3d = generadorY.generar(ast);
+        C3DEmitter generadorY = new C3DEmitter();
+        List<Instruction> c3d = generadorY.generar(ast);
 
         assertNotNull(c3d, "La lista de C3D de Y no debe ser nula");
         assertFalse(c3d.isEmpty(), "Debe haber instrucciones C3D para Utilidades.y");
@@ -82,8 +82,8 @@ public class C3DEmitterTest {
         MarcoPrincipalPig marcoPig = constructorMem.construir(astPig);
         assertNotNull(marcoPig, "El marco principal de Pig no debe ser nulo");
 
-        GeneradorC3DPig generadorPig = new GeneradorC3DPig(astPig, marcoPig, registro);
-        List<Cuadruplo> c3dPig = generadorPig.generar();
+        elmer.compi2.zetariano.codegen.piglatin.PigC3DEmitter generadorPig = new elmer.compi2.zetariano.codegen.piglatin.PigC3DEmitter(astPig, marcoPig, registro);
+        List<Instruction> c3dPig = generadorPig.generar();
 
         assertNotNull(c3dPig, "El C3D de Pig no debe ser nulo");
         assertFalse(c3dPig.isEmpty(), "Debe haber instrucciones C3D para Principal.pig");
@@ -93,17 +93,17 @@ public class C3DEmitterTest {
         YLexer lexerY = new YLexer(CharStreams.fromString(codigoY));
         YParser parserY = new YParser(new CommonTokenStream(lexerY));
         NodoAST astY = new YTreeBuilder().visit(parserY.programa());
-        List<Cuadruplo> c3dY = new GeneradorC3D().generar(astY);
+        List<Instruction> c3dY = new C3DEmitter().generar(astY);
 
         // Generar C3D de Z
-        List<Cuadruplo> c3dZ = new GeneradorC3DZ().generar(cargadorZ.getUltimoProgramaAST());
+        List<Instruction> c3dZ = new elmer.compi2.zetariano.codegen.zeta.ZC3DEmitter().generar(cargadorZ.getUltimoProgramaAST());
 
         // Validar enlace con todos los modulos
         EnlazadorC3D enlazador = new EnlazadorC3D();
         enlazador.agregarModuloY(c3dY);
         enlazador.agregarModuloZ(c3dZ);
         enlazador.establecerModuloPig(c3dPig);
-        List<Cuadruplo> enlazado = enlazador.enlazar();
+        List<Instruction> enlazado = enlazador.enlazar();
 
         assertNotNull(enlazado, "El codigo enlazado no debe ser nulo");
         assertFalse(enlazador.tieneErrores(), "El enlazador no debe tener errores: " + enlazador.getErrores());

@@ -1,13 +1,10 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.zeta;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
+
 public class SwitchASTZ extends SentenciaASTZ {
 
     private final ExpresionASTZ expresion;

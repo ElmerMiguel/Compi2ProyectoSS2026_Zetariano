@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.imports;
 
-/**
- *
- */
+
 public class AtributoImportadoPig {
 
     private final String nombre;

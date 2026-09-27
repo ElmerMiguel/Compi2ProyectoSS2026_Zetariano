@@ -1,10 +1,7 @@
-/*
- */
+
 package elmer.compi2.zetariano.core.node.zeta;
 
-/**
- *
- */
+
 public class LiteralASTZ extends ExpresionASTZ {
 
     private final Object valor;
