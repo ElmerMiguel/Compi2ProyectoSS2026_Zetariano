@@ -1,7 +1,10 @@
-
+/*
+ */
 package elmer.compi2.zetariano.core.node.zeta;
 
-
+/**
+ *
+ */
 public class DeclaracionASTZ extends SentenciaASTZ {
 
     private final String nombre;

@@ -1,10 +1,13 @@
-
+/*
+ */
 package elmer.compi2.zetariano.core.node.zeta;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ *
+ */
 public class ClaseASTZ extends NodoASTZ {
 
     private final String nombre;

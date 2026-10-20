@@ -1,7 +1,10 @@
-
+/*
+ */
 package elmer.compi2.zetariano.codegen;
 
-
+/**
+ *
+ */
 public class TempManager {
 
     private int contador;
@@ -15,23 +18,11 @@ public class TempManager {
         return "t" + contador;
     }
 
-    public String newTemp() {
-        return nuevoTemporal();
-    }
-
     public void reiniciar() {
         contador = 0;
     }
 
-    public void reset() {
-        reiniciar();
-    }
-
     public int getCantidad() {
         return contador;
-    }
-
-    public int getCount() {
-        return getCantidad();
     }
 }

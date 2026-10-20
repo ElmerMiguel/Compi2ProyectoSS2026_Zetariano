@@ -1,7 +1,10 @@
-
+/*
+ */
 package elmer.compi2.zetariano.core.node.zeta;
 
-
+/**
+ *
+ */
 public class UnariaASTZ extends ExpresionASTZ {
 
     private final String operador;

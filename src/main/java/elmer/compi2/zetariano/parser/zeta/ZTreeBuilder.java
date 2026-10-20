@@ -2,7 +2,8 @@ package elmer.compi2.zetariano.parser.zeta;
 
 import elmer.compi2.zetariano.core.node.*;
 import elmer.compi2.zetariano.core.node.zeta.*;
-
+/*
+ */
 import elmer.compi2.zetariano.core.node.*;
 import elmer.compi2.zetariano.core.node.zeta.*;
 
@@ -11,12 +12,14 @@ import java.util.List;
 import elmer.compi2.zetariano.antlr.zeta.ZParser;
 import elmer.compi2.zetariano.antlr.zeta.ZParserBaseVisitor;
 
-
+/**
+ *
+ */
 public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
 
-    
+    // =========================================================
     // PROGRAMA
-    
+    // =========================================================
     @Override
     public NodoASTZ visitPrograma(
             ZParser.ProgramaContext ctx) {
@@ -30,9 +33,9 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         );
     }
 
-    
+    // =========================================================
     // CLASE
-    
+    // =========================================================
     @Override
     public NodoASTZ visitDefinicionClase(
             ZParser.DefinicionClaseContext ctx) {
@@ -59,9 +62,9 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         return clase;
     }
 
-    
+    // =========================================================
     // MIEMBRO DE CLASE
-    
+    // =========================================================
     @Override
     public NodoASTZ visitMiembroClase(
             ZParser.MiembroClaseContext ctx) {
@@ -81,9 +84,9 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         return null;
     }
 
-    
+    // =========================================================
     // ATRIBUTO
-    
+    // =========================================================
     @Override
     public NodoASTZ visitAtributo(
             ZParser.AtributoContext ctx) {
@@ -118,9 +121,9 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         );
     }
 
-    
+    // =========================================================
     // CONSTRUCTOR
-    
+    // =========================================================
     @Override
     public NodoASTZ visitConstructor(
             ZParser.ConstructorContext ctx) {
@@ -145,9 +148,9 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         );
     }
 
-    
+    // =========================================================
     // METODO
-    
+    // =========================================================
     @Override
     public NodoASTZ visitMetodo(
             ZParser.MetodoContext ctx) {
@@ -176,9 +179,9 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         );
     }
 
-    
+    // =========================================================
     // PARAMETROS
-    
+    // =========================================================
     private List<ParametroASTZ> construirParametros(
             ZParser.ListaParametrosContext ctx) {
 
@@ -217,9 +220,9 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         return parametros;
     }
 
-    
+    // =========================================================
     // BLOQUE
-    
+    // =========================================================
     @Override
     public NodoASTZ visitBloque(
             ZParser.BloqueContext ctx) {

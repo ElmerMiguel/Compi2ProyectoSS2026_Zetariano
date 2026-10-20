@@ -1,10 +1,13 @@
-
+/*
+ */
 package elmer.compi2.zetariano.codegen;
 
 import elmer.compi2.zetariano.core.node.NodoAST;
 import java.util.List;
 
-
+/**
+ *
+ */
 public class ArrayAccessInfo {
 
     private final NodoAST base;

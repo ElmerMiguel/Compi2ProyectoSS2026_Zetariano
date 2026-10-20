@@ -41,11 +41,15 @@ public class OutputPanel extends JPanel {
 
         // 2. Cuadruplos C3D
         c3dArea = createTextArea();
-        tabbedPane.addTab("Cuadruplos (C3D)", new JScrollPane(c3dArea));
+        JScrollPane c3dScroll = new JScrollPane(c3dArea);
+        c3dScroll.setRowHeaderView(new LineNumberGutter(c3dArea));
+        tabbedPane.addTab("Cuadruplos (C3D)", c3dScroll);
 
         // 3. Codigo C generado
         cCodeArea = createTextArea();
-        tabbedPane.addTab("Codigo C", new JScrollPane(cCodeArea));
+        JScrollPane cCodeScroll = new JScrollPane(cCodeArea);
+        cCodeScroll.setRowHeaderView(new LineNumberGutter(cCodeArea));
+        tabbedPane.addTab("Codigo C", cCodeScroll);
 
         // 4. Tabla de Errores
         errorsModel = new DefaultTableModel(new Object[]{"Fase", "Linea", "Columna", "Mensaje"}, 0) {

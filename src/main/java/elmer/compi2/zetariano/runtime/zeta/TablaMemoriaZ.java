@@ -1,11 +1,14 @@
-
+/*
+ */
 package elmer.compi2.zetariano.runtime.zeta;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
+/**
+ *
+ */
 public class TablaMemoriaZ {
 
     private final Map<String, MarcoMetodoZ> marcos;

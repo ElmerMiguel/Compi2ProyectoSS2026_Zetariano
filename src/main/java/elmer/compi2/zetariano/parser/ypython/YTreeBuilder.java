@@ -1,20 +1,23 @@
 package elmer.compi2.zetariano.parser.ypython;
 
 import elmer.compi2.zetariano.core.node.*;
-
+/*
+ */
 import elmer.compi2.zetariano.core.node.*;
 
 import elmer.compi2.zetariano.antlr.ypython.YParser;
 import elmer.compi2.zetariano.antlr.ypython.YParserBaseVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-
+/**
+ *
+ */
 public class YTreeBuilder
         extends YParserBaseVisitor<NodoAST> {
 
-    // -------------------
+    // ============================================================
     // PROGRAMA
-    // -------------------
+    // ============================================================
     @Override
     public NodoAST visitPrograma(
             YParser.ProgramaContext ctx) {
@@ -26,9 +29,9 @@ public class YTreeBuilder
                         ctx
                 );
 
-        
+        // ========================================================
         // SECCION DE ESTRUCTURAS
-        
+        // ========================================================
         if (ctx.seccionEstructuras() != null) {
 
             NodoAST estructuras
@@ -41,9 +44,9 @@ public class YTreeBuilder
             );
         }
 
-        
+        // ========================================================
         // SECCION DE FUNCIONES
-        
+        // ========================================================
         if (ctx.seccionFunciones() != null) {
 
             NodoAST funciones
@@ -59,9 +62,9 @@ public class YTreeBuilder
         return programa;
     }
 
-    // --------------------===
+    // ============================================================
     // SECCION DE ESTRUCTURAS
-    // --------------------===
+    // ============================================================
     @Override
     public NodoAST visitSeccionEstructuras(
             YParser.SeccionEstructurasContext ctx) {
@@ -89,9 +92,9 @@ public class YTreeBuilder
         return seccion;
     }
 
-    // --------------------===
+    // ============================================================
     // DEFINICION DE ESTRUCTURA
-    // --------------------===
+    // ============================================================
     @Override
     public NodoAST visitDefinicionEstructura(
             YParser.DefinicionEstructuraContext ctx) {
@@ -107,9 +110,9 @@ public class YTreeBuilder
                         ctx
                 );
 
-        
+        // ========================================================
         // ATRIBUTOS
-        
+        // ========================================================
         for (YParser.AtributoEstructuraContext atributoCtx
                 : ctx.atributoEstructura()) {
 
@@ -126,9 +129,9 @@ public class YTreeBuilder
         return estructura;
     }
 
-    // --------------------===
+    // ============================================================
     // ATRIBUTO DE ESTRUCTURA
-    // --------------------===
+    // ============================================================
     @Override
     public NodoAST visitAtributoEstructura(
             YParser.AtributoEstructuraContext ctx) {
@@ -175,9 +178,9 @@ public class YTreeBuilder
         return atributo;
     }
 
-    // --------------------===
+    // ============================================================
     // SECCION DE FUNCIONES
-    // --------------------===
+    // ============================================================
     @Override
     public NodoAST visitSeccionFunciones(
             YParser.SeccionFuncionesContext ctx) {
@@ -205,9 +208,9 @@ public class YTreeBuilder
         return seccion;
     }
 
-    // --------------------===
+    // ============================================================
     // FUNCION
-    // --------------------===
+    // ============================================================
     @Override
     public NodoAST visitDefinicionFuncion(
             YParser.DefinicionFuncionContext ctx) {
@@ -223,9 +226,9 @@ public class YTreeBuilder
                         ctx
                 );
 
-        
+        // ========================================================
         // PARAMETROS
-        
+        // ========================================================
         if (ctx.parametros() != null) {
 
             for (YParser.ParametroContext parametroCtx
@@ -243,9 +246,9 @@ public class YTreeBuilder
             }
         }
 
-        
+        // ========================================================
         // TIPO DE RETORNO
-        
+        // ========================================================
         if (ctx.retornoFuncion() != null) {
 
             String tipoRetorno
@@ -265,9 +268,9 @@ public class YTreeBuilder
             );
         }
 
-        
+        // ========================================================
         // BLOQUE
-        
+        // ========================================================
         if (ctx.bloqueFuncion() != null) {
 
             NodoAST bloque
@@ -283,9 +286,9 @@ public class YTreeBuilder
         return funcion;
     }
 
-    // --------------------===
+    // ============================================================
     // BLOQUE DE FUNCION
-    // --------------------===
+    // ============================================================
     @Override
     public NodoAST visitBloqueFuncion(
             YParser.BloqueFuncionContext ctx) {
@@ -439,9 +442,9 @@ public class YTreeBuilder
                         ctx
                 );
 
-        // --------------------===
+        // ============================================================
         // DIMENSIONES
-        // --------------------===
+        // ============================================================
         for (YParser.DimensionesContext dimension
                 : ctx.dimensiones()) {
 
@@ -466,9 +469,9 @@ public class YTreeBuilder
             );
         }
 
-        // --------------------===
+        // ============================================================
         // INICIALIZADOR
-        // --------------------===
+        // ============================================================
         if (ctx.inicializador() != null) {
 
             NodoAST inicializador
@@ -838,9 +841,9 @@ public class YTreeBuilder
     public NodoAST visitExpresionUnaria(
             YParser.ExpresionUnariaContext ctx) {
 
-        // --------------------===
+        // ============================================================
         // NOT
-        // --------------------===
+        // ============================================================
         if (ctx.NOT() != null) {
 
             NodoAST nodo
@@ -859,9 +862,9 @@ public class YTreeBuilder
             return nodo;
         }
 
-        // --------------------===
+        // ============================================================
         // NEGATIVO
-        // --------------------===
+        // ============================================================
         if (ctx.MENOS() != null) {
 
             NodoAST nodo
@@ -880,9 +883,9 @@ public class YTreeBuilder
             return nodo;
         }
 
-        // --------------------===
+        // ============================================================
         // PRIMARIA
-        // --------------------===
+        // ============================================================
         return visit(
                 ctx.expresionPrimaria()
         );
@@ -892,9 +895,9 @@ public class YTreeBuilder
     public NodoAST visitExpresionPrimaria(
             YParser.ExpresionPrimariaContext ctx) {
 
-        // --------------------===
+        // ============================================================
         // ENTERO
-        // --------------------===
+        // ============================================================
         if (ctx.ENTERO() != null) {
 
             return crearNodo(
@@ -904,9 +907,9 @@ public class YTreeBuilder
             );
         }
 
-        // --------------------===
+        // ============================================================
         // DECIMAL
-        // --------------------===
+        // ============================================================
         if (ctx.DECIMAL() != null) {
 
             return crearNodo(
@@ -916,9 +919,9 @@ public class YTreeBuilder
             );
         }
 
-        // --------------------===
+        // ============================================================
         // CADENA
-        // --------------------===
+        // ============================================================
         if (ctx.CADENA() != null) {
 
             return crearNodo(
@@ -928,9 +931,9 @@ public class YTreeBuilder
             );
         }
 
-        // --------------------===
+        // ============================================================
         // CARACTER
-        // --------------------===
+        // ============================================================
         if (ctx.CARACTER() != null) {
 
             return crearNodo(
@@ -940,9 +943,9 @@ public class YTreeBuilder
             );
         }
 
-        // --------------------===
+        // ============================================================
         // BOOLEANOS
-        // --------------------===
+        // ============================================================
         if (ctx.VERDADERO() != null) {
 
             return crearNodo(
@@ -961,9 +964,9 @@ public class YTreeBuilder
             );
         }
 
-        // --------------------===
+        // ============================================================
         // ACCESO
-        // --------------------===
+        // ============================================================
         if (ctx.acceso() != null) {
 
             return visit(
@@ -971,9 +974,9 @@ public class YTreeBuilder
             );
         }
 
-        // --------------------===
+        // ============================================================
         // LLAMADA DE FUNCION
-        // --------------------===
+        // ============================================================
         if (ctx.llamadaFuncion() != null) {
 
             return visit(
@@ -981,9 +984,9 @@ public class YTreeBuilder
             );
         }
 
-        // --------------------===
+        // ============================================================
         // LEER()
-        // --------------------===
+        // ============================================================
         if (ctx.lectura() != null) {
 
             return visit(
@@ -991,11 +994,11 @@ public class YTreeBuilder
             );
         }
 
-        // --------------------===
+        // ============================================================
         // EXPRESION ENTRE PARENTESIS
         //
         // Los parentesis NO necesitan nodo propio.
-        // --------------------===
+        // ============================================================
         if (ctx.expresion() != null) {
 
             return visit(
@@ -1021,11 +1024,11 @@ public class YTreeBuilder
         for (YParser.SufijoAccesoContext sufijo
                 : ctx.sufijoAcceso()) {
 
-            
+            // ========================================================
             // ACCESO A ARREGLO
             //
             // arreglo[indice]
-            
+            // ========================================================
             if (sufijo.expresion() != null) {
 
                 NodoAST accesoArreglo
@@ -1051,11 +1054,11 @@ public class YTreeBuilder
                 continue;
             }
 
-            
+            // ========================================================
             // ACCESO A ATRIBUTO
             //
             // objeto.atributo
-            
+            // ========================================================
             if (sufijo.IDENTIFICADOR() != null) {
 
                 NodoAST accesoAtributo
@@ -1313,9 +1316,9 @@ public class YTreeBuilder
                         ctx
                 );
 
-        // --------------------===
+        // ============================================================
         // 1. INICIALIZACION
-        // --------------------===
+        // ============================================================
         NodoAST nodoInicializacion
                 = crearNodo(
                         TipoNodoAST.INICIALIZACION_FOR,
@@ -1350,9 +1353,9 @@ public class YTreeBuilder
                 nodoInicializacion
         );
 
-        // --------------------===
+        // ============================================================
         // 2. CONDICION
-        // --------------------===
+        // ============================================================
         NodoAST nodoCondicion
                 = crearNodo(
                         TipoNodoAST.CONDICION_FOR,
@@ -1373,9 +1376,9 @@ public class YTreeBuilder
                 nodoCondicion
         );
 
-        // --------------------===
+        // ============================================================
         // 3. ACTUALIZACION
-        // --------------------===
+        // ============================================================
         NodoAST nodoActualizacion
                 = crearNodo(
                         TipoNodoAST.ACTUALIZACION_FOR,
@@ -1410,9 +1413,9 @@ public class YTreeBuilder
                 nodoActualizacion
         );
 
-        // --------------------===
+        // ============================================================
         // 4. CUERPO
-        // --------------------===
+        // ============================================================
         nodoFor.agregarHijo(
                 visit(
                         ctx.bloque()
@@ -1634,9 +1637,9 @@ public class YTreeBuilder
         return parametro;
     }
 
-    // --------------------===
+    // ============================================================
     // CREACION DE NODOS
-    // --------------------===
+    // ============================================================
     private NodoAST crearNodo(
             TipoNodoAST tipo,
             String valor,

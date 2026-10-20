@@ -1,7 +1,10 @@
-
+/*
+ */
 package elmer.compi2.zetariano.analysis.semantic.zeta;
 
-
+/**
+ *
+ */
 public class VariableZ {
 
     private final String nombre;

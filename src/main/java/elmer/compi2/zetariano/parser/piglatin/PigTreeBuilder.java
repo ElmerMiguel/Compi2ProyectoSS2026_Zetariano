@@ -2,7 +2,8 @@ package elmer.compi2.zetariano.parser.piglatin;
 
 import elmer.compi2.zetariano.core.node.*;
 import elmer.compi2.zetariano.core.node.piglatin.*;
-
+/*
+ */
 import elmer.compi2.zetariano.core.node.*;
 import elmer.compi2.zetariano.core.node.piglatin.*;
 
@@ -11,13 +12,15 @@ import java.util.List;
 import elmer.compi2.zetariano.antlr.piglatin.PigLatinParser;
 import elmer.compi2.zetariano.antlr.piglatin.PigLatinParserBaseVisitor;
 
-
+/**
+ *
+ */
 public class PigTreeBuilder
         extends PigLatinParserBaseVisitor<NodoASTPig> {
 
-    // --------------------
+    // =========================================================
     // PROGRAMA
-    // --------------------
+    // =========================================================
     @Override
     public NodoASTPig visitPrograma(
             PigLatinParser.ProgramaContext ctx) {
@@ -28,9 +31,9 @@ public class PigTreeBuilder
                         columna(ctx)
                 );
 
-        
+        // =====================================================
         // IMPORTS
-        
+        // =====================================================
         for (PigLatinParser.ImportacionContext importacion
                 : ctx.importacion()) {
 
@@ -44,9 +47,9 @@ public class PigTreeBuilder
             );
         }
 
-        
+        // =====================================================
         // VARIABLES GLOBALES
-        
+        // =====================================================
         if (ctx.seccionVariables() != null) {
 
             for (PigLatinParser.DeclaracionGlobalContext global
@@ -64,9 +67,9 @@ public class PigTreeBuilder
             }
         }
 
-        
+        // =====================================================
         // MAIOR
-        
+        // =====================================================
         if (ctx.seccionPrincipal() != null) {
 
             for (PigLatinParser.SentenciaContext sentencia
@@ -91,9 +94,9 @@ public class PigTreeBuilder
         return programa;
     }
 
-    // --------------------
+    // =========================================================
     // IMPORT
-    // --------------------
+    // =========================================================
     private ImportASTPig construirImport(
             PigLatinParser.ImportacionContext ctx) {
 
@@ -127,9 +130,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // DECLARACION GLOBAL
-    // --------------------
+    // =========================================================
     private SentenciaASTPig construirDeclaracionGlobal(
             PigLatinParser.DeclaracionGlobalContext ctx) {
 
@@ -150,9 +153,9 @@ public class PigTreeBuilder
         return null;
     }
 
-    // --------------------
+    // =========================================================
     // SENTENCIAS
-    // --------------------
+    // =========================================================
 
     /*
      * Retornamos una lista porque una sola regla "escritura"
@@ -391,9 +394,9 @@ public class PigTreeBuilder
         return resultado;
     }
 
-    // --------------------
+    // =========================================================
     // DECLARACION VARIABLE
-    // --------------------
+    // =========================================================
     private DeclaracionASTPig construirDeclaracionVariable(
             PigLatinParser.DeclaracionVariableContext ctx) {
 
@@ -401,21 +404,43 @@ public class PigTreeBuilder
                 = ctx.IDENTIFICADOR()
                         .getText();
 
+        boolean declaracionConNovus
+                = ctx.tipo() == null
+                && ctx.creacionObjeto() != null;
+
         String tipo
-                = ctx.tipo()
+                = declaracionConNovus
+                ? ctx.creacionObjeto()
+                        .IDENTIFICADOR()
+                        .getText()
+                : ctx.tipo()
                         .getText();
 
         String tipoReferencia
-                = ctx.tipo().IDENTIFICADOR() != null
-                ? ctx.tipo()
-                        .IDENTIFICADOR()
-                        .getText()
-                : null;
+                = declaracionConNovus
+                ? tipo
+                : ctx.tipo().IDENTIFICADOR() != null
+                        && !"bool".equalsIgnoreCase(
+                                ctx.tipo()
+                                        .IDENTIFICADOR()
+                                        .getText()
+                        )
+                        ? ctx.tipo()
+                                .IDENTIFICADOR()
+                                .getText()
+                        : null;
 
         ExpresionASTPig inicializador
                 = null;
 
-        if (ctx.inicializacionVariable() != null) {
+        if (declaracionConNovus) {
+
+            inicializador
+                    = construirNuevoObjeto(
+                            ctx.creacionObjeto()
+                    );
+
+        } else if (ctx.inicializacionVariable() != null) {
 
             PigLatinParser.InicializacionVariableContext inicializacion
                     = ctx.inicializacionVariable();
@@ -449,9 +474,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // DECLARACION ARREGLO
-    // --------------------
+    // =========================================================
     private DeclaracionASTPig construirDeclaracionArreglo(
             PigLatinParser.DeclaracionArregloContext ctx) {
 
@@ -465,6 +490,11 @@ public class PigTreeBuilder
 
         String tipoReferencia
                 = ctx.tipo().IDENTIFICADOR() != null
+                && !"bool".equalsIgnoreCase(
+                        ctx.tipo()
+                                .IDENTIFICADOR()
+                                .getText()
+                )
                 ? ctx.tipo()
                         .IDENTIFICADOR()
                         .getText()
@@ -517,9 +547,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // ASIGNACION
-    // --------------------
+    // =========================================================
     private AsignacionASTPig construirAsignacion(
             PigLatinParser.AsignacionContext ctx) {
 
@@ -536,9 +566,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // INCREMENTO / DECREMENTO
-    // --------------------
+    // =========================================================
     private IncrementoDecrementoASTPig
             construirIncrementoDecremento(
                     PigLatinParser.IncrementoDecrementoContext ctx) {
@@ -558,9 +588,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // BLOQUE
-    // --------------------
+    // =========================================================
     private BloqueASTPig construirBloque(
             PigLatinParser.BloqueContext ctx) {
 
@@ -590,9 +620,9 @@ public class PigTreeBuilder
         return bloque;
     }
 
-    // --------------------
+    // =========================================================
     // IF / ELSE IF / ELSE
-    // --------------------
+    // =========================================================
     private IfASTPig construirIf(
             PigLatinParser.SentenciaSiContext ctx) {
 
@@ -674,9 +704,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // WHILE
-    // --------------------
+    // =========================================================
     private WhileASTPig construirWhile(
             PigLatinParser.SentenciaDumContext ctx) {
 
@@ -692,9 +722,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // DO WHILE
-    // --------------------
+    // =========================================================
     private DoWhileASTPig construirDoWhile(
             PigLatinParser.SentenciaFacereContext ctx) {
 
@@ -710,9 +740,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // FOR
-    // --------------------
+    // =========================================================
     private ForASTPig construirFor(
             PigLatinParser.SentenciaPerContext ctx) {
 
@@ -746,9 +776,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // FOR - INICIALIZACION
-    // --------------------
+    // =========================================================
     private SentenciaASTPig construirInicializacionFor(
             PigLatinParser.InicializacionPerContext ctx) {
 
@@ -793,9 +823,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // FOR - ACTUALIZACION
-    // --------------------
+    // =========================================================
     private SentenciaASTPig construirActualizacionFor(
             PigLatinParser.ActualizacionPerContext ctx) {
 
@@ -835,9 +865,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // ACCESO
-    // --------------------
+    // =========================================================
     private AccesoASTPig construirAcceso(
             PigLatinParser.AccesoContext ctx) {
 
@@ -903,9 +933,9 @@ public class PigTreeBuilder
         return acceso;
     }
 
-    // --------------------
+    // =========================================================
     // LLAMADA
-    // --------------------
+    // =========================================================
     private ExpresionASTPig construirLlamada(
             PigLatinParser.LlamadaContext ctx) {
 
@@ -948,9 +978,9 @@ public class PigTreeBuilder
         return llamada;
     }
 
-    // --------------------
+    // =========================================================
     // ARGUMENTOS
-    // --------------------
+    // =========================================================
     private List<ExpresionASTPig> construirArgumentos(
             PigLatinParser.ListaArgumentosContext ctx) {
 
@@ -974,9 +1004,9 @@ public class PigTreeBuilder
         return argumentos;
     }
 
-    // --------------------
+    // =========================================================
     // NOVUS
-    // --------------------
+    // =========================================================
     private NuevoObjetoASTPig construirNuevoObjeto(
             PigLatinParser.CreacionObjetoContext ctx) {
 
@@ -1001,9 +1031,9 @@ public class PigTreeBuilder
         return nuevo;
     }
 
-    // --------------------
+    // =========================================================
     // INICIALIZADOR ESTRUCTURA
-    // --------------------
+    // =========================================================
     private InicializadorListaASTPig
             construirInicializadorEstructura(
                     PigLatinParser.InicializadorEstructuraContext ctx) {
@@ -1025,9 +1055,9 @@ public class PigTreeBuilder
         return lista;
     }
 
-    // --------------------
+    // =========================================================
     // INICIALIZADOR ARREGLO
-    // --------------------
+    // =========================================================
     private InicializadorListaASTPig
             construirInicializadorLista(
                     PigLatinParser.InicializadorListaContext ctx) {
@@ -1075,9 +1105,9 @@ public class PigTreeBuilder
         }
     }
 
-    // --------------------
+    // =========================================================
     // EXPRESION
-    // --------------------
+    // =========================================================
     private ExpresionASTPig construirExpresion(
             PigLatinParser.ExpresionContext ctx) {
 
@@ -1090,9 +1120,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // OR
-    // --------------------
+    // =========================================================
     private ExpresionASTPig construirOr(
             PigLatinParser.ExpresionOrContext ctx) {
 
@@ -1116,9 +1146,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // AND
-    // --------------------
+    // =========================================================
     private ExpresionASTPig construirAnd(
             PigLatinParser.ExpresionAndContext ctx) {
 
@@ -1142,9 +1172,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // == / !=
-    // --------------------
+    // =========================================================
     private ExpresionASTPig construirIgualdad(
             PigLatinParser.ExpresionIgualdadContext ctx) {
 
@@ -1172,9 +1202,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // < > <= >=
-    // --------------------
+    // =========================================================
     private ExpresionASTPig construirRelacional(
             PigLatinParser.ExpresionRelacionalContext ctx) {
 
@@ -1202,9 +1232,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // + / -
-    // --------------------
+    // =========================================================
     private ExpresionASTPig construirAditiva(
             PigLatinParser.ExpresionAditivaContext ctx) {
 
@@ -1232,9 +1262,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // * / %
-    // --------------------
+    // =========================================================
     private ExpresionASTPig construirMultiplicativa(
             PigLatinParser.ExpresionMultiplicativaContext ctx) {
 
@@ -1262,9 +1292,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // UNARIA
-    // --------------------
+    // =========================================================
     private ExpresionASTPig construirUnaria(
             PigLatinParser.ExpresionUnariaContext ctx) {
 
@@ -1290,9 +1320,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // PRIMARIO
-    // --------------------
+    // =========================================================
     private ExpresionASTPig construirPrimario(
             PigLatinParser.PrimarioContext ctx) {
 
@@ -1327,9 +1357,9 @@ public class PigTreeBuilder
         return null;
     }
 
-    // --------------------
+    // =========================================================
     // LITERAL
-    // --------------------
+    // =========================================================
     private LiteralASTPig construirLiteral(
             PigLatinParser.LiteralContext ctx) {
 
@@ -1431,9 +1461,9 @@ public class PigTreeBuilder
         );
     }
 
-    // --------------------
+    // =========================================================
     // UTILIDADES
-    // --------------------
+    // =========================================================
     private int linea(
             org.antlr.v4.runtime.ParserRuleContext ctx) {
 

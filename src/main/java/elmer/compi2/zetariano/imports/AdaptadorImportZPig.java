@@ -1,4 +1,5 @@
-
+/*
+ */
 package elmer.compi2.zetariano.imports;
 
 import elmer.compi2.zetariano.runtime.zeta.AtributoMemoriaZ;
@@ -10,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ *
+ */
 public class AdaptadorImportZPig {
 
     public void importar(
@@ -23,9 +26,9 @@ public class AdaptadorImportZPig {
             return;
         }
 
-        
+        // =====================================================
         // 1. IMPORTAR CLASES Y ATRIBUTOS
-        
+        // =====================================================
         for (ClaseMemoriaZ claseZ
                 : tablaZ.getClases().values()) {
 
@@ -55,9 +58,9 @@ public class AdaptadorImportZPig {
             );
         }
 
-        
+        // =====================================================
         // 2. IMPORTAR CONSTRUCTORES Y METODOS
-        
+        // =====================================================
         for (Map.Entry<String, MarcoMetodoZ> entrada
                 : tablaZ.getMarcos().entrySet()) {
 
@@ -110,9 +113,9 @@ public class AdaptadorImportZPig {
         }
     }
 
-    // --------------------
+    // =========================================================
     // BUSCAR CLASE PROPIETARIA
-    // --------------------
+    // =========================================================
     private ClaseImportadaPig buscarClasePropietaria(
             RegistroImportsPig registro,
             TablaMemoriaZ tablaZ,
@@ -157,9 +160,9 @@ public class AdaptadorImportZPig {
         return unica;
     }
 
-    // --------------------
+    // =========================================================
     // PARAMETROS
-    // --------------------
+    // =========================================================
     private List<String> obtenerTiposParametros(
             MarcoMetodoZ marco) {
 
@@ -186,9 +189,9 @@ public class AdaptadorImportZPig {
         return tipos;
     }
 
-    // --------------------
+    // =========================================================
     // RETORNO
-    // --------------------
+    // =========================================================
     private String obtenerTipoRetorno(
             MarcoMetodoZ marco) {
 
@@ -205,9 +208,9 @@ public class AdaptadorImportZPig {
         );
     }
 
-    // --------------------
+    // =========================================================
     // FIRMA
-    // --------------------
+    // =========================================================
     private String extraerNombreFirma(
             String firma) {
 

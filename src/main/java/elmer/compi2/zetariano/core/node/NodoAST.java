@@ -1,11 +1,14 @@
-
+/*
+ */
 package elmer.compi2.zetariano.core.node;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
+/**
+ *
+ */
 public class NodoAST {
 
     private final TipoNodoAST tipo;
@@ -54,9 +57,9 @@ public class NodoAST {
         this.hijos = new ArrayList<>();
     }
 
-    // --------------------===
+    // ============================================================
     // HIJOS
-    // --------------------===
+    // ============================================================
     public void agregarHijo(
             NodoAST hijo) {
 
@@ -96,9 +99,9 @@ public class NodoAST {
         return hijos.size();
     }
 
-    // --------------------===
+    // ============================================================
     // GETTERS / SETTERS
-    // --------------------===
+    // ============================================================
     public TipoNodoAST getTipo() {
 
         return tipo;
@@ -137,9 +140,9 @@ public class NodoAST {
         this.columna = columna;
     }
 
-    // -------------------
+    // ============================================================
     // REPRESENTACION
-    // -------------------
+    // ============================================================
     @Override
     public String toString() {
 

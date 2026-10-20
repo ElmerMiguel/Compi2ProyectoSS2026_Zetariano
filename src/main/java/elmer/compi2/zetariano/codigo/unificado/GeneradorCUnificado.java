@@ -1,7 +1,8 @@
-
+/*
+ */
 package elmer.compi2.zetariano.codigo.unificado;
 
-import elmer.compi2.zetariano.codegen.Instruction;
+import elmer.compi2.zetariano.codegen.Cuadruplo;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -9,10 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
+/**
+ *
+ */
 public class GeneradorCUnificado {
 
-    private final List<Instruction> cuadruplos;
+    private final List<Cuadruplo> cuadruplos;
 
     private final StringBuilder salida;
 
@@ -24,7 +27,7 @@ public class GeneradorCUnificado {
     private final Set<String> funciones;
 
     public GeneradorCUnificado(
-            List<Instruction> cuadruplos) {
+            List<Cuadruplo> cuadruplos) {
 
         this.cuadruplos
                 = cuadruplos == null
@@ -41,9 +44,9 @@ public class GeneradorCUnificado {
                 = new LinkedHashSet<>();
     }
 
-    // --------------------
+    // =========================================================
     // GENERAR
-    // --------------------
+    // =========================================================
     public String generar() {
 
         salida.setLength(0);
@@ -55,8 +58,6 @@ public class GeneradorCUnificado {
 
         generarEncabezado();
 
-        generarRuntime();
-
         generarPrototipos();
 
         generarFunciones();
@@ -66,14 +67,14 @@ public class GeneradorCUnificado {
         return salida.toString();
     }
 
-    // --------------------
+    // =========================================================
     // RECOLECCION
-    // --------------------
+    // =========================================================
     private void recolectar() {
 
         String funcionActual = null;
 
-        for (Instruction cuadruplo
+        for (Cuadruplo cuadruplo
                 : cuadruplos) {
 
             if (cuadruplo == null) {
@@ -156,9 +157,9 @@ public class GeneradorCUnificado {
                 .add(valor);
     }
 
-    // --------------------
+    // =========================================================
     // ENCABEZADO
-    // --------------------
+    // =========================================================
     private void generarEncabezado() {
 
         salida.append(
@@ -208,9 +209,9 @@ public class GeneradorCUnificado {
         );
     }
 
-    // --------------------
+    // =========================================================
     // RUNTIME
-    // --------------------
+    // =========================================================
     private void generarRuntime() {
 
         generarRuntimePrintString();
@@ -595,9 +596,9 @@ public class GeneradorCUnificado {
         );
     }
 
-    // --------------------
+    // =========================================================
     // PROTOTIPOS
-    // --------------------
+    // =========================================================
     private void generarPrototipos() {
 
         for (String funcion
@@ -621,16 +622,16 @@ public class GeneradorCUnificado {
         salida.append("\n");
     }
 
-    // --------------------
+    // =========================================================
     // FUNCIONES
-    // --------------------
+    // =========================================================
     private void generarFunciones() {
 
         String funcionActual = null;
 
         boolean dentroFuncion = false;
 
-        for (Instruction cuadruplo
+        for (Cuadruplo cuadruplo
                 : cuadruplos) {
 
             if (cuadruplo == null) {
@@ -747,11 +748,11 @@ public class GeneradorCUnificado {
         );
     }
 
-    // --------------------
+    // =========================================================
     // TRADUCCION
-    // --------------------
+    // =========================================================
     private void traducir(
-            Instruction cuadruplo) {
+            Cuadruplo cuadruplo) {
 
         String operador
                 = cuadruplo.getOperador();
@@ -773,16 +774,16 @@ public class GeneradorCUnificado {
 
         switch (operador) {
 
-            
+            // =================================================
             // METADATA
-            
+            // =================================================
             case "DECL", "PARAM" -> {
                 return;
             }
 
-            
+            // =================================================
             // ASIGNACION
-            
+            // =================================================
             case "=" -> {
 
                 linea(
@@ -793,9 +794,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            
+            // =================================================
             // BINARIOS
-            
+            // =================================================
             case "+", "*", "/", "<", ">", "<=", ">=", "==", "!=", "&&", "||" -> {
 
                 linea(
@@ -842,9 +843,9 @@ public class GeneradorCUnificado {
                 }
             }
 
-            
+            // =================================================
             // MODULO
-            
+            // =================================================
             case "%" -> {
 
                 linea(
@@ -857,9 +858,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            
+            // =================================================
             // NOT
-            
+            // =================================================
             case "!" -> {
 
                 linea(
@@ -870,9 +871,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            
+            // =================================================
             // STACK
-            
+            // =================================================
             case "STACK_GET" -> {
 
                 linea(
@@ -894,9 +895,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            
+            // =================================================
             // HEAP
-            
+            // =================================================
             case "HEAP_GET" -> {
 
                 linea(
@@ -918,9 +919,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            
+            // =================================================
             // LABEL
-            
+            // =================================================
             case "LABEL" -> {
 
                 salida.append(
@@ -935,9 +936,9 @@ public class GeneradorCUnificado {
                         "    ;\n"
                 );
             }
-            
+            // =================================================
             // GOTO
-            
+            // =================================================
             case "GOTO" -> {
 
                 linea(
@@ -947,9 +948,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            
+            // =================================================
             // IF FALSE
-            
+            // =================================================
             case "IF_FALSE" -> {
 
                 linea(
@@ -961,9 +962,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            
+            // =================================================
             // IF TRUE
-            
+            // =================================================
             case "IF_TRUE" -> {
 
                 linea(
@@ -975,9 +976,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            
+            // =================================================
             // CALL
-            
+            // =================================================
             case "CALL" -> {
 
                 linea(
@@ -988,9 +989,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            
+            // =================================================
             // RETURN
-            
+            // =================================================
             case "RETURN" -> {
 
                 linea(
@@ -998,9 +999,9 @@ public class GeneradorCUnificado {
                 );
             }
 
-            
+            // =================================================
             // PRINT
-            
+            // =================================================
             case "PRINT" -> {
 
                 linea(
@@ -1020,54 +1021,26 @@ public class GeneradorCUnificado {
             }
 
             case "PRINT_DOUBLE" -> {
-
-                linea(
-                        "runtime_print_double((double)("
-                        + a1
-                        + "), 0);"
-                );
+                generarImpresionDecimal(a1, false);
             }
 
             case "PRINTLN_DOUBLE" -> {
-
-                linea(
-                        "runtime_print_double((double)("
-                        + a1
-                        + "), 1);"
-                );
+                generarImpresionDecimal(a1, true);
             }
 
             case "PRINT_STRING" -> {
-
-                linea(
-                        "runtime_print_string("
-                        + a1
-                        + ");"
-                );
+                generarImpresionCadena(a1, false);
             }
 
             case "PRINTLN_STRING" -> {
-
-                linea(
-                        "runtime_print_string("
-                        + a1
-                        + ");"
-                );
-
-                linea(
-                        "printf(\"\\n\");"
-                );
+                generarImpresionCadena(a1, true);
             }
 
-            
+            // =================================================
             // INPUT
-            
+            // =================================================
             case "READ", "READLN" -> {
-
-                linea(
-                        resultado
-                        + " = runtime_readln();"
-                );
+                generarLecturaTexto(resultado);
             }
 
             case "PRINT_CHAR" -> {
@@ -1089,67 +1062,43 @@ public class GeneradorCUnificado {
             }
 
             case "READ_INT" -> {
-                linea(resultado + " = runtime_read_int();");
+                generarLecturaEntero(resultado);
             }
 
             case "READ_DOUBLE" -> {
-                linea(resultado + " = runtime_read_double();");
+                generarLecturaDecimal(resultado);
             }
 
             case "READ_CHAR" -> {
-                linea(resultado + " = runtime_read_char();");
+                generarLecturaCaracter(resultado);
             }
 
             case "READ_BOOL" -> {
-                linea(resultado + " = runtime_read_bool();");
+                generarLecturaBooleano(resultado);
             }
 
-            
+            // =================================================
             // CONVERSIONES
-            
+            // =================================================
             case "INT_TO_STRING" -> {
-
-                linea(
-                        resultado
-                        + " = runtime_int_to_string("
-                        + a1
-                        + ");"
-                );
+                generarConversionCadena(resultado, a1, "int");
             }
 
             case "DOUBLE_TO_STRING" -> {
-
-                linea(
-                        resultado
-                        + " = runtime_double_to_string("
-                        + a1
-                        + ");"
-                );
+                generarConversionCadena(resultado, a1, "double");
             }
 
             case "BOOL_TO_STRING" -> {
-
-                linea(
-                        resultado
-                        + " = runtime_bool_to_string("
-                        + a1
-                        + ");"
-                );
+                generarConversionCadena(resultado, a1, "bool");
             }
 
             case "CHAR_TO_STRING" -> {
-
-                linea(
-                        resultado
-                        + " = runtime_char_to_string("
-                        + a1
-                        + ");"
-                );
+                generarConversionCadena(resultado, a1, "char");
             }
 
-            
+            // =================================================
             // DESCONOCIDO
-            
+            // =================================================
             default -> {
 
                 salida.append(
@@ -1167,9 +1116,232 @@ public class GeneradorCUnificado {
         }
     }
 
-    // --------------------
+    /*
+     * Estas expansiones se escriben directamente en la funcion traducida.
+     * No producen procedimientos runtime_* que oculten el uso de Stack,
+     * Heap, temporales, etiquetas o saltos del C3D.
+     */
+    private void generarImpresionCadena(
+            String puntero,
+            boolean saltoLinea) {
+
+        linea("{");
+        linea("    int __pos = (int)(" + puntero + ");");
+        linea("    while ((int)Heap[__pos] != -1) {");
+        linea("        putchar((char)((int)Heap[__pos]));");
+        linea("        __pos++;");
+        linea("    }");
+
+        if (saltoLinea) {
+            linea("    putchar('\\n');");
+        }
+
+        linea("}");
+    }
+
+    private void generarImpresionDecimal(
+            String valor,
+            boolean saltoLinea) {
+
+        linea("{");
+        linea("    char __buffer[64];");
+        linea("    double __valor = (double)(" + valor + ");");
+        linea("    snprintf(__buffer, sizeof(__buffer), \"%.15g\", __valor);");
+        linea("    fputs(__buffer, stdout);");
+        linea("    if (isfinite(__valor) && strchr(__buffer, '.') == NULL");
+        linea("            && strchr(__buffer, 'e') == NULL");
+        linea("            && strchr(__buffer, 'E') == NULL) fputs(\".0\", stdout);");
+
+        if (saltoLinea) {
+            linea("    putchar('\\n');");
+        }
+
+        linea("}");
+    }
+
+    private void generarLecturaTexto(
+            String resultado) {
+
+        linea("{");
+        linea("    int __c;");
+        linea("    " + resultado + " = H;");
+        linea("    while ((__c = getchar()) != '\\n' && __c != EOF) {");
+        linea("        Heap[(int)H] = (double)__c;");
+        linea("        H = H + 1;");
+        linea("    }");
+        linea("    Heap[(int)H] = -1;");
+        linea("    H = H + 1;");
+        linea("}");
+    }
+
+    private void generarInicioLecturaValidada() {
+
+        linea("{");
+        linea("    char __buffer[256];");
+        linea("    for (;;) {");
+        linea("        size_t __longitud;");
+        linea("        int __c;");
+        linea("        if (fgets(__buffer, sizeof(__buffer), stdin) == NULL) {");
+    }
+
+    private void generarFinLecturaLinea() {
+
+        linea("        __longitud = strcspn(__buffer, \"\\r\\n\");");
+        linea("        if (__buffer[__longitud] == '\\0'");
+        linea("                && __longitud == sizeof(__buffer) - 1) {");
+        linea("            while ((__c = getchar()) != '\\n' && __c != EOF) { }");
+        linea("        }");
+        linea("        __buffer[__longitud] = '\\0';");
+    }
+
+    private void generarLecturaEntero(
+            String resultado) {
+
+        generarInicioLecturaValidada();
+        linea("            " + resultado + " = 0;");
+        linea("            break;");
+        linea("        }");
+        generarFinLecturaLinea();
+        linea("        char *__fin = NULL;");
+        linea("        errno = 0;");
+        linea("        long __valor = strtol(__buffer, &__fin, 10);");
+        linea("        int __huboDigitos = __fin != __buffer;");
+        linea("        while (__fin != NULL && isspace((unsigned char)*__fin)) __fin++;");
+        linea("        if (__huboDigitos && __fin != NULL && *__fin == '\\0'");
+        linea("                && errno != ERANGE && __valor >= INT_MIN && __valor <= INT_MAX) {");
+        linea("            " + resultado + " = (double)__valor;");
+        linea("            break;");
+        linea("        }");
+        linea("        printf(\"Entrada invalida. Ingrese un entero: \"");
+        linea("        );");
+        linea("        fflush(stdout);");
+        linea("    }");
+        linea("}");
+    }
+
+    private void generarLecturaDecimal(
+            String resultado) {
+
+        generarInicioLecturaValidada();
+        linea("            " + resultado + " = 0;");
+        linea("            break;");
+        linea("        }");
+        generarFinLecturaLinea();
+        linea("        char *__fin = NULL;");
+        linea("        errno = 0;");
+        linea("        double __valor = strtod(__buffer, &__fin);");
+        linea("        int __huboDigitos = __fin != __buffer;");
+        linea("        while (__fin != NULL && isspace((unsigned char)*__fin)) __fin++;");
+        linea("        if (__huboDigitos && __fin != NULL && *__fin == '\\0'");
+        linea("                && errno != ERANGE && isfinite(__valor)) {");
+        linea("            " + resultado + " = __valor;");
+        linea("            break;");
+        linea("        }");
+        linea("        printf(\"Entrada invalida. Ingrese un decimal: \"");
+        linea("        );");
+        linea("        fflush(stdout);");
+        linea("    }");
+        linea("}");
+    }
+
+    private void generarLecturaCaracter(
+            String resultado) {
+
+        generarInicioLecturaValidada();
+        linea("            " + resultado + " = 0;");
+        linea("            break;");
+        linea("        }");
+        generarFinLecturaLinea();
+        linea("        if (strlen(__buffer) == 1) {");
+        linea("            " + resultado + " = (double)(unsigned char)__buffer[0];");
+        linea("            break;");
+        linea("        }");
+        linea("        printf(\"Entrada invalida. Ingrese exactamente un caracter: \"");
+        linea("        );");
+        linea("        fflush(stdout);");
+        linea("    }");
+        linea("}");
+    }
+
+    private void generarLecturaBooleano(
+            String resultado) {
+
+        generarInicioLecturaValidada();
+        linea("            " + resultado + " = 0;");
+        linea("            break;");
+        linea("        }");
+        generarFinLecturaLinea();
+        linea("        for (size_t __i = 0; __buffer[__i] != '\\0'; __i++) {");
+        linea("            __buffer[__i] = (char)tolower((unsigned char)__buffer[__i]);");
+        linea("        }");
+        linea("        if (strcmp(__buffer, \"1\") == 0");
+        linea("                || strcmp(__buffer, \"true\") == 0");
+        linea("                || strcmp(__buffer, \"verum\") == 0) {");
+        linea("            " + resultado + " = 1;");
+        linea("            break;");
+        linea("        }");
+        linea("        if (strcmp(__buffer, \"0\") == 0");
+        linea("                || strcmp(__buffer, \"false\") == 0");
+        linea("                || strcmp(__buffer, \"falsus\") == 0) {");
+        linea("            " + resultado + " = 0;");
+        linea("            break;");
+        linea("        }");
+        linea("        printf(\"Entrada invalida. Use 1, 0, true, false, verum o falsus: \"");
+        linea("        );");
+        linea("        fflush(stdout);");
+        linea("    }");
+        linea("}");
+    }
+
+    private void generarConversionCadena(
+            String resultado,
+            String valor,
+            String tipo) {
+
+        linea("{");
+
+        if ("char".equals(tipo)) {
+
+            linea("    " + resultado + " = H;");
+            linea("    Heap[(int)H] = " + valor + ";");
+            linea("    H = H + 1;");
+
+        } else {
+
+            linea("    char __buffer[128];");
+
+            switch (tipo) {
+
+                case "int" ->
+                    linea("    snprintf(__buffer, sizeof(__buffer), \"%d\", (int)(" + valor + "));");
+
+                case "double" ->
+                    linea("    snprintf(__buffer, sizeof(__buffer), \"%g\", (double)(" + valor + "));");
+
+                case "bool" -> {
+                    linea("    const char *__texto = (" + valor + ") != 0 ? \"true\" : \"false\";");
+                    linea("    snprintf(__buffer, sizeof(__buffer), \"%s\", __texto);");
+                }
+
+                default ->
+                    linea("    __buffer[0] = '\\0';");
+            }
+
+            linea("    " + resultado + " = H;");
+            linea("    for (int __i = 0; __buffer[__i] != '\\0'; __i++) {");
+            linea("        Heap[(int)H] = (double)__buffer[__i];");
+            linea("        H = H + 1;");
+            linea("    }");
+        }
+
+        linea("    Heap[(int)H] = -1;");
+        linea("    H = H + 1;");
+        linea("}");
+    }
+
+    // =========================================================
     // MAIN
-    // --------------------
+    // =========================================================
     private void generarMain() {
 
         salida.append(
@@ -1201,9 +1373,9 @@ public class GeneradorCUnificado {
         );
     }
 
-    // --------------------
+    // =========================================================
     // UTILIDADES
-    // --------------------
+    // =========================================================
     private void linea(
             String texto) {
 

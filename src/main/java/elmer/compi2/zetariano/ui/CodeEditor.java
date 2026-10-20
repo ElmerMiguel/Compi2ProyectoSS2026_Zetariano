@@ -44,6 +44,7 @@ public class CodeEditor extends JPanel {
 
         JScrollPane scrollPane = new JScrollPane(textPane);
         scrollPane.setBorder(null);
+        scrollPane.setRowHeaderView(new LineNumberGutter(textPane));
         add(scrollPane, BorderLayout.CENTER);
     }
 

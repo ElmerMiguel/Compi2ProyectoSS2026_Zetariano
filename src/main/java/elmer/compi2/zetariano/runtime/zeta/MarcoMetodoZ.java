@@ -1,4 +1,5 @@
-
+/*
+ */
 package elmer.compi2.zetariano.runtime.zeta;
 
 import elmer.compi2.zetariano.core.node.zeta.DeclaracionASTZ;
@@ -9,7 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ *
+ */
 public class MarcoMetodoZ {
 
     private final String firma;
@@ -53,9 +56,9 @@ public class MarcoMetodoZ {
         );
     }
 
-    // --------------------
+    // =========================================================
     // VARIABLES ESPECIALES
-    // --------------------
+    // =========================================================
     private void registrarEspeciales(
             String tipoRetorno) {
 

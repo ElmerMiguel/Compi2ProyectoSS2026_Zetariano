@@ -1,4 +1,5 @@
-
+/*
+ */
 package elmer.compi2.zetariano.analysis.semantic.zeta;
 
 import java.util.Collection;
@@ -11,7 +12,8 @@ import java.util.Map;
  */
 public class ClaseZ {
 
-
+    // TODO Fase 2: Soporte para Herencia simple y multiple (extends, implements)
+    // TODO Fase 2: Registro de clase padre y resolucion polimorfica de metodos
     private final String nombre;
 
 
@@ -31,7 +33,9 @@ public class ClaseZ {
         return nombre;
     }
 
+    // =========================================================
     // ATRIBUTOS
+    // =========================================================
     public boolean registrarAtributo(AtributoZ atributo) {
 
         if (atributo == null) {
@@ -54,7 +58,9 @@ public class ClaseZ {
         return atributos.values();
     }
 
+    // =========================================================
     // METODOS
+    // =========================================================
     public boolean registrarMetodo(MetodoZ metodo) {
 
         if (metodo == null) {
@@ -79,9 +85,9 @@ public class ClaseZ {
         return metodos.values();
     }
 
-    
+    // =========================================================
     // CONSTRUCTORES
-    
+    // =========================================================
     public boolean registrarConstructor(ConstructorZ constructor) {
 
         if (constructor == null) {

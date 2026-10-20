@@ -1,11 +1,14 @@
-
+/*
+ */
 package elmer.compi2.zetariano.core.node.piglatin;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
+/**
+ *
+ */
 public class ProgramaASTPig
         extends NodoASTPig {
 
@@ -34,9 +37,9 @@ public class ProgramaASTPig
                 = new ArrayList<>();
     }
 
-    // --------------------
+    // =========================================================
     // IMPORTS
-    // --------------------
+    // =========================================================
     public void agregarImport(
             ImportASTPig importacion) {
 
@@ -55,9 +58,9 @@ public class ProgramaASTPig
         );
     }
 
-    // --------------------
+    // =========================================================
     // VARIABLES GLOBALES
-    // --------------------
+    // =========================================================
     public void agregarVariableGlobal(
             SentenciaASTPig sentencia) {
 
@@ -76,9 +79,9 @@ public class ProgramaASTPig
         );
     }
 
-    // --------------------
+    // =========================================================
     // PRINCIPAL
-    // --------------------
+    // =========================================================
     public void agregarSentenciaPrincipal(
             SentenciaASTPig sentencia) {
 
@@ -97,9 +100,9 @@ public class ProgramaASTPig
         );
     }
 
-    // --------------------
+    // =========================================================
     // TEXTO
-    // --------------------
+    // =========================================================
     @Override
     public String generarTexto() {
 

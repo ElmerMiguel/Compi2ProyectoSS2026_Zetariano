@@ -6,9 +6,9 @@ options {
 
 
 
-// ***********
-// program
-// ***********
+// ============================================================
+// PROGRAMA
+// ============================================================
 
 programa
     : importacion*
@@ -17,9 +17,9 @@ programa
       EOF
     ;
 
-// ***********
-// importaciones
-// ***********
+// ============================================================
+// IMPORTACIONES
+// ============================================================
 
 importacion
     : IMPORT rutaImportacion
@@ -30,9 +30,9 @@ rutaImportacion
       (PUNTO IDENTIFICADOR)*
     ;
 
-// ***********
-// secc var globales
-// ***********
+// ============================================================
+// SECCION DE VARIABLES GLOBALES
+// ============================================================
 
 seccionVariables
     : VARIABILES MAYOR
@@ -44,9 +44,9 @@ declaracionGlobal
     | declaracionArreglo
     ;
 
-// ***********
-// secc princip
-// ***********
+// ============================================================
+// SECCION PRINCIPAL
+// ============================================================
 
 seccionPrincipal
     : MAIOR MAYOR
@@ -54,9 +54,9 @@ seccionPrincipal
       FINIS PUNTO_COMA
     ;
 
-// ***********
-// sentencias
-// ***********
+// ============================================================
+// SENTENCIAS
+// ============================================================
 
 sentencia
     : declaracionVariable
@@ -74,12 +74,14 @@ sentencia
     | INTERRUMPE PUNTO_COMA
     ;
 
-// ***********
-// dec vars
-// ***********
+// ============================================================
+// DECLARACION VARIABLE
+// ============================================================
 
 declaracionVariable
-    : ESTO IDENTIFICADOR DOS_PUNTOS tipo inicializacionVariable? PUNTO_COMA
+    : ESTO IDENTIFICADOR DOS_PUNTOS
+      (tipo inicializacionVariable? | creacionObjeto)
+      PUNTO_COMA
     ;
 
 inicializacionVariable
@@ -87,9 +89,9 @@ inicializacionVariable
     | inicializadorEstructura
     ;
 
-// ***********
-// dec arrays
-// ***********
+// ============================================================
+// DECLARACION ARREGLO
+// ============================================================
 
 declaracionArreglo
     : SERIES IDENTIFICADOR dimensionesDeclaracion DOS_PUNTOS tipo
@@ -109,57 +111,58 @@ inicializadorArreglo
     : inicializadorLista
     ;
 
-// ***********
-// tips
-// ***********
+// ============================================================
+// TIPOS
+// ============================================================
 
 tipo
     : NUMERUS
     | TEXTUM
     | DECIMALIS
     | LITTERA
+    | BOOL
     | VERUM
     | FALSUS
     | IDENTIFICADOR
     ;
 
-// ***********
-// asignacion
-// ***********
+// ============================================================
+// ASIGNACION
+// ============================================================
 
 asignacion
     : acceso IGUAL expresion PUNTO_COMA
     ;
 
-// ***********
+// ============================================================
 // INCREMENTO / DECREMENTO
-// ***********
+// ============================================================
 
 incrementoDecremento
     : acceso INCREMENTO PUNTO_COMA
     | acceso DECREMENTO PUNTO_COMA
     ;
 
-// ***********
-// llamada como sentencia
-// ***********
+// ============================================================
+// LLAMADA COMO SENTENCIA
+// ============================================================
 
 llamadaSentencia
     : llamada PUNTO_COMA
     ;
 
-// ***********
+// ============================================================
 // ENTRADA
-// ***********
+// ============================================================
 
 lectura
-    : LECTURA PUNTO_COMA
-    | acceso LECTURA PUNTO_COMA
+    : LECTURA PUNTO_COMA?
+    | acceso LECTURA PUNTO_COMA?
     ;
 
-// ***********
+// ============================================================
 // SALIDA
-// ***********
+// ============================================================
 
 escritura
     : ESCRITURA expresion
@@ -167,9 +170,9 @@ escritura
       PUNTO_COMA
     ;
 
-// ***********
+// ============================================================
 // IF / ELSE IF / ELSE
-// ***********
+// ============================================================
 
 sentenciaSi
     : SI PARENTESIS_IZQ expresion PARENTESIS_DER
@@ -184,9 +187,9 @@ sentenciaSi
       FINIS_BLOQUE PUNTO_COMA
     ;
 
-// ***********
+// ============================================================
 // WHILE
-// ***********
+// ============================================================
 
 sentenciaDum
     : DUM PARENTESIS_IZQ expresion PARENTESIS_DER
@@ -194,9 +197,9 @@ sentenciaDum
       FINIS_BLOQUE PUNTO_COMA
     ;
 
-// ***********
+// ============================================================
 // DO WHILE
-// ***********
+// ============================================================
 
 sentenciaFacere
     : FACERE
@@ -205,9 +208,9 @@ sentenciaFacere
       PUNTO_COMA
     ;
 
-// ***********
+// ============================================================
 // FOR
-// ***********
+// ============================================================
 
 sentenciaPer
     : PER PARENTESIS_IZQ
@@ -231,9 +234,9 @@ actualizacionPer
     | acceso IGUAL expresion
     ;
 
-// ***********
+// ============================================================
 // BLOQUES
-// ***********
+// ============================================================
 
 bloque
     : LLAVE_IZQ
@@ -241,9 +244,9 @@ bloque
       LLAVE_DER
     ;
 
-// ***********
+// ============================================================
 // ACCESOS
-// ***********
+// ============================================================
 
 acceso
     : IDENTIFICADOR sufijoAcceso*
@@ -256,9 +259,9 @@ sufijoAcceso
       PARENTESIS_IZQ listaArgumentos? PARENTESIS_DER
     ;
 
-// ***********
+// ============================================================
 // LLAMADAS
-// ***********
+// ============================================================
 
 llamada
     : IDENTIFICADOR
@@ -271,18 +274,18 @@ listaArgumentos
       (COMA expresion)*
     ;
 
-// ***********
+// ============================================================
 // CREACION DE OBJETO
-// ***********
+// ============================================================
 
 creacionObjeto
     : NOVUS IDENTIFICADOR
       PARENTESIS_IZQ listaArgumentos? PARENTESIS_DER
     ;
 
-// ***********
+// ============================================================
 // INICIALIZADORES
-// ***********
+// ============================================================
 
 inicializadorEstructura
     : LLAVE_IZQ
@@ -306,9 +309,9 @@ valorInicializacion
     | inicializadorLista
     ;
 
-// ***********
+// ============================================================
 // EXPRESIONES
-// ***********
+// ============================================================
 
 expresion
     : expresionOr
@@ -366,9 +369,9 @@ primario
     | PARENTESIS_IZQ expresion PARENTESIS_DER
     ;
 
-// ***********
+// ============================================================
 // LITERALES
-// ***********
+// ============================================================
 
 literal
     : ENTERO

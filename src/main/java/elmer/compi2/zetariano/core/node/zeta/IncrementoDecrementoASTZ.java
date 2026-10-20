@@ -1,7 +1,10 @@
-
+/*
+ */
 package elmer.compi2.zetariano.core.node.zeta;
 
-
+/**
+ *
+ */
 public class IncrementoDecrementoASTZ extends SentenciaASTZ {
 
     private final ExpresionASTZ destino;

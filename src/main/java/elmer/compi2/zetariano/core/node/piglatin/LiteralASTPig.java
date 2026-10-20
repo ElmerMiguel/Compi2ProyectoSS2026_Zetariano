@@ -1,7 +1,10 @@
-
+/*
+ */
 package elmer.compi2.zetariano.core.node.piglatin;
 
-
+/**
+ *
+ */
 public class LiteralASTPig extends ExpresionASTPig{
 
     private final Object valor;

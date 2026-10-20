@@ -1,4 +1,5 @@
-
+/*
+ */
 package elmer.compi2.zetariano.analysis.semantic.zeta;
 
 import java.util.ArrayDeque;
@@ -6,7 +7,9 @@ import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
+/**
+ *
+ */
 public class TablaVariablesZ {
 
     private final Deque<Map<String, VariableZ>> ambitos
