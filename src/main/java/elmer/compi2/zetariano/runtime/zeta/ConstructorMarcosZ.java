@@ -37,6 +37,7 @@ public class ConstructorMarcosZ {
                 = new ClaseMemoriaZ(
                         clase.getNombre()
                 );
+        claseMemoria.setNombrePadre(clase.getNombrePadre());
         for (MiembroASTZ miembro
                 : clase.getMiembros()) {
 

@@ -37,6 +37,7 @@ public class AdaptadorImportZPig {
                             claseZ.getNombre(),
                             TipoImportPig.Z
                     );
+            clasePig.setNombrePadre(claseZ.getNombrePadre());
 
             for (AtributoMemoriaZ atributoZ
                     : claseZ.getAtributos().values()) {

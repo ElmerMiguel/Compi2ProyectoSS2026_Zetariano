@@ -49,6 +49,12 @@ public class TablaClasesZ {
         return clases.values();
     }
 
+    public void resolverReferenciasPadre() {
+        for (ClaseZ clase : clases.values()) {
+            clase.setClasePadre(buscar(clase.getNombrePadre()));
+        }
+    }
+
     public void limpiar() {
         clases.clear();
     }

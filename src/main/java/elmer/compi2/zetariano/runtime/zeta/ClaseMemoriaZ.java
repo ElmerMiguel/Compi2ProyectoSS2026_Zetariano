@@ -12,6 +12,7 @@ import java.util.Map;
 public class ClaseMemoriaZ {
 
     private final String nombre;
+    private String nombrePadre;
 
     private final Map<String, AtributoMemoriaZ> atributos;
 
@@ -21,10 +22,23 @@ public class ClaseMemoriaZ {
             String nombre) {
 
         this.nombre = nombre;
+        this.nombrePadre = null;
         this.atributos
                 = new LinkedHashMap<>();
 
         this.siguienteOffset = 0;
+    }
+
+    public String getNombrePadre() {
+        return nombrePadre;
+    }
+
+    public void setNombrePadre(String nombrePadre) {
+        this.nombrePadre = nombrePadre;
+    }
+
+    public boolean tienePadre() {
+        return nombrePadre != null && !nombrePadre.isBlank();
     }
 
     public AtributoMemoriaZ registrarAtributo(

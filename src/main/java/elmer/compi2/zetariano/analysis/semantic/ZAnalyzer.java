@@ -11,9 +11,11 @@ import elmer.compi2.zetariano.analysis.semantic.zeta.ResultadoAccesoZ;
 import elmer.compi2.zetariano.analysis.semantic.zeta.TablaClasesZ;
 import elmer.compi2.zetariano.analysis.semantic.zeta.TablaVariablesZ;
 import elmer.compi2.zetariano.analysis.semantic.zeta.VariableZ;
+import elmer.compi2.zetariano.core.node.zeta.ModificadorAccesoZ;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,6 +49,10 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         ZParser.MetodoContext, List<ParametroZ>> parametrosMetodos
             = new IdentityHashMap<>();
 
+    private String firmaConstructorActual = null;
+    private final Map<String, String> delegacionesThis = new LinkedHashMap<>();
+    private final Map<String, ParserRuleContext> contextosDelegacionThis = new LinkedHashMap<>();
+
     private int profundidadCiclo = 0;
     private int profundidadSwitch = 0;
 
@@ -60,6 +66,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
 
         parametrosConstructores.clear();
         parametrosMetodos.clear();
+        delegacionesThis.clear();
+        contextosDelegacionThis.clear();
+        firmaConstructorActual = null;
 
         profundidadCiclo = 0;
         profundidadSwitch = 0;
@@ -82,6 +91,9 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
 
         parametrosConstructores.clear();
         parametrosMetodos.clear();
+        delegacionesThis.clear();
+        contextosDelegacionThis.clear();
+        firmaConstructorActual = null;
 
         profundidadCiclo = 0;
         profundidadSwitch = 0;
@@ -127,12 +139,24 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         String nombreClase
                 = ctx.IDENTIFICADOR().getText();
 
-        claseActual
-                = new ClaseZ(nombreClase);
+        String nombrePadre
+                = ctx.herencia() == null ? null : ctx.herencia().IDENTIFICADOR().getText();
 
-        tablaClases.registrar(
-                claseActual
-        );
+        claseActual
+                = new ClaseZ(
+                        nombreClase,
+                        nombrePadre,
+                        ctx.getStart().getLine(),
+                        ctx.getStart().getCharPositionInLine()
+                );
+
+        if (!tablaClases.registrar(claseActual)) {
+            agregarError(
+                    ctx.getStart().getLine(),
+                    ctx.getStart().getCharPositionInLine(),
+                    "La clase '" + nombreClase + "' ya fue declarada."
+            );
+        }
 
         for (ZParser.MiembroClaseContext miembro
                 : ctx.miembroClase()) {
@@ -163,6 +187,13 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             }
         }
 
+        tablaClases.resolverReferenciasPadre();
+        validarHerenciaClase(ctx);
+        validarOverrideClase(ctx);
+
+        delegacionesThis.clear();
+        contextosDelegacionThis.clear();
+
         for (ZParser.MiembroClaseContext miembro
                 : ctx.miembroClase()) {
 
@@ -192,6 +223,8 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             }
         }
 
+        validarCiclosDelegacionConstructores();
+
         return null;
     }
 
@@ -215,6 +248,87 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             ZParser.ConstructorContext ctx) {
 
         analizarConstructor(ctx);
+
+        return null;
+    }
+
+    @Override
+    public Void visitLlamadaConstructorEspecial(
+            ZParser.LlamadaConstructorEspecialContext ctx) {
+
+        if (ctx == null) {
+            return null;
+        }
+
+        if (firmaConstructorActual == null || claseActual == null) {
+            agregarError(
+                    ctx.getStart().getLine(),
+                    ctx.getStart().getCharPositionInLine(),
+                    "La llamada al constructor especial ('this' o 'super') solo puede ejecutarse dentro de un constructor."
+            );
+            return null;
+        }
+
+        List<ResultadoAccesoZ> argumentos
+                = obtenerArgumentosCompletos(ctx.listaArgumentos());
+
+        if (ctx.THIS() != null) {
+            ConstructorZ destino
+                    = buscarConstructorCompatible(claseActual, argumentos);
+
+            if (destino == null) {
+                agregarError(
+                        ctx.getStart().getLine(),
+                        ctx.getStart().getCharPositionInLine(),
+                        "No existe un constructor compatible en la clase '"
+                        + claseActual.getNombre()
+                        + "' para los argumentos "
+                        + describirArgumentos(argumentos)
+                        + "."
+                );
+            } else {
+                delegacionesThis.put(firmaConstructorActual, destino.obtenerFirma());
+                contextosDelegacionThis.put(firmaConstructorActual, ctx);
+            }
+        } else if (ctx.SUPER() != null) {
+            ClaseZ padre = claseActual.getClasePadre();
+            if (padre == null) {
+                agregarError(
+                        ctx.getStart().getLine(),
+                        ctx.getStart().getCharPositionInLine(),
+                        "La clase '"
+                        + claseActual.getNombre()
+                        + "' no tiene superclase para invocar 'super(...)'."
+                );
+            } else {
+                ConstructorZ destino
+                        = buscarConstructorCompatible(padre, argumentos);
+
+                if (destino == null) {
+                    agregarError(
+                            ctx.getStart().getLine(),
+                            ctx.getStart().getCharPositionInLine(),
+                            "No existe un constructor compatible en la superclase '"
+                            + padre.getNombre()
+                            + "' para los argumentos "
+                            + describirArgumentos(argumentos)
+                            + "."
+                    );
+                } else if (!esMiembroAccesible(destino.getModificador(), destino.getClaseDeclarante(), claseActual.getNombre())) {
+                    agregarError(
+                            ctx.getStart().getLine(),
+                            ctx.getStart().getCharPositionInLine(),
+                            "El constructor '"
+                            + destino.obtenerFirma()
+                            + "' tiene acceso "
+                            + destino.getModificador()
+                            + " y no es accesible desde '"
+                            + claseActual.getNombre()
+                            + "'."
+                    );
+                }
+            }
+        }
 
         return null;
     }
@@ -1081,6 +1195,21 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
                     return null;
                 }
 
+                if (!esMiembroAccesible(atributo.getModificador(), atributo.getClaseDeclarante(), nombreClaseActual())) {
+                    agregarError(
+                            sufijo.getStart().getLine(),
+                            sufijo.getStart().getCharPositionInLine(),
+                            "El atributo '"
+                            + nombreAtributo
+                            + "' tiene acceso "
+                            + atributo.getModificador()
+                            + " y no es accesible desde '"
+                            + nombreClaseActual()
+                            + "'."
+                    );
+                    return null;
+                }
+
                 tipoActual
                         = atributo.getTipo();
 
@@ -1155,6 +1284,22 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
                     + claseMetodo.getNombre()
                     + "'."
             );
+            return null;
+        }
+
+        if (!esMiembroAccesible(metodo.getModificador(), metodo.getClaseDeclarante(), nombreClaseActual())) {
+            agregarError(
+                    ctx.getStart().getLine(),
+                    ctx.getStart().getCharPositionInLine(),
+                    "El método '"
+                    + nombreMetodo
+                    + "' tiene acceso "
+                    + metodo.getModificador()
+                    + " y no es accesible desde '"
+                    + nombreClaseActual()
+                    + "'."
+            );
+            return null;
         }
 
         return null;
@@ -1424,6 +1569,14 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
 
     private VariableZ buscarVariable(String nombre) {
 
+        if ("this".equals(nombre) && claseActual != null) {
+            return new VariableZ("this", claseActual.getNombre(), 0, false);
+        }
+
+        if ("super".equals(nombre) && claseActual != null && claseActual.getClasePadre() != null) {
+            return new VariableZ("super", claseActual.getClasePadre().getNombre(), 0, false);
+        }
+
         VariableZ variable
                 = tablaVariables.buscar(nombre);
 
@@ -1514,6 +1667,10 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
 
             return destino.equals("String")
                     || esTipoObjeto(destino);
+        }
+
+        if (esSubclaseDe(origen, destino)) {
+            return true;
         }
 
         return false;
@@ -2223,7 +2380,7 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
                 = Integer.MAX_VALUE;
 
         for (MetodoZ metodo
-                : clase.getMetodos()) {
+                : clase.getMetodosJerarquia()) {
 
             if (!metodo.getNombre()
                     .equals(nombre)) {
@@ -2409,6 +2566,21 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
                     return ResultadoAccesoZ.error();
                 }
 
+                if (!esMiembroAccesible(metodo.getModificador(), metodo.getClaseDeclarante(), nombreClaseActual())) {
+                    agregarError(
+                            sufijo.getStart().getLine(),
+                            sufijo.getStart().getCharPositionInLine(),
+                            "El método '"
+                            + nombreMetodo
+                            + "' tiene acceso "
+                            + metodo.getModificador()
+                            + " y no es accesible desde '"
+                            + nombreClaseActual()
+                            + "'."
+                    );
+                    return ResultadoAccesoZ.error();
+                }
+
                 tipoActual
                         = metodo.getTipoRetorno();
 
@@ -2474,6 +2646,21 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
                             + "'."
                     );
 
+                    return ResultadoAccesoZ.error();
+                }
+
+                if (!esMiembroAccesible(atributo.getModificador(), atributo.getClaseDeclarante(), nombreClaseActual())) {
+                    agregarError(
+                            sufijo.getStart().getLine(),
+                            sufijo.getStart().getCharPositionInLine(),
+                            "El atributo '"
+                            + nombreAtributo
+                            + "' tiene acceso "
+                            + atributo.getModificador()
+                            + " y no es accesible desde '"
+                            + nombreClaseActual()
+                            + "'."
+                    );
                     return ResultadoAccesoZ.error();
                 }
 
@@ -2730,11 +2917,15 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
                 = ctx.dimensionesParametro().size()
                 + ctx.dimensiones().size();
 
+        ModificadorAccesoZ mod = obtenerModificador(ctx.modificadorAcceso());
+
         AtributoZ atributo
                 = new AtributoZ(
                         nombre,
                         tipo,
-                        dimensiones
+                        dimensiones,
+                        mod,
+                        claseActual.getNombre()
                 );
 
         if (!claseActual.registrarAtributo(
@@ -2900,10 +3091,14 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return;
         }
 
+        ModificadorAccesoZ mod = obtenerModificador(ctx.modificadorAcceso());
+
         ConstructorZ constructor
                 = new ConstructorZ(
                         nombreConstructor,
-                        parametros
+                        parametros,
+                        mod,
+                        claseActual.getNombre()
                 );
 
         if (!claseActual.registrarConstructor(
@@ -2958,6 +3153,14 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         nombreMetodoActual
                 = nombreConstructor;
 
+        ConstructorZ constructorInfo = claseActual.buscarConstructorPorFirma(
+                nombreConstructor + "(" + describirTiposParametros(parametros) + ")"
+        );
+        firmaConstructorActual = constructorInfo != null ? constructorInfo.obtenerFirma() : (nombreConstructor + "()");
+
+        validarPosicionLlamadaConstructorEspecial(ctx.bloque());
+        validarConstructorPadreImplicito(ctx);
+
         tablaVariables.entrarAmbito();
 
         registrarParametrosEnAmbito(
@@ -2977,6 +3180,8 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
 
         nombreMetodoActual
                 = nombreMetodoAnterior;
+
+        firmaConstructorActual = null;
     }
 
     private void registrarFirmaMetodo(
@@ -3009,11 +3214,17 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
                 parametros
         );
 
+        ModificadorAccesoZ mod = obtenerModificador(ctx.modificadorAcceso());
+        boolean override = ctx.OVERRIDE() != null;
+
         MetodoZ metodo
                 = new MetodoZ(
                         nombreMetodo,
                         tipoRetorno,
-                        parametros
+                        parametros,
+                        mod,
+                        override,
+                        claseActual.getNombre()
                 );
 
         if (!claseActual.registrarMetodo(
@@ -4111,6 +4322,10 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             return 1;
         }
 
+        if (esSubclaseDe(tipoArgumento, tipoParametro)) {
+            return 1;
+        }
+
         return -1;
     }
 
@@ -4220,6 +4435,314 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
             sb.append("[]");
         }
 
+        return sb.toString();
+    }
+
+    private ModificadorAccesoZ obtenerModificador(
+            ZParser.ModificadorAccesoContext ctx) {
+
+        if (ctx == null) {
+            return ModificadorAccesoZ.DEFAULT;
+        }
+        if (ctx.PUBLIC() != null) {
+            return ModificadorAccesoZ.PUBLIC;
+        }
+        if (ctx.PRIVATE() != null) {
+            return ModificadorAccesoZ.PRIVATE;
+        }
+        if (ctx.PROTECTED() != null) {
+            return ModificadorAccesoZ.PROTECTED;
+        }
+        return ModificadorAccesoZ.DEFAULT;
+    }
+
+    private boolean esMiembroAccesible(
+            ModificadorAccesoZ mod,
+            String claseDeclarante,
+            String claseLlamadora) {
+
+        if (mod == null || mod == ModificadorAccesoZ.PUBLIC) {
+            return true;
+        }
+        if (claseDeclarante == null || claseLlamadora == null) {
+            return true;
+        }
+        if (claseDeclarante.equals(claseLlamadora)) {
+            return true;
+        }
+        if (mod == ModificadorAccesoZ.PROTECTED) {
+            return esSubclaseDe(claseLlamadora, claseDeclarante);
+        }
+        if (mod == ModificadorAccesoZ.DEFAULT) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean esSubclaseDe(
+            String posibleHija,
+            String posiblePadre) {
+
+        if (posibleHija == null || posiblePadre == null) {
+            return false;
+        }
+        ClaseZ hija = tablaClases.buscar(posibleHija);
+        if (hija == null) {
+            return false;
+        }
+        return hija.esSubclaseDe(posiblePadre);
+    }
+
+    private String nombreClaseActual() {
+        return claseActual != null ? claseActual.getNombre() : null;
+    }
+
+    private void validarHerenciaClase(
+            ZParser.DefinicionClaseContext ctx) {
+
+        if (claseActual == null || !claseActual.tienePadre()) {
+            return;
+        }
+
+        String nombreClase = claseActual.getNombre();
+        String nombrePadre = claseActual.getNombrePadre();
+
+        if (nombreClase.equals(nombrePadre)) {
+            agregarError(
+                    ctx.herencia().getStart().getLine(),
+                    ctx.herencia().getStart().getCharPositionInLine(),
+                    "La clase '" + nombreClase + "' no puede heredar de sí misma."
+            );
+            return;
+        }
+
+        ClaseZ padre = tablaClases.buscar(nombrePadre);
+        if (padre == null) {
+            agregarError(
+                    ctx.herencia().getStart().getLine(),
+                    ctx.herencia().getStart().getCharPositionInLine(),
+                    "La superclase '" + nombrePadre + "' no existe o no ha sido declarada."
+            );
+            return;
+        }
+
+        Set<String> visitados = new HashSet<>();
+        visitados.add(nombreClase);
+        ClaseZ cursor = padre;
+        while (cursor != null) {
+            if (!visitados.add(cursor.getNombre())) {
+                agregarError(
+                        ctx.herencia().getStart().getLine(),
+                        ctx.herencia().getStart().getCharPositionInLine(),
+                        "Herencia cíclica detectada en la clase '" + nombreClase + "' involucrando a '" + cursor.getNombre() + "'."
+                );
+                break;
+            }
+            cursor = cursor.getClasePadre();
+        }
+    }
+
+    private void validarOverrideClase(
+            ZParser.DefinicionClaseContext ctx) {
+
+        if (claseActual == null) {
+            return;
+        }
+
+        for (ZParser.MiembroClaseContext miembro : ctx.miembroClase()) {
+            if (miembro.metodo() != null) {
+                validarOverrideMetodo(miembro.metodo());
+            }
+        }
+    }
+
+    private void validarOverrideMetodo(
+            ZParser.MetodoContext ctx) {
+
+        String nombreMetodo = ctx.IDENTIFICADOR().getText();
+        List<ParametroZ> parametros = parametrosMetodos.get(ctx);
+        if (parametros == null) {
+            parametros = obtenerParametros(
+                    ctx.listaParametros(),
+                    "método '" + nombreMetodo + "'"
+            );
+        }
+
+        String tipoRetorno = obtenerTipoRetorno(ctx.tipoRetorno());
+        boolean tieneOverride = ctx.OVERRIDE() != null;
+        ModificadorAccesoZ modActual = obtenerModificador(ctx.modificadorAcceso());
+
+        MetodoZ temp = new MetodoZ(
+                nombreMetodo,
+                tipoRetorno,
+                parametros,
+                modActual,
+                tieneOverride,
+                claseActual.getNombre()
+        );
+        String firma = temp.obtenerFirma();
+
+        MetodoZ metodoPadre = claseActual.buscarMetodoHeredablePorFirma(firma);
+
+        if (tieneOverride) {
+            if (metodoPadre == null) {
+                agregarError(
+                        ctx.getStart().getLine(),
+                        ctx.getStart().getCharPositionInLine(),
+                        "El método con firma '" + firma
+                                + "' tiene anotación @Override pero no sobreescribe ningún método de la superclase."
+                );
+            } else {
+                if (!tiposCompatibles(metodoPadre.getTipoRetorno(), tipoRetorno)) {
+                    agregarError(
+                            ctx.getStart().getLine(),
+                            ctx.getStart().getCharPositionInLine(),
+                            "El método que sobreescribe '" + firma
+                                    + "' tiene un tipo de retorno incompatible ('"
+                                    + tipoRetorno + "' frente a '" + metodoPadre.getTipoRetorno() + "')."
+                    );
+                }
+                if (esVisibilidadMasRestringida(modActual, metodoPadre.getModificador())) {
+                    agregarError(
+                            ctx.getStart().getLine(),
+                            ctx.getStart().getCharPositionInLine(),
+                            "No se puede reducir la visibilidad del método sobreescrito '" + firma
+                                    + "'. Esperado al menos: " + metodoPadre.getModificador()
+                                    + ", actual: " + modActual + "."
+                    );
+                }
+            }
+        } else {
+            if (metodoPadre != null) {
+                agregarError(
+                        ctx.getStart().getLine(),
+                        ctx.getStart().getCharPositionInLine(),
+                        "El método '" + firma
+                                + "' sobreescribe un método de la superclase y requiere la anotación @Override."
+                );
+            }
+        }
+    }
+
+    private boolean esVisibilidadMasRestringida(
+            ModificadorAccesoZ actual,
+            ModificadorAccesoZ base) {
+
+        int nivelActual = nivelVisibilidad(actual);
+        int nivelBase = nivelVisibilidad(base);
+        return nivelActual < nivelBase;
+    }
+
+    private int nivelVisibilidad(
+            ModificadorAccesoZ mod) {
+
+        if (mod == null) {
+            return 1;
+        }
+        return switch (mod) {
+            case PUBLIC -> 3;
+            case PROTECTED -> 2;
+            case DEFAULT -> 1;
+            case PRIVATE -> 0;
+        };
+    }
+
+    private void validarPosicionLlamadaConstructorEspecial(
+            ZParser.BloqueContext bloque) {
+
+        if (bloque == null || bloque.sentencia() == null) {
+            return;
+        }
+
+        int total = bloque.sentencia().size();
+        for (int i = 0; i < total; i++) {
+            ZParser.SentenciaContext sent = bloque.sentencia(i);
+            if (sent.llamadaConstructorEspecial() != null) {
+                if (i != 0) {
+                    agregarError(
+                            sent.getStart().getLine(),
+                            sent.getStart().getCharPositionInLine(),
+                            "La llamada al constructor especial ('this' o 'super') debe ser la primera sentencia del constructor."
+                    );
+                }
+            }
+        }
+    }
+
+    private void validarConstructorPadreImplicito(
+            ZParser.ConstructorContext ctx) {
+
+        if (claseActual == null || !claseActual.tienePadre() || claseActual.getClasePadre() == null) {
+            return;
+        }
+
+        boolean tieneLlamadaEspecial = false;
+        if (ctx.bloque() != null && ctx.bloque().sentencia() != null) {
+            for (ZParser.SentenciaContext sent : ctx.bloque().sentencia()) {
+                if (sent.llamadaConstructorEspecial() != null) {
+                    tieneLlamadaEspecial = true;
+                    break;
+                }
+            }
+        }
+
+        if (!tieneLlamadaEspecial) {
+            ClaseZ padre = claseActual.getClasePadre();
+            ConstructorZ vacio = padre.buscarConstructorPorFirma(padre.getNombre() + "()");
+            if (vacio == null && !padre.getConstructores().isEmpty()) {
+                agregarError(
+                        ctx.getStart().getLine(),
+                        ctx.getStart().getCharPositionInLine(),
+                        "La superclase '" + padre.getNombre()
+                                + "' no tiene un constructor por defecto sin parámetros. Se requiere 'super(...)' explícito."
+                );
+            }
+        }
+    }
+
+    private void validarCiclosDelegacionConstructores() {
+
+        for (Map.Entry<String, String> entry : delegacionesThis.entrySet()) {
+            String origen = entry.getKey();
+            Set<String> visitados = new HashSet<>();
+            visitados.add(origen);
+            String cursor = entry.getValue();
+
+            while (cursor != null) {
+                if (!visitados.add(cursor)) {
+                    ParserRuleContext ctx = contextosDelegacionThis.get(origen);
+                    int linea = ctx != null ? ctx.getStart().getLine() : 1;
+                    int col = ctx != null ? ctx.getStart().getCharPositionInLine() : 1;
+                    agregarError(
+                            linea,
+                            col,
+                            "Llamada recursiva cíclica entre constructores detectada en la clase '"
+                                    + (claseActual != null ? claseActual.getNombre() : "") + "'."
+                    );
+                    break;
+                }
+                cursor = delegacionesThis.get(cursor);
+            }
+        }
+    }
+
+    private String describirTiposParametros(
+            List<ParametroZ> parametros) {
+
+        if (parametros == null || parametros.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < parametros.size(); i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            ParametroZ p = parametros.get(i);
+            sb.append(p.getTipo());
+            for (int j = 0; j < p.getDimensiones(); j++) {
+                sb.append("[]");
+            }
+        }
         return sb.toString();
     }
 

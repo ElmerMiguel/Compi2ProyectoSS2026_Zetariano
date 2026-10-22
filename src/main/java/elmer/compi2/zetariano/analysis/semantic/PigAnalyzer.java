@@ -67,6 +67,16 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         return !errores.isEmpty();
     }
 
+    public boolean tieneErrores() {
+        return hayErrores();
+    }
+
+    public void analizar(PigLatinParser.ProgramaContext ctx) {
+        if (ctx != null) {
+            visit(ctx);
+        }
+    }
+
     public void imprimirErrores() {
 
         System.out.println();
@@ -96,6 +106,15 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         this.directorioBase = Path.of(".")
                 .toAbsolutePath()
                 .normalize();
+    }
+
+    public PigAnalyzer(RegistroImportsPig registro) {
+        this();
+        if (registro != null) {
+            for (ClaseImportadaPig c : registro.getClases()) {
+                this.registroImports.registrarClase(c);
+            }
+        }
     }
 
     public PigAnalyzer(Path directorioBase) {
@@ -292,180 +311,133 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
     public TipoDato visitDeclaracionVariable(
             PigLatinParser.DeclaracionVariableContext ctx) {
 
-        String nombre
-                = ctx.IDENTIFICADOR().getText();
-
-        int linea
-                = ctx.getStart().getLine();
+        String nombre = ctx.IDENTIFICADOR().getText();
+        int linea = ctx.getStart().getLine();
 
         if (tabla.existeEnAmbitoActual(nombre)) {
-
             error(
                     linea,
-                    "La variable '"
-                    + nombre
-                    + "' ya fue declarada en este ambito."
+                    "La variable '" + nombre + "' ya fue declarada en este ambito."
             );
-
             return TipoDato.DESCONOCIDO;
         }
 
-        boolean declaracionConNovus
-                = ctx.tipo() == null
-                && ctx.creacionObjeto() != null;
+        boolean declaracionConNull = ctx.NULL() != null;
+        boolean declaracionConNovus = ctx.creacionObjeto() != null;
 
-        String nombreTipoReferencia
-                = declaracionConNovus
-                ? ctx.creacionObjeto()
-                        .IDENTIFICADOR()
-                        .getText()
-                : ctx.tipo().IDENTIFICADOR() != null
-                        ? ctx.tipo()
-                                .IDENTIFICADOR()
-                                .getText()
-                        : null;
+        String nombreTipoReferencia = null;
+        TipoDato tipoDeclarado = TipoDato.DESCONOCIDO;
 
-        TipoDato tipoDeclarado
-                = declaracionConNovus
-                ? TipoDato.OBJETO
-                : obtenerTipo(ctx.tipo());
+        if (ctx.tipo() != null) {
+            tipoDeclarado = obtenerTipo(ctx.tipo());
+            if (ctx.tipo().IDENTIFICADOR() != null) {
+                nombreTipoReferencia = ctx.tipo().IDENTIFICADOR().getText();
+            }
+        } else if (declaracionConNovus) {
+            tipoDeclarado = TipoDato.OBJETO;
+            nombreTipoReferencia = ctx.creacionObjeto().IDENTIFICADOR().getText();
+        } else if (declaracionConNull) {
+            tipoDeclarado = TipoDato.OBJETO;
+        }
 
         if (nombreTipoReferencia != null) {
-
-            String nombreTipo
-                    = nombreTipoReferencia;
-
-            if (!registroImports.existeClase(nombreTipo)) {
-
+            if (!registroImports.existeClase(nombreTipoReferencia)) {
                 error(
                         linea,
-                        "El tipo '"
-                        + nombreTipo
-                        + "' no ha sido importado."
+                        "El tipo '" + nombreTipoReferencia + "' no ha sido importado."
                 );
-
-                tipoDeclarado
-                        = TipoDato.DESCONOCIDO;
+                tipoDeclarado = TipoDato.DESCONOCIDO;
             }
         }
 
-        Simbolo simbolo
-                = new Simbolo(
-                        nombre,
-                        tipoDeclarado,
-                        CategoriaSimbolo.VARIABLE,
-                        tabla.getNivelActual(),
-                        tabla.getAmbitoActual()
-                );
+        Simbolo simbolo = new Simbolo(
+                nombre,
+                tipoDeclarado,
+                CategoriaSimbolo.VARIABLE,
+                tabla.getNivelActual(),
+                tabla.getAmbitoActual()
+        );
 
-        if (tipoDeclarado == TipoDato.OBJETO
-                && nombreTipoReferencia != null) {
-
-            simbolo.setTipoReferencia(
-                    nombreTipoReferencia
-            );
+        if (tipoDeclarado == TipoDato.OBJETO && nombreTipoReferencia != null) {
+            simbolo.setTipoReferencia(nombreTipoReferencia);
         }
 
         tabla.agregar(simbolo);
 
         if (declaracionConNovus) {
+            TipoDato tipoValor = visit(ctx.creacionObjeto());
+            String tipoCreado = ctx.creacionObjeto().IDENTIFICADOR().getText();
 
-            TipoDato tipoValor
-                    = visit(ctx.creacionObjeto());
-
-            if (!sonCompatibles(
-                    tipoDeclarado,
-                    tipoValor)) {
-
+            if (!sonCompatibles(tipoDeclarado, tipoValor)) {
                 error(
                         linea,
-                        "No se puede inicializar '"
-                        + nombre
-                        + "' con el objeto creado."
+                        "No se puede inicializar '" + nombre + "' con el objeto creado."
+                );
+            } else if (nombreTipoReferencia != null && !esMismaClaseOSubclase(tipoCreado, nombreTipoReferencia)) {
+                error(
+                        linea,
+                        "El tipo creado '" + tipoCreado + "' no es compatible con el tipo declarado '"
+                        + nombreTipoReferencia + "'."
                 );
             }
 
             return tipoDeclarado;
         }
 
+        if (declaracionConNull) {
+            return tipoDeclarado;
+        }
+
         if (ctx.inicializacionVariable() != null) {
+            PigLatinParser.InicializacionVariableContext inicializacion = ctx.inicializacionVariable();
 
-            PigLatinParser.InicializacionVariableContext inicializacion
-                    = ctx.inicializacionVariable();
-
-            // =====================================================
-            // INICIALIZADOR POSICIONAL DE ESTRUCTURA: { ... }
-            // =====================================================
             if (inicializacion.inicializadorEstructura() != null) {
-
-                if (tipoDeclarado != TipoDato.OBJETO
-                        || simbolo.getTipoReferencia() == null) {
-
+                if (tipoDeclarado != TipoDato.OBJETO || simbolo.getTipoReferencia() == null) {
                     error(
                             linea,
-                            "El inicializador { ... } solo puede utilizarse "
-                            + "con una estructura importada desde Y."
+                            "El inicializador { ... } solo puede utilizarse con una estructura importada desde Y."
                     );
-
                 } else {
-
-                    ClaseImportadaPig clase
-                            = registroImports.buscarClase(
-                                    simbolo.getTipoReferencia()
-                            );
-
+                    ClaseImportadaPig clase = registroImports.buscarClase(simbolo.getTipoReferencia());
                     if (clase == null) {
-
                         error(
                                 linea,
                                 "No existe informacion importada para la estructura '"
-                                + simbolo.getTipoReferencia()
-                                + "'."
+                                + simbolo.getTipoReferencia() + "'."
                         );
-
-                    } else if (clase.getOrigen()
-                            != TipoImportPig.Y) {
-
+                    } else if (clase.getOrigen() != TipoImportPig.Y) {
                         error(
                                 linea,
-                                "El tipo '"
-                                + simbolo.getTipoReferencia()
+                                "El tipo '" + simbolo.getTipoReferencia()
                                 + "' proviene de Z y debe inicializarse con novus."
                         );
-
                     } else {
-
                         validarInicializadorEstructura(
                                 inicializacion.inicializadorEstructura(),
                                 clase
                         );
                     }
                 }
+            } else if (inicializacion.expresion() != null) {
+                TipoDato tipoValor = visit(inicializacion.expresion());
 
-            } else {
-
-                // =================================================
-                // INICIALIZACION NORMAL MEDIANTE EXPRESION
-                // =================================================
-                TipoDato tipoValor
-                        = visit(
-                                inicializacion.expresion()
-                        );
-
-                if (!sonCompatibles(
-                        tipoDeclarado,
-                        tipoValor)) {
-
+                if (!sonCompatibles(tipoDeclarado, tipoValor)) {
                     error(
                             linea,
-                            "No se puede inicializar '"
-                            + nombre
-                            + "' de tipo "
-                            + tipoDeclarado
-                            + " con un valor de tipo "
-                            + tipoValor
-                            + "."
+                            "No se puede inicializar '" + nombre + "' de tipo " + tipoDeclarado
+                            + " con un valor de tipo " + tipoValor + "."
                     );
+                } else if (tipoDeclarado == TipoDato.OBJETO && nombreTipoReferencia != null) {
+                    String refOrigen = obtenerReferenciaObjetoExpresion(inicializacion.expresion());
+                    if (refOrigen != null && !"null".equalsIgnoreCase(refOrigen)) {
+                        if (!esMismaClaseOSubclase(refOrigen, nombreTipoReferencia)) {
+                            error(
+                                    linea,
+                                    "No se puede inicializar '" + nombre + "' de tipo '" + nombreTipoReferencia
+                                    + "' con un valor de tipo '" + refOrigen + "'."
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -635,6 +607,18 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                     + tipoValor
                     + "."
             );
+        } else if (tipoDestino == TipoDato.OBJETO) {
+            String refDestino = obtenerReferenciaFinalAcceso(ctx.acceso());
+            String refOrigen = obtenerReferenciaObjetoExpresion(ctx.expresion());
+            if (refDestino != null && refOrigen != null && !"null".equalsIgnoreCase(refOrigen)) {
+                if (!esMismaClaseOSubclase(refOrigen, refDestino)) {
+                    error(
+                            ctx.getStart().getLine(),
+                            "No se puede asignar un objeto de tipo '" + refOrigen
+                            + "' a una referencia de tipo '" + refDestino + "'."
+                    );
+                }
+            }
         }
 
         return tipoDestino;
@@ -851,7 +835,8 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             // =====================================================
             AtributoImportadoPig atributo
                     = clase.buscarAtributo(
-                            nombreMiembro
+                            nombreMiembro,
+                            registroImports
                     );
 
             if (atributo == null) {
@@ -1577,6 +1562,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
                 || ctx.FALSUS() != null) {
 
             return TipoDato.BOOLEANO;
+        }
+
+        if (ctx.NULL() != null) {
+            return TipoDato.OBJETO;
         }
 
         return TipoDato.DESCONOCIDO;
@@ -2496,7 +2485,28 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             }
         }
 
+        if (!constructor && clase.tienePadre()) {
+            ClaseImportadaPig padre = registroImports.buscarClase(clase.getNombrePadre());
+            if (padre != null) {
+                return buscarMetodoCompatible(padre, nombre, argumentos, false);
+            }
+        }
+
         return null;
+    }
+
+    private boolean esMismaClaseOSubclase(String tipoHija, String tipoPadre) {
+        if (tipoHija == null || tipoPadre == null) {
+            return false;
+        }
+        if (tipoHija.equalsIgnoreCase(tipoPadre)) {
+            return true;
+        }
+        ClaseImportadaPig clase = registroImports.buscarClase(tipoHija);
+        if (clase != null) {
+            return clase.esSubclaseDe(tipoPadre, registroImports);
+        }
+        return false;
     }
 
     private boolean tiposExternosCompatibles(
@@ -2518,8 +2528,16 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
         }
 
         // Conversion de ensanchamiento segura: int -> double.
-        return "double".equals(e)
-                && "int".equals(r);
+        if ("double".equals(e)
+                && "int".equals(r)) {
+            return true;
+        }
+
+        if ("null".equalsIgnoreCase(r)) {
+            return true;
+        }
+
+        return esMismaClaseOSubclase(r, e);
     }
 
     private String normalizarTipoExterno(
@@ -2671,6 +2689,10 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
             return primario.creacionObjeto()
                     .IDENTIFICADOR()
                     .getText();
+        }
+
+        if (primario.literal() != null && primario.literal().NULL() != null) {
+            return "null";
         }
 
         if (primario.expresion() != null) {
@@ -2853,7 +2875,8 @@ public class PigAnalyzer extends PigLatinParserBaseVisitor<TipoDato> {
 
                 AtributoImportadoPig atributo
                         = clase.buscarAtributo(
-                                miembro
+                                miembro,
+                                registroImports
                         );
 
                 if (atributo == null) {
