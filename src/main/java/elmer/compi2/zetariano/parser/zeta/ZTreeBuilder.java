@@ -43,8 +43,13 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         String nombreClase
                 = ctx.IDENTIFICADOR().getText();
 
+        String nombrePadre = ctx.herencia() == null
+                ? null
+                : ctx.herencia().IDENTIFICADOR().getText();
+
         ClaseASTZ clase = new ClaseASTZ(
                 nombreClase,
+                nombrePadre,
                 ctx.getStart().getLine(),
                 ctx.getStart().getCharPositionInLine()
         );
@@ -110,11 +115,15 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
                     );
         }
 
+        ModificadorAccesoZ modificador
+                = construirModificador(ctx.modificadorAcceso());
+
         return new AtributoASTZ(
                 nombre,
                 tipo,
                 dimensiones,
                 inicializador,
+                modificador,
                 ctx.getStart().getLine(),
                 ctx.getStart()
                         .getCharPositionInLine()
@@ -139,10 +148,14 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         BloqueASTZ cuerpo
                 = (BloqueASTZ) visit(ctx.bloque());
 
+        ModificadorAccesoZ modificador
+                = construirModificador(ctx.modificadorAcceso());
+
         return new ConstructorASTZ(
                 nombre,
                 parametros,
                 cuerpo,
+                modificador,
                 ctx.getStart().getLine(),
                 ctx.getStart().getCharPositionInLine()
         );
@@ -169,14 +182,41 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         BloqueASTZ cuerpo
                 = (BloqueASTZ) visit(ctx.bloque());
 
+        ModificadorAccesoZ modificador
+                = construirModificador(ctx.modificadorAcceso());
+
         return new MetodoASTZ(
                 nombre,
                 tipoRetorno,
                 parametros,
                 cuerpo,
+                modificador,
+                ctx.OVERRIDE() != null,
                 ctx.getStart().getLine(),
                 ctx.getStart().getCharPositionInLine()
         );
+    }
+
+    private ModificadorAccesoZ construirModificador(
+            ZParser.ModificadorAccesoContext ctx) {
+
+        if (ctx == null) {
+            return ModificadorAccesoZ.DEFAULT;
+        }
+
+        if (ctx.PUBLIC() != null) {
+            return ModificadorAccesoZ.PUBLIC;
+        }
+
+        if (ctx.PRIVATE() != null) {
+            return ModificadorAccesoZ.PRIVATE;
+        }
+
+        if (ctx.PROTECTED() != null) {
+            return ModificadorAccesoZ.PROTECTED;
+        }
+
+        return ModificadorAccesoZ.DEFAULT;
     }
 
     // =========================================================
@@ -394,6 +434,10 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
                     ctx.getStart().getLine(),
                     ctx.getStart().getCharPositionInLine()
             );
+        }
+
+        if (ctx.llamadaConstructorEspecial() != null) {
+            return visit(ctx.llamadaConstructorEspecial());
         }
 
         if (ctx.llamadaMetodo() != null) {
@@ -1089,6 +1133,22 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         );
 
         return acceso;
+    }
+
+    @Override
+    public NodoASTZ visitLlamadaConstructorEspecial(
+            ZParser.LlamadaConstructorEspecialContext ctx) {
+
+        LlamadaConstructorEspecialASTZ.Tipo tipo = ctx.THIS() != null
+                ? LlamadaConstructorEspecialASTZ.Tipo.THIS
+                : LlamadaConstructorEspecialASTZ.Tipo.SUPER;
+
+        return new LlamadaConstructorEspecialASTZ(
+                tipo,
+                construirArgumentos(ctx.listaArgumentos()),
+                ctx.getStart().getLine(),
+                ctx.getStart().getCharPositionInLine()
+        );
     }
 
     @Override

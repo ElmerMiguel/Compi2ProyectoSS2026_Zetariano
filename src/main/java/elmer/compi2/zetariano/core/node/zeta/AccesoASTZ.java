@@ -28,6 +28,14 @@ public class AccesoASTZ extends ExpresionASTZ {
         return base;
     }
 
+    public boolean esThis() {
+        return "this".equals(base);
+    }
+
+    public boolean esSuper() {
+        return "super".equals(base);
+    }
+
     public List<PasoAccesoASTZ> getPasos() {
         return pasos;
     }

@@ -405,19 +405,20 @@ public class PigTreeBuilder
                         .getText();
 
         boolean declaracionConNovus
-                = ctx.tipo() == null
-                && ctx.creacionObjeto() != null;
+                = ctx.creacionObjeto() != null;
+
+        boolean declaracionConNull
+                = ctx.NULL() != null;
 
         String tipo
-                = declaracionConNovus
-                ? ctx.creacionObjeto()
+                = ctx.tipo() != null
+                ? ctx.tipo().getText()
+                : ctx.creacionObjeto()
                         .IDENTIFICADOR()
-                        .getText()
-                : ctx.tipo()
                         .getText();
 
         String tipoReferencia
-                = declaracionConNovus
+                = ctx.tipo() == null
                 ? tipo
                 : ctx.tipo().IDENTIFICADOR() != null
                         && !"bool".equalsIgnoreCase(
@@ -439,6 +440,15 @@ public class PigTreeBuilder
                     = construirNuevoObjeto(
                             ctx.creacionObjeto()
                     );
+
+        } else if (declaracionConNull) {
+
+            inicializador = new LiteralASTPig(
+                    null,
+                    "null",
+                    linea(ctx),
+                    columna(ctx)
+            );
 
         } else if (ctx.inicializacionVariable() != null) {
 
@@ -1448,6 +1458,16 @@ public class PigTreeBuilder
             return new LiteralASTPig(
                     true,
                     "verum",
+                    linea(ctx),
+                    columna(ctx)
+            );
+        }
+
+        if (ctx.NULL() != null) {
+
+            return new LiteralASTPig(
+                    null,
+                    "null",
                     linea(ctx),
                     columna(ctx)
             );
