@@ -14,7 +14,9 @@ import elmer.compi2.zetariano.imports.RegistroImportsPig;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import elmer.compi2.zetariano.imports.MetodoImportadoPig;
 import elmer.compi2.zetariano.imports.TipoImportPig;
 
@@ -879,6 +881,13 @@ public class GeneradorC3DPig {
             String tipo
                     = literal.getTipo();
 
+            if ("null".equalsIgnoreCase(tipo) || valor == null) {
+                return new ResultadoPig(
+                        "0",
+                        "null"
+                );
+            }
+
             // =================================================
             // BOOLEANO
             // =================================================
@@ -1193,41 +1202,10 @@ public class GeneradorC3DPig {
             );
         }
 
-        String base
-                = temporales.nuevoTemporal();
-
-        agregar(
-                "=",
-                "H",
-                null,
-                base
+        String base = reservarObjeto(
+                clase,
+                clase.getOrigen() == TipoImportPig.Z
         );
-
-        int tamano
-                = Math.max(
-                        1,
-                        clase.getAtributos()
-                                .size()
-                );
-
-        for (int i = 0;
-                i < tamano;
-                i++) {
-
-            agregar(
-                    "HEAP_SET",
-                    "0",
-                    null,
-                    "H"
-            );
-
-            agregar(
-                    "+",
-                    "H",
-                    "1",
-                    "H"
-            );
-        }
 
         int desplazamiento
                 = marco.getTamano() + 1;
@@ -1922,6 +1900,43 @@ public class GeneradorC3DPig {
         return null;
     }
 
+    private String reservarObjeto(
+            ClaseImportadaPig clase,
+            boolean guardarTipoDinamico) {
+
+        if (guardarTipoDinamico) {
+            agregar(
+                    "HEAP_SET",
+                    identificadorClase(clase.getNombre()),
+                    null,
+                    "H"
+            );
+            agregar("+", "H", "1", "H");
+        }
+
+        String base = temporales.nuevoTemporal();
+        agregar("=", "H", null, base);
+
+        int tamano = Math.max(
+                1,
+                clase.getAtributos().size()
+        );
+
+        for (int i = 0; i < tamano; i++) {
+            agregar("HEAP_SET", "0", null, "H");
+            agregar("+", "H", "1", "H");
+        }
+
+        return base;
+    }
+
+    private String identificadorClase(String nombreClase) {
+        long id = Integer.toUnsignedLong(
+                nombreClase == null ? 0 : nombreClase.hashCode()
+        );
+        return String.valueOf(id);
+    }
+
     // =========================================================
     // DECLARACION DE OBJETO
     // =========================================================
@@ -1950,44 +1965,10 @@ public class GeneradorC3DPig {
         // =====================================================
         // 1. RESERVAR OBJETO
         // =====================================================
-        String base
-                = temporales.nuevoTemporal();
-
-        agregar(
-                "=",
-                "H",
-                null,
-                base
+        String base = reservarObjeto(
+                clase,
+                clase.getOrigen() == TipoImportPig.Z
         );
-
-        int cantidadAtributos
-                = clase.getAtributos()
-                        .size();
-
-        int tamanoFisico
-                = Math.max(
-                        1,
-                        cantidadAtributos
-                );
-
-        for (int i = 0;
-                i < tamanoFisico;
-                i++) {
-
-            agregar(
-                    "HEAP_SET",
-                    "0",
-                    null,
-                    "H"
-            );
-
-            agregar(
-                    "+",
-                    "H",
-                    "1",
-                    "H"
-            );
-        }
 
         // =====================================================
         // 2. GUARDAR PUNTERO EN STACK DE PIG
@@ -2697,30 +2678,35 @@ public class GeneradorC3DPig {
                 = new ArrayList<>();
 
         // =====================================================
-        // 1. FILTRAR POR NOMBRE Y CANTIDAD
+        // 1. FILTRAR POR NOMBRE Y CANTIDAD EN LA JERARQUIA
         // =====================================================
-        for (MetodoImportadoPig metodo
-                : clase.getMetodos()) {
+        ClaseImportadaPig actual = clase;
+        Set<String> visitadas = new HashSet<>();
 
-            if (metodo.esConstructor()) {
-                continue;
+        while (actual != null && visitadas.add(actual.getNombre())) {
+            for (MetodoImportadoPig metodo : actual.getMetodos()) {
+                if (metodo.esConstructor()) {
+                    continue;
+                }
+
+                if (!nombreMetodo.equals(metodo.getNombre())) {
+                    continue;
+                }
+
+                if (metodo.getTiposParametros().size() != argumentos.size()) {
+                    continue;
+                }
+
+                candidatos.add(metodo);
             }
 
-            if (!nombreMetodo.equals(
-                    metodo.getNombre())) {
-
-                continue;
+            if (!candidatos.isEmpty()) {
+                break;
             }
 
-            if (metodo.getTiposParametros().size()
-                    != argumentos.size()) {
-
-                continue;
-            }
-
-            candidatos.add(
-                    metodo
-            );
+            actual = actual.getNombrePadre() == null
+                    ? null
+                    : registroImports.buscarClase(actual.getNombrePadre());
         }
 
         if (candidatos.isEmpty()) {
@@ -3063,12 +3049,16 @@ public class GeneradorC3DPig {
         // =====================================================
         // 10. LLAMAR
         // =====================================================
-        agregar(
-                "CALL",
-                metodo.getFirma(),
-                null,
-                null
-        );
+        if (clase.getOrigen() == TipoImportPig.Z) {
+            generarCallMetodoDinamico(objeto, clase, metodo);
+        } else {
+            agregar(
+                    "CALL",
+                    metodo.getFirmaEnlace(),
+                    null,
+                    null
+            );
+        }
 
         String valorRetorno = "0";
 
@@ -3119,6 +3109,109 @@ public class GeneradorC3DPig {
                         tipoRetorno
                 )
         );
+    }
+
+    private void generarCallMetodoDinamico(
+            String objeto,
+            ClaseImportadaPig claseDeclarada,
+            MetodoImportadoPig metodoEstatico) {
+
+        if (objeto == null || claseDeclarada == null || metodoEstatico == null) {
+            agregar("CALL", metodoEstatico != null ? metodoEstatico.getFirmaEnlace() : "?", null, null);
+            return;
+        }
+
+        List<ClaseImportadaPig> descendientes = new ArrayList<>();
+        for (ClaseImportadaPig candidata : registroImports.getClases()) {
+            if (candidata.getOrigen() == TipoImportPig.Z
+                    && !candidata.getNombre().equals(claseDeclarada.getNombre())
+                    && esSubclaseDe(candidata.getNombre(), claseDeclarada.getNombre())) {
+                descendientes.add(candidata);
+            }
+        }
+
+        if (descendientes.isEmpty()) {
+            agregar("CALL", metodoEstatico.getFirmaEnlace(), null, null);
+            return;
+        }
+
+        String direccionTipo = temporales.nuevoTemporal();
+        agregar("-", objeto, "1", direccionTipo);
+
+        String tipoReal = temporales.nuevoTemporal();
+        agregar("HEAP_GET", direccionTipo, null, tipoReal);
+
+        String etiquetaSalida = etiquetas.nuevaEtiqueta();
+
+        for (ClaseImportadaPig descendiente : descendientes) {
+            MetodoImportadoPig implementacion
+                    = buscarMetodoPorFirmaEnJerarquia(
+                            descendiente,
+                            metodoEstatico.getFirma()
+                    );
+
+            if (implementacion == null
+                    || implementacion.getFirmaEnlace().equals(metodoEstatico.getFirmaEnlace())) {
+                continue;
+            }
+
+            String coincide = temporales.nuevoTemporal();
+            agregar(
+                    "==",
+                    tipoReal,
+                    identificadorClase(descendiente.getNombre()),
+                    coincide
+            );
+
+            String siguiente = etiquetas.nuevaEtiqueta();
+            agregar("IF_FALSE", coincide, null, siguiente);
+            agregar("CALL", implementacion.getFirmaEnlace(), null, null);
+            agregar("GOTO", null, null, etiquetaSalida);
+            agregar("LABEL", null, null, siguiente);
+        }
+
+        agregar("CALL", metodoEstatico.getFirmaEnlace(), null, null);
+        agregar("LABEL", null, null, etiquetaSalida);
+    }
+
+    private MetodoImportadoPig buscarMetodoPorFirmaEnJerarquia(
+            ClaseImportadaPig clase,
+            String firma) {
+
+        ClaseImportadaPig actual = clase;
+        Set<String> visitadas = new HashSet<>();
+
+        while (actual != null && visitadas.add(actual.getNombre())) {
+            MetodoImportadoPig metodo = actual.buscarMetodoPorFirma(firma);
+            if (metodo != null && !metodo.esConstructor()) {
+                return metodo;
+            }
+
+            actual = actual.getNombrePadre() == null
+                    ? null
+                    : registroImports.buscarClase(actual.getNombrePadre());
+        }
+
+        return null;
+    }
+
+    private boolean esSubclaseDe(
+            String posibleHija,
+            String posiblePadre) {
+
+        String actual = posibleHija;
+        Set<String> visitadas = new HashSet<>();
+
+        while (actual != null && visitadas.add(actual)) {
+            if (actual.equals(posiblePadre)) {
+                return true;
+            }
+
+            ClaseImportadaPig clase = registroImports.buscarClase(actual);
+            actual = clase == null ? null : clase.getNombrePadre();
+        }
+
+        return false;
     }
 
     // =========================================================

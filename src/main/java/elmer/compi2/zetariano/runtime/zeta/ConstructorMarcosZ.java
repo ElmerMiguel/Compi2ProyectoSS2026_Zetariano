@@ -12,6 +12,7 @@ public class ConstructorMarcosZ {
     private final TablaMemoriaZ tabla;
 
     private MarcoMetodoZ marcoActual;
+    private String nombreClaseActual;
 
     public ConstructorMarcosZ() {
 
@@ -19,6 +20,7 @@ public class ConstructorMarcosZ {
                 = new TablaMemoriaZ();
 
         this.marcoActual = null;
+        this.nombreClaseActual = null;
     }
 
     public TablaMemoriaZ construir(
@@ -30,20 +32,90 @@ public class ConstructorMarcosZ {
             return tabla;
         }
 
-        ClaseASTZ clase
-                = programa.getClase();
+        return construir(java.util.Collections.singletonList(programa));
+    }
 
-        ClaseMemoriaZ claseMemoria
-                = new ClaseMemoriaZ(
-                        clase.getNombre()
-                );
-        claseMemoria.setNombrePadre(clase.getNombrePadre());
-        for (MiembroASTZ miembro
-                : clase.getMiembros()) {
+    public TablaMemoriaZ construir(
+            java.util.List<ProgramaASTZ> programas) {
 
+        if (programas == null || programas.isEmpty()) {
+            return tabla;
+        }
+
+        java.util.Map<String, ClaseASTZ> clasesAST = new java.util.LinkedHashMap<>();
+        for (ProgramaASTZ programa : programas) {
+            if (programa != null && programa.getClase() != null) {
+                clasesAST.put(programa.getClase().getNombre(), programa.getClase());
+            }
+        }
+
+        for (String nombreClase : clasesAST.keySet()) {
+            construirLayoutClase(nombreClase, clasesAST, new java.util.HashSet<>());
+        }
+
+        for (ProgramaASTZ programa : programas) {
+            if (programa == null || programa.getClase() == null) {
+                continue;
+            }
+
+            ClaseASTZ clase = programa.getClase();
+            nombreClaseActual = clase.getNombre();
+
+            for (MiembroASTZ miembro : clase.getMiembros()) {
+                if (miembro instanceof ConstructorASTZ constructor) {
+                    procesarConstructor(constructor);
+                } else if (miembro instanceof MetodoASTZ metodo) {
+                    procesarMetodo(metodo);
+                }
+            }
+        }
+
+        return tabla;
+    }
+
+    public ClaseMemoriaZ construirLayoutClase(
+            String nombreClase,
+            java.util.Map<String, ClaseASTZ> clasesAST,
+            java.util.Set<String> visitadas) {
+
+        ClaseMemoriaZ existente = tabla.buscarClase(nombreClase);
+        if (existente != null) {
+            return existente;
+        }
+
+        if (nombreClase == null || !visitadas.add(nombreClase)) {
+            return null;
+        }
+
+        ClaseASTZ claseAST = clasesAST.get(nombreClase);
+        if (claseAST == null) {
+            visitadas.remove(nombreClase);
+            return null;
+        }
+
+        ClaseMemoriaZ layout = new ClaseMemoriaZ(nombreClase);
+        layout.setNombrePadre(claseAST.getNombrePadre());
+
+        if (claseAST.tienePadre()) {
+            ClaseMemoriaZ padre = construirLayoutClase(
+                    claseAST.getNombrePadre(),
+                    clasesAST,
+                    visitadas
+            );
+            if (padre != null) {
+                for (AtributoMemoriaZ atributo : padre.getAtributos().values()) {
+                    layout.registrarAtributo(
+                            atributo.getNombre(),
+                            atributo.getTipo(),
+                            atributo.getDimensiones()
+                    );
+                }
+            }
+        }
+
+        for (MiembroASTZ miembro : claseAST.getMiembros()) {
             if (miembro instanceof AtributoASTZ atributo) {
-
-                claseMemoria.registrarAtributo(
+                layout.registrarAtributo(
                         atributo.getNombre(),
                         atributo.getTipo(),
                         atributo.getDimensiones()
@@ -51,28 +123,20 @@ public class ConstructorMarcosZ {
             }
         }
 
-        tabla.registrarClase(
-                claseMemoria
-        );
+        tabla.registrarClase(layout);
+        visitadas.remove(nombreClase);
+        return layout;
+    }
 
-        for (MiembroASTZ miembro
-                : clase.getMiembros()) {
+    public static String construirFirmaEnlaceMetodo(
+            String nombreClase,
+            String firmaMetodo) {
 
-            if (miembro instanceof ConstructorASTZ constructor) {
-
-                procesarConstructor(
-                        constructor
-                );
-
-            } else if (miembro instanceof MetodoASTZ metodo) {
-
-                procesarMetodo(
-                        metodo
-                );
-            }
+        if (nombreClase == null || nombreClase.isBlank()) {
+            return firmaMetodo;
         }
 
-        return tabla;
+        return nombreClase + "." + firmaMetodo;
     }
 
     // =========================================================
@@ -121,7 +185,10 @@ public class ConstructorMarcosZ {
 
         marcoActual
                 = new MarcoMetodoZ(
-                        firma,
+                        construirFirmaEnlaceMetodo(
+                                nombreClaseActual,
+                                firma
+                        ),
                         metodo.getTipoRetorno()
                 );
 

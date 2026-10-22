@@ -32,6 +32,10 @@ public class AdaptadorImportZPig {
         for (ClaseMemoriaZ claseZ
                 : tablaZ.getClases().values()) {
 
+            if (registro.existeClase(claseZ.getNombre())) {
+                continue;
+            }
+
             ClaseImportadaPig clasePig
                     = new ClaseImportadaPig(
                             claseZ.getNombre(),
@@ -68,21 +72,29 @@ public class AdaptadorImportZPig {
             MarcoMetodoZ marco
                     = entrada.getValue();
 
-            String firma
+            String firmaCompleta
                     = marco.getFirma();
 
+            String clasePropietaria
+                    = extraerClasePropietaria(firmaCompleta);
+
+            String firmaSemantica
+                    = quitarClasePropietaria(firmaCompleta);
+
             String nombre
-                    = extraerNombreFirma(firma);
+                    = extraerNombreFirma(firmaSemantica);
 
             List<String> tiposParametros
                     = obtenerTiposParametros(marco);
 
             ClaseImportadaPig claseDestino
-                    = buscarClasePropietaria(
-                            registro,
-                            tablaZ,
-                            nombre
-                    );
+                    = clasePropietaria == null
+                            ? buscarClasePropietaria(
+                                    registro,
+                                    tablaZ,
+                                    nombre
+                            )
+                            : registro.buscarClase(clasePropietaria);
 
             if (claseDestino == null) {
 
@@ -102,10 +114,11 @@ public class AdaptadorImportZPig {
             MetodoImportadoPig metodo
                     = new MetodoImportadoPig(
                             nombre,
-                            firma,
+                            firmaSemantica,
                             tipoRetorno,
                             tiposParametros,
-                            esConstructor
+                            esConstructor,
+                            claseDestino.getNombre()
                     );
 
             claseDestino.registrarMetodo(
@@ -136,6 +149,10 @@ public class AdaptadorImportZPig {
 
         for (ClaseMemoriaZ claseZ
                 : tablaZ.getClases().values()) {
+
+            if (registro.existeClase(claseZ.getNombre())) {
+                continue;
+            }
 
             ClaseImportadaPig clase
                     = registro.buscarClase(
@@ -230,6 +247,32 @@ public class AdaptadorImportZPig {
                 0,
                 posicion
         );
+    }
+
+    private String extraerClasePropietaria(String firma) {
+        if (firma == null) {
+            return null;
+        }
+
+        int parentesis = firma.indexOf('(');
+        int punto = firma.lastIndexOf('.', parentesis < 0
+                ? firma.length() - 1
+                : parentesis);
+
+        return punto < 0 ? null : firma.substring(0, punto);
+    }
+
+    private String quitarClasePropietaria(String firma) {
+        if (firma == null) {
+            return "";
+        }
+
+        int parentesis = firma.indexOf('(');
+        int punto = firma.lastIndexOf('.', parentesis < 0
+                ? firma.length() - 1
+                : parentesis);
+
+        return punto < 0 ? firma : firma.substring(punto + 1);
     }
 
     private String describirTipo(

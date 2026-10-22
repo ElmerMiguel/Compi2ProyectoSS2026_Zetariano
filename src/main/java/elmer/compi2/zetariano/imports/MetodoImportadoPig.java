@@ -18,6 +18,7 @@ public class MetodoImportadoPig {
     private final List<String> tiposParametros;
 
     private final boolean constructor;
+    private String clasePropietaria;
 
     public MetodoImportadoPig(
             String nombre,
@@ -25,6 +26,17 @@ public class MetodoImportadoPig {
             String tipoRetorno,
             List<String> tiposParametros,
             boolean constructor) {
+
+        this(nombre, firma, tipoRetorno, tiposParametros, constructor, null);
+    }
+
+    public MetodoImportadoPig(
+            String nombre,
+            String firma,
+            String tipoRetorno,
+            List<String> tiposParametros,
+            boolean constructor,
+            String clasePropietaria) {
 
         this.nombre = nombre;
         this.firma = firma;
@@ -36,6 +48,7 @@ public class MetodoImportadoPig {
                         : new ArrayList<>(tiposParametros);
 
         this.constructor = constructor;
+        this.clasePropietaria = clasePropietaria;
     }
 
     public String getNombre() {
@@ -58,6 +71,23 @@ public class MetodoImportadoPig {
 
     public boolean esConstructor() {
         return constructor;
+    }
+
+    public String getClasePropietaria() {
+        return clasePropietaria;
+    }
+
+    public void setClasePropietaria(String clasePropietaria) {
+        this.clasePropietaria = clasePropietaria;
+    }
+
+    public String getFirmaEnlace() {
+        if (constructor
+                || clasePropietaria == null
+                || clasePropietaria.isBlank()) {
+            return firma;
+        }
+        return clasePropietaria + "." + firma;
     }
 
     @Override

@@ -4,14 +4,18 @@ package elmer.compi2.zetariano.imports;
 
 import elmer.compi2.zetariano.parser.zeta.ZTreeBuilder;
 import elmer.compi2.zetariano.core.node.zeta.ProgramaASTZ;
+import elmer.compi2.zetariano.runtime.zeta.ClaseMemoriaZ;
 import elmer.compi2.zetariano.runtime.zeta.ConstructorMarcosZ;
+import elmer.compi2.zetariano.runtime.zeta.MarcoMetodoZ;
 import elmer.compi2.zetariano.runtime.zeta.TablaMemoriaZ;
 import elmer.compi2.zetariano.analysis.semantic.SemanticoZ;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -36,10 +40,17 @@ public class CargadorImportZPig {
     private final SemanticoZ semanticoCompartido
             = new SemanticoZ();
 
+    private final Map<String, ProgramaASTZ> programasCargados
+            = new LinkedHashMap<>();
+
     private ProgramaASTZ ultimoProgramaAST;
 
     public ProgramaASTZ getUltimoProgramaAST() {
         return ultimoProgramaAST;
+    }
+
+    public List<ProgramaASTZ> getTodosLosProgramasAST() {
+        return new ArrayList<>(programasCargados.values());
     }
 
     public TablaMemoriaZ cargarTabla(String rutaArchivo)
@@ -261,18 +272,33 @@ public class CargadorImportZPig {
 
         ultimoProgramaAST = programaAST;
 
+        programasCargados.put(
+                programaAST.getClase().getNombre(),
+                programaAST
+        );
+
+        if (programaAST.getClase().tienePadre()) {
+            String padre = programaAST.getClase().getNombrePadre();
+            if (!programasCargados.containsKey(padre)) {
+                Path archivoPadre = Path.of(rutaArchivo).toAbsolutePath().getParent().resolve(padre + ".z");
+                if (Files.isRegularFile(archivoPadre)) {
+                    cargarTabla(archivoPadre.toString());
+                }
+            }
+        }
+
         // ==========================================
         // 5. TABLA DE MEMORIA Z
         // ==========================================
         ConstructorMarcosZ constructorMarcos
                 = new ConstructorMarcosZ();
 
-        TablaMemoriaZ tablaMemoria
+        TablaMemoriaZ tablaCompleta
                 = constructorMarcos.construir(
-                        programaAST
+                        new ArrayList<>(programasCargados.values())
                 );
 
-        if (tablaMemoria == null) {
+        if (tablaCompleta == null) {
 
             throw new IllegalStateException(
                     "No fue posible construir "
@@ -280,6 +306,15 @@ public class CargadorImportZPig {
             );
         }
 
-        return tablaMemoria;
+        TablaMemoriaZ resultado = new TablaMemoriaZ();
+        ClaseMemoriaZ claseActual = tablaCompleta.buscarClase(programaAST.getClase().getNombre());
+        if (claseActual != null) {
+            resultado.registrarClase(claseActual);
+        }
+        for (MarcoMetodoZ marco : tablaCompleta.getMarcos().values()) {
+            resultado.registrar(marco);
+        }
+
+        return resultado;
     }
 }

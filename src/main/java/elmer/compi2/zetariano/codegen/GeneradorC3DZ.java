@@ -17,9 +17,11 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -116,26 +118,20 @@ public class GeneradorC3DZ {
             }
         }
 
-        for (ProgramaASTZ programa : programas) {
+        for (String nombreClase : clasesAST.keySet()) {
+            construirLayoutClase(
+                    nombreClase,
+                    new HashSet<>()
+            );
+        }
 
-            if (programa == null) {
-                continue;
-            }
+        TablaMemoriaZ tablaParcial
+                = constructorMarcos.construir(programas);
 
-            TablaMemoriaZ tablaParcial
-                    = constructorMarcos.construir(programa);
+        for (MarcoMetodoZ marco
+                : tablaParcial.getMarcos().values()) {
 
-            for (ClaseMemoriaZ clase
-                    : tablaParcial.getClases().values()) {
-
-                tablaMemoria.registrarClase(clase);
-            }
-
-            for (MarcoMetodoZ marco
-                    : tablaParcial.getMarcos().values()) {
-
-                tablaMemoria.registrar(marco);
-            }
+            tablaMemoria.registrar(marco);
         }
 
         for (ProgramaASTZ programa : programas) {
@@ -155,6 +151,220 @@ public class GeneradorC3DZ {
         return Collections.unmodifiableList(
                 cuadruplos
         );
+    }
+
+    private String identificadorClase(String nombreClase) {
+        long id = Integer.toUnsignedLong(
+                nombreClase == null ? 0 : nombreClase.hashCode()
+        );
+        return String.valueOf(id);
+    }
+
+    private ClaseMemoriaZ construirLayoutClase(
+            String nombreClase,
+            Set<String> visitadas) {
+
+        ClaseMemoriaZ existente
+                = tablaMemoria.buscarClase(nombreClase);
+
+        if (existente != null) {
+            return existente;
+        }
+
+        if (nombreClase == null
+                || !visitadas.add(nombreClase)) {
+            return null;
+        }
+
+        ClaseASTZ claseAST
+                = clasesAST.get(nombreClase);
+
+        if (claseAST == null) {
+            visitadas.remove(nombreClase);
+            return null;
+        }
+
+        ClaseMemoriaZ layout
+                = new ClaseMemoriaZ(nombreClase);
+
+        layout.setNombrePadre(
+                claseAST.getNombrePadre()
+        );
+
+        if (claseAST.tienePadre()) {
+            ClaseMemoriaZ padre
+                    = construirLayoutClase(
+                            claseAST.getNombrePadre(),
+                            visitadas
+                    );
+
+            if (padre != null) {
+                for (AtributoMemoriaZ atributo
+                        : padre.getAtributos().values()) {
+                    layout.registrarAtributo(
+                            atributo.getNombre(),
+                            atributo.getTipo(),
+                            atributo.getDimensiones()
+                    );
+                }
+            }
+        }
+
+        for (MiembroASTZ miembro : claseAST.getMiembros()) {
+            if (miembro instanceof AtributoASTZ atributo) {
+                layout.registrarAtributo(
+                        atributo.getNombre(),
+                        atributo.getTipo(),
+                        atributo.getDimensiones()
+                );
+            }
+        }
+
+        tablaMemoria.registrarClase(layout);
+        visitadas.remove(nombreClase);
+        return layout;
+    }
+
+    private String construirFirmaEnlaceMetodo(
+            String nombreClase,
+            String firmaMetodo) {
+
+        if (nombreClase == null
+                || nombreClase.isBlank()) {
+            return firmaMetodo;
+        }
+
+        return nombreClase + "." + firmaMetodo;
+    }
+
+    private String buscarClaseDeclaranteMetodo(
+            String nombreClase,
+            String firma) {
+
+        Set<String> visitadas = new HashSet<>();
+        String actual = nombreClase;
+
+        while (actual != null && visitadas.add(actual)) {
+            ClaseASTZ clase = clasesAST.get(actual);
+
+            if (clase == null) {
+                return null;
+            }
+
+            for (MiembroASTZ miembro : clase.getMiembros()) {
+                if (miembro instanceof MetodoASTZ metodo) {
+                    String firmaDecl = construirFirma(
+                            metodo.getNombre(),
+                            metodo.getParametros()
+                    );
+
+                    if (firmaDecl.equals(firma)) {
+                        return actual;
+                    }
+                }
+            }
+
+            actual = clase.getNombrePadre();
+        }
+
+        return null;
+    }
+
+    private boolean esSubclaseAST(
+            String posibleHija,
+            String posiblePadre) {
+
+        String actual = posibleHija;
+        Set<String> visitadas = new HashSet<>();
+
+        while (actual != null && visitadas.add(actual)) {
+            if (actual.equals(posiblePadre)) {
+                return true;
+            }
+
+            ClaseASTZ clase = clasesAST.get(actual);
+            actual = clase == null
+                    ? null
+                    : clase.getNombrePadre();
+        }
+
+        return false;
+    }
+
+    private void generarCallMetodoDinamico(
+            String punteroObjeto,
+            String tipoDeclarado,
+            String firmaMetodo,
+            String firmaEstatica) {
+
+        if (punteroObjeto == null
+                || tipoDeclarado == null
+                || firmaEstatica == null) {
+            agregar("CALL", firmaEstatica, null, null);
+            return;
+        }
+
+        List<ClaseASTZ> descendientes = new ArrayList<>();
+
+        for (ClaseASTZ candidata : clasesAST.values()) {
+            if (!candidata.getNombre().equals(tipoDeclarado)
+                    && esSubclaseAST(
+                            candidata.getNombre(),
+                            tipoDeclarado)) {
+                descendientes.add(candidata);
+            }
+        }
+
+        if (descendientes.isEmpty()) {
+            agregar("CALL", firmaEstatica, null, null);
+            return;
+        }
+
+        String direccionTipo = temporales.nuevoTemporal();
+        agregar("-", punteroObjeto, "1", direccionTipo);
+
+        String tipoReal = temporales.nuevoTemporal();
+        agregar("HEAP_GET", direccionTipo, null, tipoReal);
+
+        String etiquetaSalida = etiquetas.nuevaEtiqueta();
+
+        for (ClaseASTZ descendiente : descendientes) {
+            String declarante = buscarClaseDeclaranteMetodo(
+                    descendiente.getNombre(),
+                    firmaMetodo
+            );
+
+            if (declarante == null) {
+                continue;
+            }
+
+            String firmaDinamica
+                    = construirFirmaEnlaceMetodo(
+                            declarante,
+                            firmaMetodo
+                    );
+
+            if (firmaDinamica.equals(firmaEstatica)) {
+                continue;
+            }
+
+            String coincide = temporales.nuevoTemporal();
+            agregar(
+                    "==",
+                    tipoReal,
+                    identificadorClase(descendiente.getNombre()),
+                    coincide
+            );
+
+            String siguiente = etiquetas.nuevaEtiqueta();
+            agregar("IF_FALSE", coincide, null, siguiente);
+            agregar("CALL", firmaDinamica, null, null);
+            agregar("GOTO", null, null, etiquetaSalida);
+            agregar("LABEL", null, null, siguiente);
+        }
+
+        agregar("CALL", firmaEstatica, null, null);
+        agregar("LABEL", null, null, etiquetaSalida);
     }
 
     // =========================================================
@@ -309,13 +519,42 @@ public class GeneradorC3DZ {
                 constructor.getParametros()
         );
 
-        inicializarAtributosInstancia(
-                claseASTActual
-        );
+        BloqueASTZ cuerpo = constructor.getCuerpo();
+        List<SentenciaASTZ> sentencias = cuerpo == null
+                ? Collections.emptyList()
+                : cuerpo.getSentencias();
 
-        procesarSentencia(
-                constructor.getCuerpo()
-        );
+        LlamadaConstructorEspecialASTZ llamadaEspecial
+                = !sentencias.isEmpty()
+                && sentencias.get(0)
+                instanceof LlamadaConstructorEspecialASTZ llamada
+                        ? llamada
+                        : null;
+
+        if (llamadaEspecial != null) {
+            procesarLlamadaConstructorEspecial(llamadaEspecial);
+        } else if (claseASTActual != null
+                && claseASTActual.tienePadre()) {
+            procesarLlamadaConstructorEspecial(
+                    new LlamadaConstructorEspecialASTZ(
+                            LlamadaConstructorEspecialASTZ.Tipo.SUPER,
+                            Collections.emptyList(),
+                            constructor.getLinea(),
+                            constructor.getColumna()
+                    )
+            );
+        }
+
+        if (llamadaEspecial == null
+                || llamadaEspecial.getTipo()
+                != LlamadaConstructorEspecialASTZ.Tipo.THIS) {
+            inicializarAtributosInstancia(claseASTActual);
+        }
+
+        for (int i = llamadaEspecial == null ? 0 : 1;
+                i < sentencias.size(); i++) {
+            procesarSentencia(sentencias.get(i));
+        }
 
         agregar(
                 "FUNC_END",
@@ -326,6 +565,117 @@ public class GeneradorC3DZ {
 
         marcoActual
                 = marcoAnterior;
+    }
+
+    private void procesarLlamadaConstructorEspecial(
+            LlamadaConstructorEspecialASTZ llamada) {
+
+        if (llamada == null || claseASTActual == null) {
+            return;
+        }
+
+        String claseDestino;
+        if (llamada.getTipo() == LlamadaConstructorEspecialASTZ.Tipo.THIS) {
+            claseDestino = claseASTActual.getNombre();
+        } else {
+            claseDestino = claseASTActual.getNombrePadre();
+        }
+
+        if (claseDestino == null || claseDestino.isBlank()) {
+            return;
+        }
+
+        String firma = resolverFirmaConstructor(
+                claseDestino,
+                llamada.getArgumentos()
+        );
+
+        if (firma == null) {
+            return;
+        }
+
+        String receptor = leerThis();
+        List<String> valores = evaluarArgumentosLlamada(
+                llamada.getArgumentos()
+        );
+
+        int tamanoActual = marcoActual == null
+                ? 0
+                : marcoActual.getTamanoMarco();
+
+        String nuevaBase = temporales.nuevoTemporal();
+        agregar("+", "P", String.valueOf(tamanoActual), nuevaBase);
+
+        String direccionThis = temporales.nuevoTemporal();
+        agregar("+", nuevaBase, "1", direccionThis);
+        agregar("STACK_SET", receptor, null, direccionThis);
+
+        for (int i = 0; i < valores.size(); i++) {
+            String direccion = temporales.nuevoTemporal();
+            agregar("+", nuevaBase, String.valueOf(i + 2), direccion);
+            agregar("STACK_SET", valores.get(i), null, direccion);
+        }
+
+        agregar("+", "P", String.valueOf(tamanoActual), "P");
+        agregar("CALL", firma, null, null);
+        agregar("-", "P", String.valueOf(tamanoActual), "P");
+    }
+
+    private String resolverFirmaConstructor(
+            String nombreClase,
+            List<ExpresionASTZ> argumentos) {
+
+        String firmaInferida
+                = construirFirmaConstructorDesdeArgumentos(
+                        nombreClase,
+                        argumentos
+                );
+
+        if (tablaMemoria.buscar(firmaInferida) != null) {
+            return firmaInferida;
+        }
+
+        ClaseASTZ claseDestino
+                = clasesAST.get(nombreClase);
+
+        if (claseDestino == null) {
+            return null;
+        }
+
+        int cantidadArgumentos
+                = argumentos == null
+                        ? 0
+                        : argumentos.size();
+
+        String candidataUnica = null;
+
+        for (MiembroASTZ miembro
+                : claseDestino.getMiembros()) {
+
+            if (!(miembro instanceof ConstructorASTZ constructor)
+                    || constructor.getParametros().size()
+                    != cantidadArgumentos) {
+
+                continue;
+            }
+
+            String candidata
+                    = construirFirma(
+                            constructor.getNombre(),
+                            constructor.getParametros()
+                    );
+
+            if (candidataUnica == null) {
+                candidataUnica = candidata;
+            } else {
+                candidataUnica = "";
+            }
+        }
+
+        return candidataUnica != null
+                && !candidataUnica.isEmpty()
+                        ? candidataUnica
+                        : null;
     }
 
     // =========================================================
@@ -340,12 +690,20 @@ public class GeneradorC3DZ {
                         metodo.getParametros()
                 );
 
+        String firmaEnlace
+                = construirFirmaEnlaceMetodo(
+                        claseASTActual != null
+                                ? claseASTActual.getNombre()
+                                : null,
+                        firma
+                );
+
         MarcoMetodoZ marcoAnterior
                 = marcoActual;
 
         marcoActual
                 = tablaMemoria.buscar(
-                        firma
+                        firmaEnlace
                 );
 
         iniciarAmbitosMetodo();
@@ -354,7 +712,7 @@ public class GeneradorC3DZ {
 
             agregar(
                     "FUNC_BEGIN",
-                    firma,
+                    firmaEnlace,
                     metodo.getTipoRetorno(),
                     null
             );
@@ -369,7 +727,7 @@ public class GeneradorC3DZ {
 
             agregar(
                     "FUNC_END",
-                    firma,
+                    firmaEnlace,
                     null,
                     null
             );
@@ -1313,6 +1671,12 @@ public class GeneradorC3DZ {
                 String nombre
                         = acceso.getBase();
 
+                if ("this".equals(nombre) || "super".equals(nombre)) {
+                    return new ResultadoExpresion(
+                            leerThis()
+                    );
+                }
+
                 // =================================================
                 // VARIABLE LOCAL / PARAMETRO
                 // =================================================
@@ -2081,6 +2445,14 @@ public class GeneradorC3DZ {
         // =====================================================
         // 3. RESERVAR OBJETO EN HEAP
         // =====================================================
+        agregar(
+                "HEAP_SET",
+                identificadorClase(nombreClase),
+                null,
+                "H"
+        );
+        agregar("+", "H", "1", "H");
+
         String punteroObjeto
                 = temporales.nuevoTemporal();
 
@@ -2284,10 +2656,16 @@ public class GeneradorC3DZ {
             String tipoActual = null;
             int dimensionesActual = 0;
 
+            if ("this".equals(acceso.getBase()) && claseASTActual != null) {
+                tipoActual = claseASTActual.getNombre();
+            } else if ("super".equals(acceso.getBase()) && claseASTActual != null) {
+                tipoActual = claseASTActual.getNombrePadre();
+            }
+
             // =====================================================
             // 4.1 RESOLVER LA BASE
             // =====================================================
-            if (marcoActual != null) {
+            if (tipoActual == null && marcoActual != null) {
 
                 VariableMemoriaZ variable
                         = marcoActual.buscar(
@@ -2905,29 +3283,31 @@ public class GeneradorC3DZ {
             return null;
         }
 
-        ClaseASTZ claseBuscada
-                = clasesAST.get(nombreClase);
+        String actual = nombreClase;
+        Set<String> visitadas = new HashSet<>();
 
-        if (claseBuscada == null) {
-            return null;
-        }
-
-        for (MiembroASTZ miembro
-                : claseBuscada.getMiembros()) {
-
-            if (!(miembro instanceof MetodoASTZ metodo)) {
-                continue;
+        while (actual != null && visitadas.add(actual)) {
+            ClaseASTZ claseBuscada = clasesAST.get(actual);
+            if (claseBuscada == null) {
+                return null;
             }
 
-            String firmaMetodo
-                    = construirFirma(
-                            metodo.getNombre(),
-                            metodo.getParametros()
-                    );
+            for (MiembroASTZ miembro : claseBuscada.getMiembros()) {
+                if (!(miembro instanceof MetodoASTZ metodo)) {
+                    continue;
+                }
 
-            if (firma.equals(firmaMetodo)) {
-                return metodo;
+                String firmaMetodo = construirFirma(
+                        metodo.getNombre(),
+                        metodo.getParametros()
+                );
+
+                if (firma.equals(firmaMetodo)) {
+                    return metodo;
+                }
             }
+
+            actual = claseBuscada.getNombrePadre();
         }
 
         return null;
@@ -3003,9 +3383,22 @@ public class GeneradorC3DZ {
         // =====================================================
         // 2. BUSCAR FRAME DEL METODO
         // =====================================================
+        String tipoThis = claseASTActual != null
+                ? claseASTActual.getNombre()
+                : null;
+
+        String firmaEstatica
+                = construirFirmaEnlaceMetodo(
+                        buscarClaseDeclaranteMetodo(
+                                tipoThis,
+                                firma
+                        ),
+                        firma
+                );
+
         MarcoMetodoZ marcoDestino
                 = tablaMemoria.buscar(
-                        firma
+                        firmaEstatica
                 );
 
         if (marcoDestino == null) {
@@ -3128,11 +3521,11 @@ public class GeneradorC3DZ {
         // =====================================================
         // 11. CALL
         // =====================================================
-        agregar(
-                "CALL",
+        generarCallMetodoDinamico(
+                thisActual,
+                tipoThis,
                 firma,
-                null,
-                null
+                firmaEstatica
         );
 
         // =====================================================
@@ -3252,6 +3645,10 @@ public class GeneradorC3DZ {
         // =====================================================
         // 1. RESOLVER BASE
         // =====================================================
+        boolean baseEspecial
+                = "this".equals(nombreBase)
+                || "super".equals(nombreBase);
+
         VariableMemoriaZ variableBase
                 = marcoActual != null
                         ? marcoActual.buscar(nombreBase)
@@ -3260,9 +3657,21 @@ public class GeneradorC3DZ {
         AtributoMemoriaZ atributoBase = null;
 
         // =====================================================
-        // 1.1 VARIABLE LOCAL / PARAMETRO
+        // 1.1 BASE LOCAL / PARAMETRO / THIS / SUPER
         // =====================================================
-        if (variableBase != null) {
+        if (baseEspecial && claseASTActual != null) {
+
+            punteroActual = leerThis();
+            dimensionesActual = 0;
+            tipoActual = "super".equals(nombreBase)
+                    ? claseASTActual.getNombrePadre()
+                    : claseASTActual.getNombre();
+
+            if (tipoActual == null) {
+                return null;
+            }
+
+        } else if (variableBase != null) {
 
             punteroActual
                     = leerVariableStack(
@@ -3543,9 +3952,18 @@ public class GeneradorC3DZ {
         // =====================================================
         // 4. BUSCAR FRAME
         // =====================================================
+        String firmaEstatica
+                = construirFirmaEnlaceMetodo(
+                        buscarClaseDeclaranteMetodo(
+                                receptor.getTipo(),
+                                firma
+                        ),
+                        firma
+                );
+
         MarcoMetodoZ marcoDestino
                 = tablaMemoria.buscar(
-                        firma
+                        firmaEstatica
                 );
 
         if (marcoDestino == null) {
@@ -3663,12 +4081,16 @@ public class GeneradorC3DZ {
         // =====================================================
         // 12. CALL
         // =====================================================
-        agregar(
-                "CALL",
-                firma,
-                null,
-                null
-        );
+        if ("super".equals(acceso.getBase())) {
+            agregar("CALL", firmaEstatica, null, null);
+        } else {
+            generarCallMetodoDinamico(
+                    punteroReceptor,
+                    receptor.getTipo(),
+                    firma,
+                    firmaEstatica
+            );
+        }
 
         // =====================================================
         // 13. RECUPERAR RETORNO

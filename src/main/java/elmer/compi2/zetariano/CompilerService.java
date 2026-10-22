@@ -221,9 +221,10 @@ public class CompilerService {
                 } else if (imp.esZ()) {
                     TablaMemoriaZ tablaMemZ = cargadorZ.cargarTabla(archivoImport.toString());
                     adaptadorZ.importar(tablaMemZ, registroImports);
-                    ProgramaASTZ progZ = cargadorZ.getUltimoProgramaAST();
-                    if (progZ != null) {
-                        programasZ.add(progZ);
+                    for (ProgramaASTZ prog : cargadorZ.getTodosLosProgramasAST()) {
+                        if (!programasZ.contains(prog)) {
+                            programasZ.add(prog);
+                        }
                     }
                     log.append("Import Z cargado: ").append(rutaRelativa).append("\n");
                 }
