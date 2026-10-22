@@ -80,7 +80,12 @@ sentencia
 
 declaracionVariable
     : ESTO IDENTIFICADOR DOS_PUNTOS
-      (tipo inicializacionVariable? | creacionObjeto)
+      (
+          tipo inicializacionVariable?
+        | creacionObjeto
+        | creacionObjeto DOS_PUNTOS tipo
+        | NULL DOS_PUNTOS tipo
+      )
       PUNTO_COMA
     ;
 
@@ -380,4 +385,5 @@ literal
     | CARACTER
     | VERUM
     | FALSUS
+    | NULL
     ;

@@ -305,6 +305,14 @@ DIFERENTE
     : '!='
     ;
 
+MENOR_IGUAL
+    : '<='
+    ;
+
+MAYOR_IGUAL
+    : '>='
+    ;
+
 MENOR
     : '<'
     ;

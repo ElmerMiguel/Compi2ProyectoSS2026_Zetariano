@@ -477,6 +477,10 @@ expresionRelacional
     MENOR
     |
     MAYOR
+    |
+    MENOR_IGUAL
+    |
+    MAYOR_IGUAL
     )
     expresionAditiva
     )*

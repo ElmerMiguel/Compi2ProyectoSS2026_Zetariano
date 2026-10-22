@@ -952,7 +952,7 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         // 1. RESOLVER OBJETO BASE
         // =========================================================
         String nombreBase
-                = ctx.IDENTIFICADOR(0).getText();
+                = ctx.baseAcceso().getText();
 
         VariableZ base
                 = buscarVariable(nombreBase);
@@ -1125,9 +1125,7 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         // 4. METODO FINAL
         // =========================================================
         String nombreMetodo
-                = ctx.IDENTIFICADOR(
-                        ctx.IDENTIFICADOR().size() - 1
-                ).getText();
+                = ctx.IDENTIFICADOR().getText();
 
         // =========================================================
         // 5. ARGUMENTOS
@@ -2277,7 +2275,7 @@ public class ZAnalyzer extends ZParserBaseVisitor<Void> {
         }
 
         String nombreBase
-                = ctx.IDENTIFICADOR().getText();
+                = ctx.baseAcceso().getText();
 
         VariableZ base
                 = buscarVariable(nombreBase);

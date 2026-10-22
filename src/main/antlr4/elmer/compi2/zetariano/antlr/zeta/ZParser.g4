@@ -20,9 +20,14 @@ programa
 
 definicionClase
     : PUBLIC CLASS IDENTIFICADOR
+      herencia?
       LLAVE_IZQ
       miembroClase*
       LLAVE_DER
+    ;
+
+herencia
+    : EXTENDS IDENTIFICADOR
     ;
 
 miembroClase
@@ -36,7 +41,8 @@ miembroClase
 // ============================================================
 
 atributo
-    : tipo dimensionesParametro*
+    : modificadorAcceso?
+      tipo dimensionesParametro*
       IDENTIFICADOR dimensiones*
       (ASIGNACION inicializador)?
       PUNTO_COMA
@@ -47,7 +53,7 @@ atributo
 // ============================================================
 
 constructor
-    : PUBLIC IDENTIFICADOR
+    : modificadorAcceso? IDENTIFICADOR
       PAREN_IZQ
       listaParametros?
       PAREN_DER
@@ -70,11 +76,19 @@ declaracionVariable
 // ============================================================
 
 metodo
-    : PUBLIC tipoRetorno IDENTIFICADOR
+    : OVERRIDE?
+      modificadorAcceso?
+      tipoRetorno IDENTIFICADOR
       PAREN_IZQ
       listaParametros?
       PAREN_DER
       bloque
+    ;
+
+modificadorAcceso
+    : PUBLIC
+    | PRIVATE
+    | PROTECTED
     ;
 
 tipoRetorno
@@ -142,6 +156,7 @@ sentencia
     | sentenciaDoWhile
     | BREAK PUNTO_COMA
     | CONTINUE PUNTO_COMA
+    | llamadaConstructorEspecial PUNTO_COMA
     | llamadaMetodo PUNTO_COMA
     | llamadaMetodoObjeto PUNTO_COMA
     | impresion PUNTO_COMA
@@ -392,7 +407,13 @@ dimensionCreacion
 // ============================================================
 
 acceso
-    : IDENTIFICADOR sufijoAcceso*
+    : baseAcceso sufijoAcceso*
+    ;
+
+baseAcceso
+    : IDENTIFICADOR
+    | THIS
+    | SUPER
     ;
 
 sufijoAcceso
@@ -425,9 +446,16 @@ listaArgumentos
 // ============================================================
 
 llamadaMetodoObjeto
-    : IDENTIFICADOR
+    : baseAcceso
       sufijoObjeto*
       PUNTO IDENTIFICADOR
+      PAREN_IZQ
+      listaArgumentos?
+      PAREN_DER
+    ;
+
+llamadaConstructorEspecial
+    : (THIS | SUPER)
       PAREN_IZQ
       listaArgumentos?
       PAREN_DER

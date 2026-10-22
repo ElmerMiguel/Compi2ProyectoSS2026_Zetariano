@@ -7,7 +7,13 @@ lexer grammar ZLexer;
 // ============================================================
 
 PUBLIC      : 'public';
+PRIVATE     : 'private';
+PROTECTED   : 'protected';
 CLASS       : 'class';
+EXTENDS     : 'extends';
+THIS        : 'this';
+SUPER       : 'super';
+OVERRIDE    : '@Override';
 
 VOID        : 'void';
 RETURN      : 'return';

@@ -837,7 +837,7 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
             ZParser.AccesoContext ctx) {
 
         String base
-                = ctx.IDENTIFICADOR().getText();
+                = ctx.baseAcceso().getText();
 
         AccesoASTZ acceso
                 = new AccesoASTZ(
@@ -1042,7 +1042,7 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
             ZParser.LlamadaMetodoObjetoContext ctx) {
 
         String base
-                = ctx.IDENTIFICADOR(0).getText();
+                = ctx.baseAcceso().getText();
 
         AccesoASTZ acceso
                 = new AccesoASTZ(
@@ -1074,9 +1074,7 @@ public class ZTreeBuilder extends ZParserBaseVisitor<NodoASTZ> {
         }
 
         String nombreMetodo
-                = ctx.IDENTIFICADOR(
-                        ctx.IDENTIFICADOR().size() - 1
-                ).getText();
+                = ctx.IDENTIFICADOR().getText();
 
         List<ExpresionASTZ> argumentos
                 = construirArgumentos(
