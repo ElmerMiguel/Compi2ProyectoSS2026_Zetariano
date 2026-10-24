@@ -20,8 +20,8 @@ void saludar();
 void saludarA();
 void sumar();
 void Hola_();
-void decir_();
-void doble_int();
+void Hola_decir_();
+void Hola_doble_int();
 void main_pig();
 
 void saludar() {
@@ -204,7 +204,7 @@ void Hola_() {
     Heap[(int)t4] = t1;
 }
 
-void decir_() {
+void Hola_decir_() {
     double t5, t6, t7, t8;
     t5 = P + 1;
     t6 = Stack[(int)t5];
@@ -220,7 +220,7 @@ void decir_() {
     }
 }
 
-void doble_int() {
+void Hola_doble_int() {
     double t9, t10, t11, t12;
     t9 = P + 2;
     t10 = Stack[(int)t9];
@@ -232,14 +232,16 @@ void doble_int() {
 
 void main_pig() {
     double t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, t21, t22, t23, t24, t25, t26, t27, t28, t29, t30, t31, t32, t33, t34;
-    t1 = H;
+    t1 = P + 0;
+    Heap[(int)H] = 2255068;
+    H = H + 1;
+    t2 = H;
     Heap[(int)H] = 0;
     H = H + 1;
-    t2 = P + 0;
-    Stack[(int)t2] = t1;
+    Stack[(int)t1] = t2;
     t3 = P + 3;
     t4 = t3 + 1;
-    Stack[(int)t4] = t1;
+    Stack[(int)t4] = t2;
     P = P + 3;
     Hola_();
     P = P - 3;
@@ -343,7 +345,7 @@ void main_pig() {
     t18 = t17 + 1;
     Stack[(int)t18] = t16;
     P = P + 3;
-    decir_();
+    Hola_decir_();
     P = P - 3;
     t19 = H;
     Heap[(int)H] = 50;
@@ -440,7 +442,7 @@ void main_pig() {
     t32 = t30 + 2;
     Stack[(int)t32] = 21;
     P = P + 3;
-    doble_int();
+    Hola_doble_int();
     t33 = P + 0;
     t34 = Stack[(int)t33];
     P = P - 3;

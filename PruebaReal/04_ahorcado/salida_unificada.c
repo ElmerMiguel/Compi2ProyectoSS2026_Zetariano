@@ -24,23 +24,23 @@ void porcentajeVictorias();
 void titulo();
 void mostrarMarcador();
 void Palabra_int_String();
-void agregarLetra_char();
-void contiene_char();
-void revelar_char();
-void estaCompleta_();
-void revelarTodo_();
-void imprimirProgreso_();
+void Palabra_agregarLetra_char();
+void Palabra_contiene_char();
+void Palabra_revelar_char();
+void Palabra_estaCompleta_();
+void Palabra_revelarTodo_();
+void Palabra_imprimirProgreso_();
 void Diccionario_();
-void obtener_int();
+void Diccionario_obtener_int();
 void Ahorcado_Palabra_int();
-void yaUsada_char();
-void intentar_char();
-void gano_();
-void perdio_();
-void terminoJuego_();
-void intentosRestantes_();
-void dibujar_();
-void mostrarEstado_();
+void Ahorcado_yaUsada_char();
+void Ahorcado_intentar_char();
+void Ahorcado_gano_();
+void Ahorcado_perdio_();
+void Ahorcado_terminoJuego_();
+void Ahorcado_intentosRestantes_();
+void Ahorcado_dibujar_();
+void Ahorcado_mostrarEstado_();
 void main_pig();
 
 void validarLetra() {
@@ -1079,7 +1079,7 @@ void Palabra_int_String() {
     Heap[(int)t29] = t26;
 }
 
-void agregarLetra_char() {
+void Palabra_agregarLetra_char() {
     double t30, t31, t32, t33, t34, t35, t36, t37, t38, t39, t40, t41, t42, t43, t44, t45, t46, t47, t48, t49, t50, t51, t52, t53, t54, t55, t56, t57, t58, t59, t60, t61, t62, t63, t64, t65;
     t30 = P + 1;
     t31 = Stack[(int)t30];
@@ -1128,7 +1128,7 @@ L1:
     ;
 }
 
-void contiene_char() {
+void Palabra_contiene_char() {
     double t66, t67, t68, t69, t70, t71, t72, t73, t74, t75, t76, t77, t78, t79, t80, t81, t82, t83, t84, t85, t86, t87, t88, t89, t90, t91;
     t66 = P + 3;
     Stack[(int)t66] = 0;
@@ -1178,7 +1178,7 @@ L5:
     return;
 }
 
-void revelar_char() {
+void Palabra_revelar_char() {
     double t92, t93, t94, t95, t96, t97, t98, t99, t100, t101, t102, t103, t104, t105, t106, t107, t108, t109, t110, t111, t112, t114, t115, t116, t117, t118, t119, t120, t121, t122, t123, t113, t124, t125, t126, t127, t128, t129, t130, t131, t132, t133, t134, t135, t136, t137, t138, t139, t140, t141, t142;
     t92 = P + 3;
     Stack[(int)t92] = 0;
@@ -1261,7 +1261,7 @@ L10:
     return;
 }
 
-void estaCompleta_() {
+void Palabra_estaCompleta_() {
     double t143, t144, t145, t146, t147, t148, t149, t150, t151, t152, t153, t154, t155, t156, t157, t158, t159, t160, t161, t162, t163, t164, t165, t166;
     t143 = P + 2;
     Stack[(int)t143] = 0;
@@ -1309,7 +1309,7 @@ L17:
     return;
 }
 
-void revelarTodo_() {
+void Palabra_revelarTodo_() {
     double t167, t168, t169, t170, t171, t172, t173, t174, t175, t176, t177, t178, t179, t180, t181, t182, t183, t184, t185, t186;
     t167 = P + 2;
     Stack[(int)t167] = 0;
@@ -1342,7 +1342,7 @@ L21:
     ;
 }
 
-void imprimirProgreso_() {
+void Palabra_imprimirProgreso_() {
     double t187, t188, t189, t190, t191, t192, t193, t194, t195, t196, t197, t198, t199, t200, t201, t202, t203, t204, t205, t206, t207, t208, t209, t210, t211, t212, t213, t214, t215, t216, t217, t218, t219, t220, t221, t222, t223, t224, t225, t226, t227, t228, t229, t230, t231, t232, t233, t234, t235, t236, t237, t238, t239, t240, t241, t242, t243, t244, t245, t246, t247, t248, t249, t250;
     t187 = H;
     Heap[(int)H] = -1;
@@ -1523,7 +1523,7 @@ void Diccionario_() {
     Heap[(int)t253] = 5;
 }
 
-void obtener_int() {
+void Diccionario_obtener_int() {
     double t254, t255, t256, t257, t258, t259, t260, t261, t262, t263, t264, t265, t266, t267, t268, t269, t270, t271, t272, t273, t274, t275, t276, t277, t278, t279, t280, t281, t282, t283, t284, t285, t286, t287, t288, t289, t290, t291, t292, t293, t294, t295, t296, t297, t298, t299, t300, t301, t302, t303, t304, t305, t306, t307, t308, t309, t310, t311, t312, t313, t314, t315, t316, t317, t318, t319, t320, t321, t322, t323, t324, t325, t326, t327, t328, t329, t330, t331, t332, t333, t334, t335, t336, t337, t338, t339, t340, t341, t342, t343, t344, t345, t346, t347, t348, t349, t350, t351, t352, t353, t354, t355, t356, t357, t358, t359, t360, t361, t362, t363, t364, t365, t366, t367, t368, t369, t370, t371, t372, t373, t374, t375, t376, t377, t378, t379, t380, t381, t382, t383, t384, t385, t386, t387, t388, t389, t390, t391, t392, t393, t394, t395, t396, t397, t398, t399, t400, t401, t402, t403, t404, t405, t406, t407, t408, t409, t410, t411, t412, t413, t414, t415, t416, t417, t418, t419, t420, t421, t422, t423, t424, t425, t426, t427, t428, t429, t430, t431, t432, t433, t434, t435, t436, t437, t438, t439, t440, t441, t442, t443, t444, t445, t446, t447, t448, t449, t450, t451, t452, t453, t454, t455, t456, t457, t458, t459, t460, t461, t462, t463, t464, t465, t466, t467, t468, t469, t470, t471, t472, t473, t474, t475, t476, t477, t478, t479, t480, t481, t482, t483, t484, t485, t486, t487, t488, t489, t490, t491, t492, t493, t494, t495, t496, t497, t498;
     t254 = P + 3;
     Stack[(int)t254] = 0;
@@ -1624,6 +1624,8 @@ L39:
     H = H + 1;
     Heap[(int)H] = -1;
     H = H + 1;
+    Heap[(int)H] = 865605899;
+    H = H + 1;
     t263 = H;
     H = H + 5;
     t264 = P + 4;
@@ -1646,7 +1648,7 @@ L39:
     t273 = t271 + 2;
     Stack[(int)t273] = 112;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t274 = P + 3;
     t275 = Stack[(int)t274];
@@ -1656,7 +1658,7 @@ L39:
     t278 = t276 + 2;
     Stack[(int)t278] = 121;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t279 = P + 3;
     t280 = Stack[(int)t279];
@@ -1666,7 +1668,7 @@ L39:
     t283 = t281 + 2;
     Stack[(int)t283] = 116;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t284 = P + 3;
     t285 = Stack[(int)t284];
@@ -1676,7 +1678,7 @@ L39:
     t288 = t286 + 2;
     Stack[(int)t288] = 104;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t289 = P + 3;
     t290 = Stack[(int)t289];
@@ -1686,7 +1688,7 @@ L39:
     t293 = t291 + 2;
     Stack[(int)t293] = 111;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t294 = P + 3;
     t295 = Stack[(int)t294];
@@ -1696,7 +1698,7 @@ L39:
     t298 = t296 + 2;
     Stack[(int)t298] = 110;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     goto L45;
 L40:
@@ -1778,6 +1780,8 @@ L40:
     H = H + 1;
     Heap[(int)H] = -1;
     H = H + 1;
+    Heap[(int)H] = 865605899;
+    H = H + 1;
     t300 = H;
     H = H + 5;
     t301 = P + 4;
@@ -1800,7 +1804,7 @@ L40:
     t310 = t308 + 2;
     Stack[(int)t310] = 99;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t311 = P + 3;
     t312 = Stack[(int)t311];
@@ -1810,7 +1814,7 @@ L40:
     t315 = t313 + 2;
     Stack[(int)t315] = 111;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t316 = P + 3;
     t317 = Stack[(int)t316];
@@ -1820,7 +1824,7 @@ L40:
     t320 = t318 + 2;
     Stack[(int)t320] = 109;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t321 = P + 3;
     t322 = Stack[(int)t321];
@@ -1830,7 +1834,7 @@ L40:
     t325 = t323 + 2;
     Stack[(int)t325] = 112;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t326 = P + 3;
     t327 = Stack[(int)t326];
@@ -1840,7 +1844,7 @@ L40:
     t330 = t328 + 2;
     Stack[(int)t330] = 105;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t331 = P + 3;
     t332 = Stack[(int)t331];
@@ -1850,7 +1854,7 @@ L40:
     t335 = t333 + 2;
     Stack[(int)t335] = 108;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t336 = P + 3;
     t337 = Stack[(int)t336];
@@ -1860,7 +1864,7 @@ L40:
     t340 = t338 + 2;
     Stack[(int)t340] = 97;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t341 = P + 3;
     t342 = Stack[(int)t341];
@@ -1870,7 +1874,7 @@ L40:
     t345 = t343 + 2;
     Stack[(int)t345] = 100;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t346 = P + 3;
     t347 = Stack[(int)t346];
@@ -1880,7 +1884,7 @@ L40:
     t350 = t348 + 2;
     Stack[(int)t350] = 111;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t351 = P + 3;
     t352 = Stack[(int)t351];
@@ -1890,7 +1894,7 @@ L40:
     t355 = t353 + 2;
     Stack[(int)t355] = 114;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     goto L45;
 L41:
@@ -1954,6 +1958,8 @@ L41:
     H = H + 1;
     Heap[(int)H] = -1;
     H = H + 1;
+    Heap[(int)H] = 865605899;
+    H = H + 1;
     t357 = H;
     H = H + 5;
     t358 = P + 4;
@@ -1976,7 +1982,7 @@ L41:
     t367 = t365 + 2;
     Stack[(int)t367] = 99;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t368 = P + 3;
     t369 = Stack[(int)t368];
@@ -1986,7 +1992,7 @@ L41:
     t372 = t370 + 2;
     Stack[(int)t372] = 101;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t373 = P + 3;
     t374 = Stack[(int)t373];
@@ -1996,7 +2002,7 @@ L41:
     t377 = t375 + 2;
     Stack[(int)t377] = 114;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t378 = P + 3;
     t379 = Stack[(int)t378];
@@ -2006,7 +2012,7 @@ L41:
     t382 = t380 + 2;
     Stack[(int)t382] = 100;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t383 = P + 3;
     t384 = Stack[(int)t383];
@@ -2016,7 +2022,7 @@ L41:
     t387 = t385 + 2;
     Stack[(int)t387] = 111;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     goto L45;
 L42:
@@ -2062,6 +2068,8 @@ L42:
     H = H + 1;
     Heap[(int)H] = -1;
     H = H + 1;
+    Heap[(int)H] = 865605899;
+    H = H + 1;
     t389 = H;
     H = H + 5;
     t390 = P + 4;
@@ -2084,7 +2092,7 @@ L42:
     t399 = t397 + 2;
     Stack[(int)t399] = 122;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t400 = P + 3;
     t401 = Stack[(int)t400];
@@ -2094,7 +2102,7 @@ L42:
     t404 = t402 + 2;
     Stack[(int)t404] = 101;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t405 = P + 3;
     t406 = Stack[(int)t405];
@@ -2104,7 +2112,7 @@ L42:
     t409 = t407 + 2;
     Stack[(int)t409] = 116;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t410 = P + 3;
     t411 = Stack[(int)t410];
@@ -2114,7 +2122,7 @@ L42:
     t414 = t412 + 2;
     Stack[(int)t414] = 97;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t415 = P + 3;
     t416 = Stack[(int)t415];
@@ -2124,7 +2132,7 @@ L42:
     t419 = t417 + 2;
     Stack[(int)t419] = 114;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t420 = P + 3;
     t421 = Stack[(int)t420];
@@ -2134,7 +2142,7 @@ L42:
     t424 = t422 + 2;
     Stack[(int)t424] = 105;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t425 = P + 3;
     t426 = Stack[(int)t425];
@@ -2144,7 +2152,7 @@ L42:
     t429 = t427 + 2;
     Stack[(int)t429] = 97;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t430 = P + 3;
     t431 = Stack[(int)t430];
@@ -2154,7 +2162,7 @@ L42:
     t434 = t432 + 2;
     Stack[(int)t434] = 110;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t435 = P + 3;
     t436 = Stack[(int)t435];
@@ -2164,7 +2172,7 @@ L42:
     t439 = t437 + 2;
     Stack[(int)t439] = 111;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     goto L45;
 L43:
@@ -2228,6 +2236,8 @@ L43:
     H = H + 1;
     Heap[(int)H] = -1;
     H = H + 1;
+    Heap[(int)H] = 865605899;
+    H = H + 1;
     t441 = H;
     H = H + 5;
     t442 = P + 4;
@@ -2250,7 +2260,7 @@ L43:
     t451 = t449 + 2;
     Stack[(int)t451] = 98;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t452 = P + 3;
     t453 = Stack[(int)t452];
@@ -2260,7 +2270,7 @@ L43:
     t456 = t454 + 2;
     Stack[(int)t456] = 121;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t457 = P + 3;
     t458 = Stack[(int)t457];
@@ -2270,7 +2280,7 @@ L43:
     t461 = t459 + 2;
     Stack[(int)t461] = 116;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t462 = P + 3;
     t463 = Stack[(int)t462];
@@ -2280,7 +2290,7 @@ L43:
     t466 = t464 + 2;
     Stack[(int)t466] = 101;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t467 = P + 3;
     t468 = Stack[(int)t467];
@@ -2290,7 +2300,7 @@ L43:
     t471 = t469 + 2;
     Stack[(int)t471] = 99;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t472 = P + 3;
     t473 = Stack[(int)t472];
@@ -2300,7 +2310,7 @@ L43:
     t476 = t474 + 2;
     Stack[(int)t476] = 111;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t477 = P + 3;
     t478 = Stack[(int)t477];
@@ -2310,7 +2320,7 @@ L43:
     t481 = t479 + 2;
     Stack[(int)t481] = 100;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     t482 = P + 3;
     t483 = Stack[(int)t482];
@@ -2320,7 +2330,7 @@ L43:
     t486 = t484 + 2;
     Stack[(int)t486] = 101;
     P = P + 4;
-    agregarLetra_char();
+    Palabra_agregarLetra_char();
     P = P - 4;
     goto L45;
 L44:
@@ -2428,7 +2438,7 @@ L44:
     t492 = t490 + 2;
     Stack[(int)t492] = 0;
     P = P + 4;
-    obtener_int();
+    Diccionario_obtener_int();
     t493 = P + 0;
     t494 = Stack[(int)t493];
     P = P - 4;
@@ -2478,7 +2488,7 @@ void Ahorcado_Palabra_int() {
     Heap[(int)t520] = 0;
 }
 
-void yaUsada_char() {
+void Ahorcado_yaUsada_char() {
     double t521, t522, t523, t524, t525, t526, t527, t528, t529, t530, t531, t532, t533, t534, t535, t536, t537, t538, t539, t540, t541, t542, t543, t544, t545, t546;
     t521 = P + 3;
     Stack[(int)t521] = 0;
@@ -2528,7 +2538,7 @@ L53:
     return;
 }
 
-void intentar_char() {
+void Ahorcado_intentar_char() {
     double t547, t548, t549, t550, t551, t552, t553, t554, t555, t556, t557, t558, t559, t560, t561, t562, t563, t564, t565, t566, t567, t568, t569, t570, t571, t572, t573, t574, t575, t576, t577, t578, t579, t580, t581, t582, t583, t584, t585, t586, t587, t588, t589, t590, t591, t592, t593, t594, t595, t596, t597, t598, t599, t600, t601, t602, t603, t604, t605, t606, t607;
     t547 = P + 1;
     t548 = Stack[(int)t547];
@@ -2540,7 +2550,7 @@ void intentar_char() {
     t553 = t551 + 2;
     Stack[(int)t553] = t550;
     P = P + 3;
-    yaUsada_char();
+    Ahorcado_yaUsada_char();
     t554 = P + 0;
     t555 = Stack[(int)t554];
     P = P - 3;
@@ -2595,7 +2605,7 @@ L58:
     t587 = t585 + 2;
     Stack[(int)t587] = t584;
     P = P + 3;
-    contiene_char();
+    Palabra_contiene_char();
     t588 = P + 0;
     t589 = Stack[(int)t588];
     P = P - 3;
@@ -2612,7 +2622,7 @@ L58:
     t598 = t596 + 2;
     Stack[(int)t598] = t595;
     P = P + 3;
-    revelar_char();
+    Palabra_revelar_char();
     t599 = P + 0;
     t600 = Stack[(int)t599];
     P = P - 3;
@@ -2635,7 +2645,7 @@ L60:
     return;
 }
 
-void gano_() {
+void Ahorcado_gano_() {
     double t608, t609, t610, t611, t612, t613, t614, t615, t616;
     t608 = P + 1;
     t609 = Stack[(int)t608];
@@ -2645,7 +2655,7 @@ void gano_() {
     t613 = t612 + 1;
     Stack[(int)t613] = t611;
     P = P + 2;
-    estaCompleta_();
+    Palabra_estaCompleta_();
     t614 = P + 0;
     t615 = Stack[(int)t614];
     P = P - 2;
@@ -2654,7 +2664,7 @@ void gano_() {
     return;
 }
 
-void perdio_() {
+void Ahorcado_perdio_() {
     double t617, t618, t619, t620, t621, t622, t623, t624, t625, t626;
     t617 = P + 1;
     t618 = Stack[(int)t617];
@@ -2670,7 +2680,7 @@ void perdio_() {
     return;
 }
 
-void terminoJuego_() {
+void Ahorcado_terminoJuego_() {
     double t627, t628, t629, t630, t631, t632, t633, t634, t635, t636, t637, t638, t639, t640;
     t627 = P + 1;
     t628 = Stack[(int)t627];
@@ -2678,7 +2688,7 @@ void terminoJuego_() {
     t630 = t629 + 1;
     Stack[(int)t630] = t628;
     P = P + 2;
-    gano_();
+    Ahorcado_gano_();
     t631 = P + 0;
     t632 = Stack[(int)t631];
     P = P - 2;
@@ -2693,7 +2703,7 @@ L62:
     t637 = t636 + 1;
     Stack[(int)t637] = t635;
     P = P + 2;
-    perdio_();
+    Ahorcado_perdio_();
     t638 = P + 0;
     t639 = Stack[(int)t638];
     P = P - 2;
@@ -2705,7 +2715,7 @@ L63:
     return;
 }
 
-void intentosRestantes_() {
+void Ahorcado_intentosRestantes_() {
     double t641, t642, t643, t644, t645, t646, t647, t648, t649, t650;
     t641 = P + 1;
     t642 = Stack[(int)t641];
@@ -2721,7 +2731,7 @@ void intentosRestantes_() {
     return;
 }
 
-void dibujar_() {
+void Ahorcado_dibujar_() {
     double t651, t652, t653, t654, t655, t656, t657, t658, t659, t660, t661, t662, t663, t664, t665, t666, t667, t668, t669, t670, t671, t672, t673, t674, t675, t676, t677, t678, t679, t680, t681, t682, t683, t684, t685, t686, t687, t688, t689, t690, t691, t692, t693, t694, t695, t696, t697, t698, t699, t700, t701, t702, t703, t704, t705, t706, t707, t708;
     t651 = H;
     Heap[(int)H] = 32;
@@ -3090,7 +3100,7 @@ L70:
     }
 }
 
-void mostrarEstado_() {
+void Ahorcado_mostrarEstado_() {
     double t709, t710, t711, t712, t713, t714, t715, t716, t717, t718, t719, t720, t721, t722, t723, t724, t725, t726, t727, t728, t729, t730, t731, t732, t733, t734, t735, t736, t737, t738, t739, t740, t741, t742, t743, t744, t745, t746, t747, t748, t749, t750, t751, t752, t753, t754, t755, t756, t757, t758, t759, t760, t761, t762, t763, t764, t765, t766, t767, t768, t769, t770, t771, t772, t773, t774, t775, t776, t777, t778, t779, t780, t781, t782, t783, t784, t785, t786, t787, t788, t789, t790, t791, t792, t793, t794, t795, t796, t797, t798, t799, t800, t801;
     t709 = H;
     Heap[(int)H] = 69;
@@ -3311,7 +3321,7 @@ L88:
     t753 = t752 + 1;
     Stack[(int)t753] = t751;
     P = P + 3;
-    intentosRestantes_();
+    Ahorcado_intentosRestantes_();
     t754 = P + 0;
     t755 = Stack[(int)t754];
     P = P - 3;
@@ -3497,7 +3507,7 @@ L95:
     t801 = t800 + 1;
     Stack[(int)t801] = t799;
     P = P + 3;
-    imprimirProgreso_();
+    Palabra_imprimirProgreso_();
     P = P - 3;
 }
 
@@ -3536,18 +3546,23 @@ void main_pig() {
     Stack[(int)t8] = 0;
     t9 = P + 7;
     Stack[(int)t9] = 0;
-    t10 = H;
+    t10 = P + 8;
+    Heap[(int)H] = 3078507962;
+    H = H + 1;
+    t11 = H;
     Heap[(int)H] = 0;
     H = H + 1;
-    t11 = P + 8;
-    Stack[(int)t11] = t10;
+    Stack[(int)t10] = t11;
     t12 = P + 13;
     t13 = t12 + 1;
-    Stack[(int)t13] = t10;
+    Stack[(int)t13] = t11;
     P = P + 13;
     Diccionario_();
     P = P - 13;
-    t14 = H;
+    t14 = P + 9;
+    Heap[(int)H] = 2710787283;
+    H = H + 1;
+    t15 = H;
     Heap[(int)H] = 0;
     H = H + 1;
     Heap[(int)H] = 0;
@@ -3558,8 +3573,7 @@ void main_pig() {
     H = H + 1;
     Heap[(int)H] = 0;
     H = H + 1;
-    t15 = P + 9;
-    Stack[(int)t15] = t14;
+    Stack[(int)t14] = t15;
     t16 = P + 8;
     t17 = Stack[(int)t16];
     t18 = P + 8;
@@ -3570,13 +3584,13 @@ void main_pig() {
     t22 = t20 + 2;
     Stack[(int)t22] = 0;
     P = P + 13;
-    obtener_int();
+    Diccionario_obtener_int();
     t23 = P + 0;
     t24 = Stack[(int)t23];
     P = P - 13;
     t25 = P + 13;
     t26 = t25 + 1;
-    Stack[(int)t26] = t14;
+    Stack[(int)t26] = t15;
     t27 = t25 + 2;
     Stack[(int)t27] = t24;
     t28 = t25 + 3;
@@ -3612,7 +3626,8 @@ void main_pig() {
     Heap[(int)t35] = 0;
     t36 = P + 10;
     Stack[(int)t36] = t29;
-    t37 = H;
+    t37 = P + 11;
+    t38 = H;
     Heap[(int)H] = 0;
     H = H + 1;
     Heap[(int)H] = 0;
@@ -3625,21 +3640,20 @@ void main_pig() {
     H = H + 1;
     Heap[(int)H] = 0;
     H = H + 1;
-    t38 = P + 11;
-    Stack[(int)t38] = t37;
-    t39 = t37 + 0;
+    Stack[(int)t37] = t38;
+    t39 = t38 + 0;
     Heap[(int)t39] = 0;
-    t40 = t37 + 1;
+    t40 = t38 + 1;
     Heap[(int)t40] = 0;
-    t41 = t37 + 2;
+    t41 = t38 + 2;
     Heap[(int)t41] = 0;
-    t42 = t37 + 3;
+    t42 = t38 + 3;
     Heap[(int)t42] = 0;
-    t43 = t37 + 4;
+    t43 = t38 + 4;
     Heap[(int)t43] = 0;
     t44 = P + 10;
     t45 = Stack[(int)t44];
-    t46 = t37 + 5;
+    t46 = t38 + 5;
     Heap[(int)t46] = t45;
     t47 = H;
     Heap[(int)H] = 61;
@@ -4022,10 +4036,12 @@ L1:
     t64 = t62 + 2;
     Stack[(int)t64] = t61;
     P = P + 13;
-    obtener_int();
+    Diccionario_obtener_int();
     t65 = P + 0;
     t66 = Stack[(int)t65];
     P = P - 13;
+    Heap[(int)H] = 2710787283;
+    H = H + 1;
     t67 = H;
     Heap[(int)H] = 0;
     H = H + 1;
@@ -4098,7 +4114,7 @@ L4:
     t85 = t84 + 1;
     Stack[(int)t85] = t83;
     P = P + 13;
-    terminoJuego_();
+    Ahorcado_terminoJuego_();
     t86 = P + 0;
     t87 = Stack[(int)t86];
     P = P - 13;
@@ -4112,7 +4128,7 @@ L4:
     t94 = t93 + 1;
     Stack[(int)t94] = t92;
     P = P + 13;
-    dibujar_();
+    Ahorcado_dibujar_();
     P = P - 13;
     t95 = P + 9;
     t96 = Stack[(int)t95];
@@ -4122,7 +4138,7 @@ L4:
     t100 = t99 + 1;
     Stack[(int)t100] = t98;
     P = P + 13;
-    mostrarEstado_();
+    Ahorcado_mostrarEstado_();
     P = P - 13;
     t101 = H;
     Heap[(int)H] = 73;
@@ -4343,7 +4359,7 @@ L6:
     t120 = t118 + 2;
     Stack[(int)t120] = t117;
     P = P + 13;
-    intentar_char();
+    Ahorcado_intentar_char();
     t121 = P + 0;
     t122 = Stack[(int)t121];
     P = P - 13;
@@ -4604,7 +4620,7 @@ L5:
     t147 = t146 + 1;
     Stack[(int)t147] = t145;
     P = P + 13;
-    gano_();
+    Ahorcado_gano_();
     t148 = P + 0;
     t149 = Stack[(int)t148];
     P = P - 13;
@@ -4770,7 +4786,7 @@ L13:
     t176 = t175 + 1;
     Stack[(int)t176] = t174;
     P = P + 13;
-    dibujar_();
+    Ahorcado_dibujar_();
     P = P - 13;
     t177 = P + 9;
     t178 = Stack[(int)t177];
@@ -4784,7 +4800,7 @@ L13:
     t186 = t185 + 1;
     Stack[(int)t186] = t184;
     P = P + 13;
-    revelarTodo_();
+    Palabra_revelarTodo_();
     P = P - 13;
     t187 = P + 9;
     t188 = Stack[(int)t187];
@@ -4798,7 +4814,7 @@ L13:
     t196 = t195 + 1;
     Stack[(int)t196] = t194;
     P = P + 13;
-    imprimirProgreso_();
+    Palabra_imprimirProgreso_();
     P = P - 13;
     t197 = H;
     Heap[(int)H] = 80;

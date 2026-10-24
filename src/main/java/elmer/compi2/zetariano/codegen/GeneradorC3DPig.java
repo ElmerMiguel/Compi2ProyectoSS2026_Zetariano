@@ -1953,190 +1953,200 @@ public class GeneradorC3DPig {
             tipoObjeto = variable.getTipo();
         }
 
-        ClaseImportadaPig clase
-                = registroImports.buscarClase(
-                        tipoObjeto
-                );
-
-        if (clase == null) {
-            return;
-        }
-
-        // =====================================================
-        // 1. RESERVAR OBJETO
-        // =====================================================
-        String base = reservarObjeto(
-                clase,
-                clase.getOrigen() == TipoImportPig.Z
-        );
-
-        // =====================================================
-        // 2. GUARDAR PUNTERO EN STACK DE PIG
-        // =====================================================
         String direccionStack
                 = nuevaDireccionStack(
                         variable
                 );
 
-        agregar(
-                "STACK_SET",
-                base,
-                null,
-                direccionStack
-        );
-
-        // =====================================================
-        // 3. INICIALIZADOR DEL OBJETO
-        // =====================================================
         ExpresionASTPig inicializador
                 = declaracion.getInicializador();
 
-        // -----------------------------------------------------
-        // ESTRUCTURA IMPORTADA DESDE Y
-        // -----------------------------------------------------
-        if (inicializador instanceof InicializadorListaASTPig lista) {
+        if (inicializador == null) {
+            agregar(
+                    "STACK_SET",
+                    "0",
+                    null,
+                    direccionStack
+            );
+            return;
+        }
 
+        if (inicializador instanceof LiteralASTPig literal
+                && ("null".equalsIgnoreCase(literal.getTipo()) || literal.getValor() == null)) {
+            agregar(
+                    "STACK_SET",
+                    "0",
+                    null,
+                    direccionStack
+            );
+            return;
+        }
+
+        if (inicializador instanceof InicializadorListaASTPig lista) {
+            ClaseImportadaPig clase
+                    = registroImports.buscarClase(
+                            tipoObjeto
+                    );
+            if (clase == null) {
+                return;
+            }
+            String base = reservarObjeto(
+                    clase,
+                    clase.getOrigen() == TipoImportPig.Z
+            );
+            agregar(
+                    "STACK_SET",
+                    base,
+                    null,
+                    direccionStack
+            );
             generarInicializacionEstructuraY(
                     clase,
                     base,
                     lista
             );
-
             return;
         }
 
-        // -----------------------------------------------------
-        // OBJETO IMPORTADO DESDE Z
-        // -----------------------------------------------------
-        if (!(inicializador instanceof NuevoObjetoASTPig nuevo)) {
+        if (inicializador instanceof NuevoObjetoASTPig nuevo) {
+            if (nuevo.getTipoObjeto() != null
+                    && !nuevo.getTipoObjeto().isBlank()) {
+                tipoObjeto = nuevo.getTipoObjeto();
+            }
 
-            return;
-        }
+            ClaseImportadaPig clase
+                    = registroImports.buscarClase(
+                            tipoObjeto
+                    );
 
-        // =====================================================
-        // 4. BUSCAR CONSTRUCTOR
-        // =====================================================
-        MetodoImportadoPig constructor
-                = buscarConstructor(
-                        clase,
-                        nuevo
-                );
+            if (clase == null) {
+                return;
+            }
 
-        if (constructor == null) {
-
-            return;
-        }
-
-        // =====================================================
-        // 5. EVALUAR ARGUMENTOS PRIMERO
-        // =====================================================
-        List<ResultadoPig> argumentos
-                = new ArrayList<>();
-
-        for (ExpresionASTPig argumento
-                : nuevo.getArgumentos()) {
-
-            argumentos.add(
-                    generarExpresion(
-                            argumento
-                    )
+            String base = reservarObjeto(
+                    clase,
+                    clase.getOrigen() == TipoImportPig.Z
             );
-        }
 
-        int desplazamiento
-                = marco.getTamano() + 1;
+            agregar(
+                    "STACK_SET",
+                    base,
+                    null,
+                    direccionStack
+            );
 
-        String baseFrame
-                = temporales.nuevoTemporal();
+            MetodoImportadoPig constructor
+                    = buscarConstructor(
+                            clase,
+                            nuevo
+                    );
 
-        agregar(
-                "+",
-                "P",
-                String.valueOf(
-                        desplazamiento
-                ),
-                baseFrame
-        );
+            if (constructor == null) {
+                return;
+            }
 
-        // =====================================================
-        // 7. $this
-        // =====================================================
-        String direccionThis
-                = temporales.nuevoTemporal();
+            List<ResultadoPig> argumentos
+                    = new ArrayList<>();
 
-        agregar(
-                "+",
-                baseFrame,
-                "1",
-                direccionThis
-        );
+            for (ExpresionASTPig argumento
+                    : nuevo.getArgumentos()) {
 
-        agregar(
-                "STACK_SET",
-                base,
-                null,
-                direccionThis
-        );
+                argumentos.add(
+                        generarExpresion(
+                                argumento
+                        )
+                );
+            }
 
-        // =====================================================
-        // 8. PARAMETROS
-        // =====================================================
-        for (int i = 0;
-                i < argumentos.size();
-                i++) {
+            int desplazamiento
+                    = marco.getTamano() + 1;
 
-            String direccionParametro
+            String baseFrame
+                    = temporales.nuevoTemporal();
+
+            agregar(
+                    "+",
+                    "P",
+                    String.valueOf(
+                            desplazamiento
+                    ),
+                    baseFrame
+            );
+
+            String direccionThis
                     = temporales.nuevoTemporal();
 
             agregar(
                     "+",
                     baseFrame,
-                    String.valueOf(
-                            i + 2
-                    ),
-                    direccionParametro
+                    "1",
+                    direccionThis
             );
 
             agregar(
                     "STACK_SET",
-                    argumentos.get(i).valor,
+                    base,
                     null,
-                    direccionParametro
+                    direccionThis
             );
+
+            for (int i = 0;
+                    i < argumentos.size();
+                    i++) {
+
+                String direccionParametro
+                        = temporales.nuevoTemporal();
+
+                agregar(
+                        "+",
+                        baseFrame,
+                        String.valueOf(
+                                i + 2
+                        ),
+                        direccionParametro
+                );
+
+                agregar(
+                        "STACK_SET",
+                        argumentos.get(i).valor,
+                        null,
+                        direccionParametro
+                );
+            }
+
+            agregar(
+                    "+",
+                    "P",
+                    String.valueOf(
+                            desplazamiento
+                    ),
+                    "P"
+            );
+
+            agregar(
+                    "CALL",
+                    constructor.getFirma(),
+                    null,
+                    null
+            );
+
+            agregar(
+                    "-",
+                    "P",
+                    String.valueOf(
+                            desplazamiento
+                    ),
+                    "P"
+            );
+            return;
         }
 
-        // =====================================================
-        // 9. MOVER P
-        // =====================================================
+        ResultadoPig res = generarExpresion(inicializador);
         agregar(
-                "+",
-                "P",
-                String.valueOf(
-                        desplazamiento
-                ),
-                "P"
-        );
-
-        // =====================================================
-        // 10. CALL CON FIRMA REAL
-        // =====================================================
-        agregar(
-                "CALL",
-                constructor.getFirma(),
+                "STACK_SET",
+                res.valor,
                 null,
-                null
-        );
-
-        // =====================================================
-        // 11. RESTAURAR P
-        // =====================================================
-        agregar(
-                "-",
-                "P",
-                String.valueOf(
-                        desplazamiento
-                ),
-                "P"
+                direccionStack
         );
     }
 

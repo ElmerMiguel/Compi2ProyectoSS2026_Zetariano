@@ -362,6 +362,14 @@ public class CompilerService {
         }
     }
 
+    /**
+     * Compila un archivo fuente Pig Latin con sus dependencias.
+     */
+    public CompilationResult compilePigFile(Path archivo) throws java.io.IOException {
+        String source = java.nio.file.Files.readString(archivo);
+        return compilePigSource(source, archivo.getParent());
+    }
+
     private CompilationResult abortWithErrors(StringBuilder log, String razon) {
         log.append("\n[FALLO DE COMPILACION]: ").append(razon).append("\n");
         for (ErrorReport err : ErrorCollector.getErrors()) {

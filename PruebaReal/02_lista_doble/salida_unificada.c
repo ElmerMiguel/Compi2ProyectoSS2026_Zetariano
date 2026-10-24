@@ -23,26 +23,26 @@ void imprimirRegistro();
 void Nodo_int();
 void ListaDoble_();
 void ListaDoble_int();
-void estaVacia_();
-void insertarInicio_int();
-void insertarFinal_int();
-void insertarFinal_int_int();
-void insertarEn_int_int();
-void eliminarInicio_();
-void eliminarFinal_();
-void eliminarEn_int();
-void eliminarValor_int();
-void vaciar_();
-void obtenerNodo_int();
-void obtener_int();
-void buscar_int();
-void maximo_();
-void sumaRecursiva_Nodo();
-void suma_();
-void invertir_();
-void ordenar_();
-void imprimirAdelante_();
-void imprimirAtras_();
+void ListaDoble_estaVacia_();
+void ListaDoble_insertarInicio_int();
+void ListaDoble_insertarFinal_int();
+void ListaDoble_insertarFinal_int_int();
+void ListaDoble_insertarEn_int_int();
+void ListaDoble_eliminarInicio_();
+void ListaDoble_eliminarFinal_();
+void ListaDoble_eliminarEn_int();
+void ListaDoble_eliminarValor_int();
+void ListaDoble_vaciar_();
+void ListaDoble_obtenerNodo_int();
+void ListaDoble_obtener_int();
+void ListaDoble_buscar_int();
+void ListaDoble_maximo_();
+void ListaDoble_sumaRecursiva_Nodo();
+void ListaDoble_suma_();
+void ListaDoble_invertir_();
+void ListaDoble_ordenar_();
+void ListaDoble_imprimirAdelante_();
+void ListaDoble_imprimirAtras_();
 void main_pig();
 
 void registrar() {
@@ -725,11 +725,11 @@ void ListaDoble_int() {
     t36 = t34 + 2;
     Stack[(int)t36] = t33;
     P = P + 3;
-    insertarFinal_int();
+    ListaDoble_insertarFinal_int();
     P = P - 3;
 }
 
-void estaVacia_() {
+void ListaDoble_estaVacia_() {
     double t37, t38, t39, t40, t41, t42;
     t37 = P + 1;
     t38 = Stack[(int)t37];
@@ -741,10 +741,12 @@ void estaVacia_() {
     return;
 }
 
-void insertarInicio_int() {
+void ListaDoble_insertarInicio_int() {
     double t43, t44, t45, t46, t47, t48, t49, t50, t51, t52, t53, t54, t55, t56, t57, t58, t59, t60, t61, t62, t63, t64, t65, t66, t67, t68, t69, t70, t71, t72, t73, t74, t75, t76, t77, t78, t79, t80, t81, t82, t83, t84, t85, t86, t87, t88;
     t43 = P + 2;
     t44 = Stack[(int)t43];
+    Heap[(int)H] = 2433580;
+    H = H + 1;
     t45 = H;
     H = H + 3;
     t46 = P + 4;
@@ -810,10 +812,12 @@ L1:
     Heap[(int)t86] = t88;
 }
 
-void insertarFinal_int() {
+void ListaDoble_insertarFinal_int() {
     double t89, t90, t91, t92, t93, t94, t95, t96, t97, t98, t99, t100, t101, t102, t103, t104, t105, t106, t107, t108, t109, t110, t111, t112, t113, t114, t115, t116, t117, t118, t119, t120, t121, t122, t123, t124, t125, t126, t127, t128, t129, t130, t131, t132, t133, t134;
     t89 = P + 2;
     t90 = Stack[(int)t89];
+    Heap[(int)H] = 2433580;
+    H = H + 1;
     t91 = H;
     H = H + 3;
     t92 = P + 4;
@@ -879,7 +883,7 @@ L3:
     Heap[(int)t132] = t134;
 }
 
-void insertarFinal_int_int() {
+void ListaDoble_insertarFinal_int_int() {
     double t135, t136, t137, t138, t139, t140, t141, t142, t143, t144, t145, t146, t147, t148;
     t135 = P + 1;
     t136 = Stack[(int)t135];
@@ -891,7 +895,7 @@ void insertarFinal_int_int() {
     t141 = t139 + 2;
     Stack[(int)t141] = t138;
     P = P + 4;
-    insertarFinal_int();
+    ListaDoble_insertarFinal_int();
     P = P - 4;
     t142 = P + 1;
     t143 = Stack[(int)t142];
@@ -903,11 +907,11 @@ void insertarFinal_int_int() {
     t148 = t146 + 2;
     Stack[(int)t148] = t145;
     P = P + 4;
-    insertarFinal_int();
+    ListaDoble_insertarFinal_int();
     P = P - 4;
 }
 
-void insertarEn_int_int() {
+void ListaDoble_insertarEn_int_int() {
     double t149, t150, t151, t152, t153, t154, t155, t156, t157, t158, t159, t160, t161, t162, t163, t164, t165, t166, t167, t168, t169, t170, t171, t172, t173, t174, t175, t176, t177, t178, t179, t180, t181, t182, t183, t184, t185, t186, t187, t188, t189, t190, t191, t192, t193, t194, t195, t196, t197, t198, t199, t200, t201, t202, t203, t204, t205, t206, t207, t208, t209, t210, t211, t212, t213, t214, t215, t216, t217, t218, t219, t220, t221, t222, t223, t224, t225, t226, t227, t228, t229, t230, t231, t232, t233;
     t149 = P + 2;
     t150 = Stack[(int)t149];
@@ -950,7 +954,7 @@ L5:
     t170 = t168 + 2;
     Stack[(int)t170] = t167;
     P = P + 6;
-    insertarInicio_int();
+    ListaDoble_insertarInicio_int();
     P = P - 6;
     t171 = P + 0;
     Stack[(int)t171] = 1;
@@ -978,7 +982,7 @@ L9:
     t185 = t183 + 2;
     Stack[(int)t185] = t182;
     P = P + 6;
-    insertarFinal_int();
+    ListaDoble_insertarFinal_int();
     P = P - 6;
     t186 = P + 0;
     Stack[(int)t186] = 1;
@@ -998,7 +1002,7 @@ L11:
     t193 = t191 + 2;
     Stack[(int)t193] = t190;
     P = P + 6;
-    obtenerNodo_int();
+    ListaDoble_obtenerNodo_int();
     t194 = P + 0;
     t195 = Stack[(int)t194];
     P = P - 6;
@@ -1006,6 +1010,8 @@ L11:
     Stack[(int)t196] = t195;
     t197 = P + 3;
     t198 = Stack[(int)t197];
+    Heap[(int)H] = 2433580;
+    H = H + 1;
     t199 = H;
     H = H + 3;
     t200 = P + 6;
@@ -1057,7 +1063,7 @@ L11:
     return;
 }
 
-void eliminarInicio_() {
+void ListaDoble_eliminarInicio_() {
     double t234, t235, t236, t237, t238, t239, t240, t241, t242, t243, t244, t245, t246, t247, t248, t249, t250, t251, t252, t253, t254, t255, t256, t257, t258, t259, t260, t261, t262, t263, t264, t265, t266, t267, t268, t269, t270, t271, t272, t273, t274;
     t234 = P + 1;
     t235 = Stack[(int)t234];
@@ -1123,7 +1129,7 @@ L15:
     return;
 }
 
-void eliminarFinal_() {
+void ListaDoble_eliminarFinal_() {
     double t275, t276, t277, t278, t279, t280, t281, t282, t283, t284, t285, t286, t287, t288, t289, t290, t291, t292, t293, t294, t295, t296, t297, t298, t299, t300, t301, t302, t303, t304, t305, t306, t307, t308, t309, t310, t311, t312, t313, t314, t315;
     t275 = P + 1;
     t276 = Stack[(int)t275];
@@ -1189,7 +1195,7 @@ L19:
     return;
 }
 
-void eliminarEn_int() {
+void ListaDoble_eliminarEn_int() {
     double t316, t317, t318, t319, t320, t321, t322, t323, t324, t325, t326, t327, t328, t329, t330, t331, t332, t333, t334, t335, t336, t337, t338, t339, t340, t341, t342, t343, t344, t345, t346, t347, t348, t349, t350, t351, t352, t353, t354, t355, t356, t357, t358, t359, t360, t361, t362, t363, t364, t365, t366, t367, t368, t369, t370, t371, t372, t373, t374, t375, t376, t377, t378, t379, t380, t381, t382, t383, t384, t385, t386;
     t316 = P + 2;
     t317 = Stack[(int)t316];
@@ -1228,7 +1234,7 @@ L21:
     t334 = t333 + 1;
     Stack[(int)t334] = t332;
     P = P + 4;
-    eliminarInicio_();
+    ListaDoble_eliminarInicio_();
     t335 = P + 0;
     t336 = Stack[(int)t335];
     P = P - 4;
@@ -1255,7 +1261,7 @@ L25:
     t349 = t348 + 1;
     Stack[(int)t349] = t347;
     P = P + 4;
-    eliminarFinal_();
+    ListaDoble_eliminarFinal_();
     t350 = P + 0;
     t351 = Stack[(int)t350];
     P = P - 4;
@@ -1277,7 +1283,7 @@ L27:
     t359 = t357 + 2;
     Stack[(int)t359] = t356;
     P = P + 4;
-    obtenerNodo_int();
+    ListaDoble_obtenerNodo_int();
     t360 = P + 0;
     t361 = Stack[(int)t360];
     P = P - 4;
@@ -1314,7 +1320,7 @@ L27:
     return;
 }
 
-void eliminarValor_int() {
+void ListaDoble_eliminarValor_int() {
     double t387, t388, t389, t390, t391, t392, t393, t394, t395, t396, t397, t398, t399, t400, t401, t402, t403, t404, t405, t406, t407, t408, t409, t410, t411;
     t387 = P + 1;
     t388 = Stack[(int)t387];
@@ -1326,7 +1332,7 @@ void eliminarValor_int() {
     t393 = t391 + 2;
     Stack[(int)t393] = t390;
     P = P + 4;
-    buscar_int();
+    ListaDoble_buscar_int();
     t394 = P + 0;
     t395 = Stack[(int)t394];
     P = P - 4;
@@ -1355,7 +1361,7 @@ L29:
     t408 = t406 + 2;
     Stack[(int)t408] = t405;
     P = P + 4;
-    eliminarEn_int();
+    ListaDoble_eliminarEn_int();
     t409 = P + 0;
     t410 = Stack[(int)t409];
     P = P - 4;
@@ -1364,7 +1370,7 @@ L29:
     return;
 }
 
-void vaciar_() {
+void ListaDoble_vaciar_() {
     double t412, t413, t414, t415, t416, t417, t418, t419, t420;
     t412 = P + 1;
     t413 = Stack[(int)t412];
@@ -1380,7 +1386,7 @@ void vaciar_() {
     Heap[(int)t420] = 0;
 }
 
-void obtenerNodo_int() {
+void ListaDoble_obtenerNodo_int() {
     double t421, t422, t423, t424, t425, t426, t427, t428, t429, t430, t431, t432, t433, t434, t435, t436, t437, t438, t439, t440, t441, t442, t443, t444, t445, t446, t447, t448, t449, t450, t451, t452, t453, t454, t455, t456, t457, t458, t459, t460, t461, t462, t463, t464, t465, t466, t467, t468, t469, t470, t471, t472, t473, t474, t475, t476, t477, t478, t479, t480, t481, t482, t483, t484, t485, t486, t487, t488, t489;
     t421 = P + 2;
     t422 = Stack[(int)t421];
@@ -1501,7 +1507,7 @@ L35:
     return;
 }
 
-void obtener_int() {
+void ListaDoble_obtener_int() {
     double t490, t491, t492, t493, t494, t495, t496, t497, t498, t499, t500, t501, t502, t504, t503, t505, t506, t507, t508, t509;
     t490 = P + 1;
     t491 = Stack[(int)t490];
@@ -1513,7 +1519,7 @@ void obtener_int() {
     t496 = t494 + 2;
     Stack[(int)t496] = t493;
     P = P + 4;
-    obtenerNodo_int();
+    ListaDoble_obtenerNodo_int();
     t497 = P + 0;
     t498 = Stack[(int)t497];
     P = P - 4;
@@ -1540,7 +1546,7 @@ L44:
     return;
 }
 
-void buscar_int() {
+void ListaDoble_buscar_int() {
     double t510, t511, t512, t513, t514, t515, t516, t517, t518, t519, t520, t521, t522, t523, t524, t525, t526, t527, t528, t529, t530, t531, t532, t533, t534, t535, t536, t537, t538, t539;
     t510 = P + 1;
     t511 = Stack[(int)t510];
@@ -1594,7 +1600,7 @@ L46:
     return;
 }
 
-void maximo_() {
+void ListaDoble_maximo_() {
     double t540, t541, t542, t543, t544, t545, t546, t547, t548, t549, t550, t551, t552, t553, t554, t555, t556, t557, t558, t559, t560, t561, t562, t563, t564, t565, t566, t567, t568, t569, t570, t571, t572, t573, t574, t575, t576, t577, t578, t579, t580, t581, t582;
     t540 = P + 1;
     t541 = Stack[(int)t540];
@@ -1667,7 +1673,7 @@ L52:
     return;
 }
 
-void sumaRecursiva_Nodo() {
+void ListaDoble_sumaRecursiva_Nodo() {
     double t583, t584, t585, t586, t587, t588, t589, t590, t591, t592, t593, t594, t595, t596, t597, t598, t599, t600, t601, t602, t603;
     t583 = P + 2;
     t584 = Stack[(int)t583];
@@ -1697,7 +1703,7 @@ L55:
     t599 = t597 + 2;
     Stack[(int)t599] = t596;
     P = P + 3;
-    sumaRecursiva_Nodo();
+    ListaDoble_sumaRecursiva_Nodo();
     t600 = P + 0;
     t601 = Stack[(int)t600];
     P = P - 3;
@@ -1707,7 +1713,7 @@ L55:
     return;
 }
 
-void suma_() {
+void ListaDoble_suma_() {
     double t604, t605, t606, t607, t608, t609, t610, t611, t612, t613, t614, t615;
     t604 = P + 1;
     t605 = Stack[(int)t604];
@@ -1721,7 +1727,7 @@ void suma_() {
     t612 = t610 + 2;
     Stack[(int)t612] = t609;
     P = P + 2;
-    sumaRecursiva_Nodo();
+    ListaDoble_sumaRecursiva_Nodo();
     t613 = P + 0;
     t614 = Stack[(int)t613];
     P = P - 2;
@@ -1730,7 +1736,7 @@ void suma_() {
     return;
 }
 
-void invertir_() {
+void ListaDoble_invertir_() {
     double t616, t617, t618, t619, t620, t621, t622, t623, t624, t625, t626, t627, t628, t629, t630, t631, t632, t633, t634, t635, t636, t637, t638, t639, t640, t641, t642, t643, t644, t645, t646, t647, t648, t649, t650, t651, t652, t653, t654, t655, t656, t657, t658, t659, t660, t661, t662, t663;
     t616 = P + 1;
     t617 = Stack[(int)t616];
@@ -1797,7 +1803,7 @@ L58:
     Heap[(int)t663] = t660;
 }
 
-void ordenar_() {
+void ListaDoble_ordenar_() {
     double t664, t665, t666, t667, t668, t669, t670, t671, t672, t674, t675, t676, t677, t678, t673, t679, t680, t681, t682, t683, t684, t685, t686, t687, t688, t689, t690, t691, t692, t693, t694, t695, t696, t697, t698, t699, t700, t701, t702, t703, t704, t705, t706, t707, t708, t709, t710, t711, t712, t713, t714, t715, t716, t717, t718;
 L59:
     ;
@@ -1890,7 +1896,7 @@ L61:
     ;
 }
 
-void imprimirAdelante_() {
+void ListaDoble_imprimirAdelante_() {
     double t719, t720, t721, t722, t723, t724, t725, t726, t727, t728, t729, t730, t731, t732, t733, t734, t735, t736, t737, t738, t739, t740, t741, t742, t743, t744, t745, t746, t747, t748, t749, t750, t751, t752, t753, t754, t755, t756, t757, t758, t759, t760, t761, t762, t763, t764, t765, t766, t767, t768, t769, t770, t771, t772, t773, t774, t775, t776, t777;
     t719 = H;
     Heap[(int)H] = 91;
@@ -2069,7 +2075,7 @@ L83:
     }
 }
 
-void imprimirAtras_() {
+void ListaDoble_imprimirAtras_() {
     double t778, t779, t780, t781, t782, t783, t784, t785, t786, t787, t788, t789, t790, t791, t792, t793, t794, t795, t796, t797, t798, t799, t800, t801, t802, t803, t804, t805, t806, t807, t808, t809, t810, t811, t812, t813, t814, t815, t816, t817, t818, t819, t820, t821, t822, t823, t824, t825, t826, t827, t828, t829, t830, t831, t832, t833, t834, t835, t836;
     t778 = H;
     Heap[(int)H] = 91;
@@ -2260,39 +2266,44 @@ void main_pig() {
     Stack[(int)t4] = 0;
     t5 = P + 4;
     Stack[(int)t5] = 0;
-    t6 = H;
+    t6 = P + 5;
+    Heap[(int)H] = 2714854221;
+    H = H + 1;
+    t7 = H;
     Heap[(int)H] = 0;
     H = H + 1;
     Heap[(int)H] = 0;
     H = H + 1;
     Heap[(int)H] = 0;
     H = H + 1;
-    t7 = P + 5;
-    Stack[(int)t7] = t6;
+    Stack[(int)t6] = t7;
     t8 = P + 10;
     t9 = t8 + 1;
-    Stack[(int)t9] = t6;
+    Stack[(int)t9] = t7;
     P = P + 10;
     ListaDoble_();
     P = P - 10;
-    t10 = H;
+    t10 = P + 6;
+    Heap[(int)H] = 2714854221;
+    H = H + 1;
+    t11 = H;
     Heap[(int)H] = 0;
     H = H + 1;
     Heap[(int)H] = 0;
     H = H + 1;
     Heap[(int)H] = 0;
     H = H + 1;
-    t11 = P + 6;
-    Stack[(int)t11] = t10;
+    Stack[(int)t10] = t11;
     t12 = P + 10;
     t13 = t12 + 1;
-    Stack[(int)t13] = t10;
+    Stack[(int)t13] = t11;
     t14 = t12 + 2;
     Stack[(int)t14] = 7;
     P = P + 10;
     ListaDoble_int();
     P = P - 10;
-    t15 = H;
+    t15 = P + 7;
+    t16 = H;
     Heap[(int)H] = 0;
     H = H + 1;
     Heap[(int)H] = 0;
@@ -2301,15 +2312,14 @@ void main_pig() {
     H = H + 1;
     Heap[(int)H] = 0;
     H = H + 1;
-    t16 = P + 7;
-    Stack[(int)t16] = t15;
-    t17 = t15 + 0;
+    Stack[(int)t15] = t16;
+    t17 = t16 + 0;
     Heap[(int)t17] = 0;
-    t18 = t15 + 1;
+    t18 = t16 + 1;
     Heap[(int)t18] = 0;
-    t19 = t15 + 2;
+    t19 = t16 + 2;
     Heap[(int)t19] = 0;
-    t20 = t15 + 3;
+    t20 = t16 + 3;
     Heap[(int)t20] = 0;
     t21 = H;
     Heap[(int)H] = 61;
@@ -2409,7 +2419,7 @@ L1:
     t35 = t33 + 2;
     Stack[(int)t35] = t32;
     P = P + 10;
-    insertarFinal_int();
+    ListaDoble_insertarFinal_int();
     P = P - 10;
 L2:
     ;
@@ -2432,7 +2442,7 @@ L3:
     t46 = t43 + 3;
     Stack[(int)t46] = 9;
     P = P + 10;
-    insertarFinal_int_int();
+    ListaDoble_insertarFinal_int_int();
     P = P - 10;
     t47 = H;
     Heap[(int)H] = 76;
@@ -2503,7 +2513,7 @@ L3:
     t53 = t52 + 1;
     Stack[(int)t53] = t51;
     P = P + 10;
-    imprimirAdelante_();
+    ListaDoble_imprimirAdelante_();
     P = P - 10;
     t54 = H;
     Heap[(int)H] = 76;
@@ -2568,7 +2578,7 @@ L3:
     t60 = t59 + 1;
     Stack[(int)t60] = t58;
     P = P + 10;
-    imprimirAtras_();
+    ListaDoble_imprimirAtras_();
     P = P - 10;
     t61 = H;
     Heap[(int)H] = 79;
@@ -2611,7 +2621,7 @@ L3:
     t67 = t66 + 1;
     Stack[(int)t67] = t65;
     P = P + 10;
-    imprimirAdelante_();
+    ListaDoble_imprimirAdelante_();
     P = P - 10;
 L4:
     ;
@@ -3382,7 +3392,7 @@ L4:
     t90 = t88 + 2;
     Stack[(int)t90] = t87;
     P = P + 10;
-    insertarInicio_int();
+    ListaDoble_insertarInicio_int();
     P = P - 10;
     t91 = P + 7;
     t92 = Stack[(int)t91];
@@ -3468,7 +3478,7 @@ L7:
     t110 = t108 + 2;
     Stack[(int)t110] = t107;
     P = P + 10;
-    insertarFinal_int();
+    ListaDoble_insertarFinal_int();
     P = P - 10;
     t111 = P + 7;
     t112 = Stack[(int)t111];
@@ -3619,7 +3629,7 @@ L9:
     t136 = t133 + 3;
     Stack[(int)t136] = t132;
     P = P + 10;
-    insertarEn_int_int();
+    ListaDoble_insertarEn_int_int();
     t137 = P + 0;
     t138 = Stack[(int)t137];
     P = P - 10;
@@ -3768,7 +3778,7 @@ L11:
     t160 = t159 + 1;
     Stack[(int)t160] = t158;
     P = P + 10;
-    eliminarInicio_();
+    ListaDoble_eliminarInicio_();
     t161 = P + 0;
     t162 = Stack[(int)t161];
     P = P - 10;
@@ -3905,7 +3915,7 @@ L15:
     t178 = t177 + 1;
     Stack[(int)t178] = t176;
     P = P + 10;
-    eliminarFinal_();
+    ListaDoble_eliminarFinal_();
     t179 = P + 0;
     t180 = Stack[(int)t179];
     P = P - 10;
@@ -4105,7 +4115,7 @@ L19:
     t202 = t200 + 2;
     Stack[(int)t202] = t199;
     P = P + 10;
-    eliminarEn_int();
+    ListaDoble_eliminarEn_int();
     t203 = P + 0;
     t204 = Stack[(int)t203];
     P = P - 10;
@@ -4359,7 +4369,7 @@ L23:
     t232 = t230 + 2;
     Stack[(int)t232] = t229;
     P = P + 10;
-    eliminarValor_int();
+    ListaDoble_eliminarValor_int();
     t233 = P + 0;
     t234 = Stack[(int)t233];
     P = P - 10;
@@ -4580,7 +4590,7 @@ L27:
     t263 = t261 + 2;
     Stack[(int)t263] = t260;
     P = P + 10;
-    buscar_int();
+    ListaDoble_buscar_int();
     t264 = P + 0;
     t265 = Stack[(int)t264];
     P = P - 10;
@@ -4720,7 +4730,7 @@ L31:
     t288 = t287 + 1;
     Stack[(int)t288] = t286;
     P = P + 10;
-    invertir_();
+    ListaDoble_invertir_();
     P = P - 10;
     t289 = H;
     Heap[(int)H] = 76;
@@ -4771,7 +4781,7 @@ L31:
     t295 = t294 + 1;
     Stack[(int)t295] = t293;
     P = P + 10;
-    imprimirAdelante_();
+    ListaDoble_imprimirAdelante_();
     P = P - 10;
     goto L36;
 L35:
@@ -4788,7 +4798,7 @@ L35:
     t304 = t303 + 1;
     Stack[(int)t304] = t302;
     P = P + 10;
-    ordenar_();
+    ListaDoble_ordenar_();
     P = P - 10;
     t305 = H;
     Heap[(int)H] = 76;
@@ -4837,7 +4847,7 @@ L35:
     t311 = t310 + 1;
     Stack[(int)t311] = t309;
     P = P + 10;
-    imprimirAdelante_();
+    ListaDoble_imprimirAdelante_();
     P = P - 10;
     goto L38;
 L37:
@@ -4883,7 +4893,7 @@ L37:
     t321 = t320 + 1;
     Stack[(int)t321] = t319;
     P = P + 10;
-    imprimirAdelante_();
+    ListaDoble_imprimirAdelante_();
     P = P - 10;
     t322 = H;
     Heap[(int)H] = 65;
@@ -4916,7 +4926,7 @@ L37:
     t328 = t327 + 1;
     Stack[(int)t328] = t326;
     P = P + 10;
-    imprimirAtras_();
+    ListaDoble_imprimirAtras_();
     P = P - 10;
     goto L40;
 L39:
@@ -4933,7 +4943,7 @@ L39:
     t337 = t336 + 1;
     Stack[(int)t337] = t335;
     P = P + 10;
-    estaVacia_();
+    ListaDoble_estaVacia_();
     t338 = P + 0;
     t339 = Stack[(int)t338];
     P = P - 10;
@@ -5101,7 +5111,7 @@ L43:
     t362 = t361 + 1;
     Stack[(int)t362] = t360;
     P = P + 10;
-    suma_();
+    ListaDoble_suma_();
     t363 = P + 0;
     t364 = Stack[(int)t363];
     P = P - 10;
@@ -5141,7 +5151,7 @@ L43:
     t371 = t370 + 1;
     Stack[(int)t371] = t369;
     P = P + 10;
-    maximo_();
+    ListaDoble_maximo_();
     t372 = P + 0;
     t373 = Stack[(int)t372];
     P = P - 10;
@@ -5239,7 +5249,7 @@ L41:
     t396 = t395 + 1;
     Stack[(int)t396] = t394;
     P = P + 10;
-    vaciar_();
+    ListaDoble_vaciar_();
     P = P - 10;
     t397 = H;
     Heap[(int)H] = 76;

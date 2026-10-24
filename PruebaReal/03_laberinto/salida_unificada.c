@@ -22,28 +22,28 @@ void mejorPuntaje();
 void imprimirResumen();
 void Jugador_String_int_int();
 void Jugador_();
-void sumarPuntos_int();
-void perderVida_();
-void estaVivo_();
-void mover_int_int();
-void mostrarEstado_();
+void Jugador_sumarPuntos_int();
+void Jugador_perderVida_();
+void Jugador_estaVivo_();
+void Jugador_mover_int_int();
+void Jugador_mostrarEstado_();
 void Tablero_int_int();
 void Tablero_();
-void esValida_int_int();
-void esPared_int_int();
-void colocar_int_int_int();
-void inicializar_();
-void puntosPorTipo_int();
-void recoger_int_int();
-void contarTipo_int();
-void primeraColumnaLibre_int();
-void distanciaAPared_int_int_int_int();
-void explorar_int_int();
-void contarAccesibles_int_int();
-void imprimir_int_int();
+void Tablero_esValida_int_int();
+void Tablero_esPared_int_int();
+void Tablero_colocar_int_int_int();
+void Tablero_inicializar_();
+void Tablero_puntosPorTipo_int();
+void Tablero_recoger_int_int();
+void Tablero_contarTipo_int();
+void Tablero_primeraColumnaLibre_int();
+void Tablero_distanciaAPared_int_int_int_int();
+void Tablero_explorar_int_int();
+void Tablero_contarAccesibles_int_int();
+void Tablero_imprimir_int_int();
 void Juego_String();
-void mover_int();
-void obtenerVeredicto_();
+void Juego_mover_int();
+void Juego_obtenerVeredicto_();
 void main_pig();
 
 void calificar() {
@@ -993,7 +993,7 @@ void Jugador_() {
     Heap[(int)t49] = 80;
 }
 
-void sumarPuntos_int() {
+void Jugador_sumarPuntos_int() {
     double t50, t51, t52, t53, t54, t55, t56;
     t50 = P + 2;
     t51 = Stack[(int)t50];
@@ -1005,7 +1005,7 @@ void sumarPuntos_int() {
     Heap[(int)t54] = t56;
 }
 
-void perderVida_() {
+void Jugador_perderVida_() {
     double t57, t58, t59, t60, t61;
     t57 = P + 1;
     t58 = Stack[(int)t57];
@@ -1015,7 +1015,7 @@ void perderVida_() {
     Heap[(int)t59] = t61;
 }
 
-void estaVivo_() {
+void Jugador_estaVivo_() {
     double t62, t63, t64, t65, t66, t67;
     t62 = P + 1;
     t63 = Stack[(int)t62];
@@ -1027,7 +1027,7 @@ void estaVivo_() {
     return;
 }
 
-void mover_int_int() {
+void Jugador_mover_int_int() {
     double t68, t69, t70, t71, t72, t73, t74, t75, t76, t77, t78, t79, t80, t81, t82;
     t68 = P + 2;
     t69 = Stack[(int)t68];
@@ -1049,7 +1049,7 @@ void mover_int_int() {
     Heap[(int)t80] = t82;
 }
 
-void mostrarEstado_() {
+void Jugador_mostrarEstado_() {
     double t83, t84, t85, t86, t87, t88, t89, t90, t91, t92, t93, t94, t95, t96, t97, t98, t99, t100, t101, t102, t103, t104, t105, t106, t107, t108, t109, t110, t111, t112, t113, t114, t115, t116, t117, t118, t119, t120, t121, t122, t123, t124, t125, t126, t127, t128, t129, t130, t131, t132, t133, t134, t135, t136, t137, t138, t139, t140, t141, t142, t143, t144, t145, t146, t147, t148, t149, t150, t151, t152, t153, t154, t155, t156, t157, t158, t159, t160, t161, t162, t163, t164, t165, t166, t167, t168, t169, t170, t171, t172, t173, t174;
     t83 = H;
     Heap[(int)H] = 74;
@@ -1573,7 +1573,7 @@ void Tablero_() {
     Heap[(int)t236] = 0;
 }
 
-void esValida_int_int() {
+void Tablero_esValida_int_int() {
     double t237, t238, t239, t241, t242, t243, t244, t245, t246, t247, t240, t249, t250, t251, t248, t253, t254, t255, t256, t257, t258, t259, t252, t260;
     t237 = P + 2;
     t238 = Stack[(int)t237];
@@ -1624,7 +1624,7 @@ L42:
     return;
 }
 
-void esPared_int_int() {
+void Tablero_esPared_int_int() {
     double t261, t262, t263, t264, t265, t266, t267, t268, t269, t270, t271, t272, t273, t274, t275, t276, t277, t278, t279, t280, t281, t282, t283, t284, t285, t286, t287, t288, t289, t290, t291;
     t261 = P + 1;
     t262 = Stack[(int)t261];
@@ -1640,7 +1640,7 @@ void esPared_int_int() {
     t270 = t267 + 3;
     Stack[(int)t270] = t266;
     P = P + 4;
-    esValida_int_int();
+    Tablero_esValida_int_int();
     t271 = P + 0;
     t272 = Stack[(int)t271];
     P = P - 4;
@@ -1675,7 +1675,7 @@ L43:
     return;
 }
 
-void colocar_int_int_int() {
+void Tablero_colocar_int_int_int() {
     double t292, t293, t294, t295, t296, t297, t298, t299, t300, t301, t302, t303, t304, t305, t306, t307, t308, t309, t310, t311, t312, t313, t314, t315, t316, t317, t318, t319, t320, t321, t322, t323, t324, t325, t326, t327, t328, t329, t330, t331, t332, t333, t334, t335, t336, t337, t338, t339, t340, t341, t342, t343, t344, t345, t346, t347, t348, t349, t350, t351, t352, t353, t354, t355, t356, t357;
     t292 = P + 1;
     t293 = Stack[(int)t292];
@@ -1691,7 +1691,7 @@ void colocar_int_int_int() {
     t301 = t298 + 3;
     Stack[(int)t301] = t297;
     P = P + 5;
-    esValida_int_int();
+    Tablero_esValida_int_int();
     t302 = P + 0;
     t303 = Stack[(int)t302];
     P = P - 5;
@@ -1898,7 +1898,7 @@ L59:
     ;
 }
 
-void inicializar_() {
+void Tablero_inicializar_() {
     double t358, t359, t360, t361, t362, t363, t364, t365, t366, t367, t368, t369, t370, t371, t372, t373, t374, t375, t376, t377, t378, t379, t380, t381, t382, t383, t384, t385, t386, t387, t388, t389, t390, t391, t392, t393, t394, t395, t396, t397, t398, t399, t400, t401, t402, t403, t404, t405, t406, t407, t408, t409, t410, t411, t412, t413, t414, t415, t416, t417, t418, t419, t420, t421, t422, t423, t424, t425, t426, t427, t428, t429, t430, t431, t432, t433, t434, t435, t436, t437, t438, t439, t440, t441, t442, t443, t444, t445, t446, t447, t448, t449, t450, t451, t452, t453, t454, t455, t456, t457, t458, t459, t460, t461, t462, t463, t464, t465, t466, t467, t468, t469, t470, t471, t472, t473, t474, t475, t476, t477, t478, t479, t480, t481, t482, t483, t484, t485, t486, t487, t488, t489, t490, t491, t492, t493, t494, t495, t496, t497, t498, t499, t500, t501, t502, t503, t504, t505, t506, t507, t508, t509, t510, t511, t512, t513, t514, t515, t516, t517, t518, t519, t520, t521, t522, t523, t524, t525, t526, t527, t528, t529, t530, t531, t532, t533, t534, t535;
     t358 = P + 1;
     t359 = Stack[(int)t358];
@@ -2042,7 +2042,7 @@ L63:
     t444 = t440 + 4;
     Stack[(int)t444] = 1;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t445 = P + 1;
     t446 = Stack[(int)t445];
@@ -2056,7 +2056,7 @@ L63:
     t451 = t447 + 4;
     Stack[(int)t451] = 1;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t452 = P + 1;
     t453 = Stack[(int)t452];
@@ -2070,7 +2070,7 @@ L63:
     t458 = t454 + 4;
     Stack[(int)t458] = 1;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t459 = P + 1;
     t460 = Stack[(int)t459];
@@ -2084,7 +2084,7 @@ L63:
     t465 = t461 + 4;
     Stack[(int)t465] = 1;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t466 = P + 1;
     t467 = Stack[(int)t466];
@@ -2098,7 +2098,7 @@ L63:
     t472 = t468 + 4;
     Stack[(int)t472] = 1;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t473 = P + 1;
     t474 = Stack[(int)t473];
@@ -2112,7 +2112,7 @@ L63:
     t479 = t475 + 4;
     Stack[(int)t479] = 1;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t480 = P + 1;
     t481 = Stack[(int)t480];
@@ -2126,7 +2126,7 @@ L63:
     t486 = t482 + 4;
     Stack[(int)t486] = 2;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t487 = P + 1;
     t488 = Stack[(int)t487];
@@ -2140,7 +2140,7 @@ L63:
     t493 = t489 + 4;
     Stack[(int)t493] = 2;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t494 = P + 1;
     t495 = Stack[(int)t494];
@@ -2154,7 +2154,7 @@ L63:
     t500 = t496 + 4;
     Stack[(int)t500] = 2;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t501 = P + 1;
     t502 = Stack[(int)t501];
@@ -2168,7 +2168,7 @@ L63:
     t507 = t503 + 4;
     Stack[(int)t507] = 2;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t508 = P + 1;
     t509 = Stack[(int)t508];
@@ -2182,7 +2182,7 @@ L63:
     t514 = t510 + 4;
     Stack[(int)t514] = 3;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t515 = P + 1;
     t516 = Stack[(int)t515];
@@ -2196,7 +2196,7 @@ L63:
     t521 = t517 + 4;
     Stack[(int)t521] = 3;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t522 = P + 1;
     t523 = Stack[(int)t522];
@@ -2210,7 +2210,7 @@ L63:
     t528 = t524 + 4;
     Stack[(int)t528] = 3;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
     t529 = P + 1;
     t530 = Stack[(int)t529];
@@ -2224,11 +2224,11 @@ L63:
     t535 = t531 + 4;
     Stack[(int)t535] = 4;
     P = P + 4;
-    colocar_int_int_int();
+    Tablero_colocar_int_int_int();
     P = P - 4;
 }
 
-void puntosPorTipo_int() {
+void Tablero_puntosPorTipo_int() {
     double t536, t537, t538, t539, t540, t541, t542, t543, t544, t545, t546, t547, t548, t549, t550, t551, t552, t553, t554, t555, t556, t557;
     t536 = P + 3;
     Stack[(int)t536] = 0;
@@ -2286,7 +2286,7 @@ L79:
     return;
 }
 
-void recoger_int_int() {
+void Tablero_recoger_int_int() {
     double t558, t559, t560, t561, t562, t563, t564, t565, t566, t567, t568, t569, t570, t571, t572, t573, t574, t575, t576, t577, t578, t579, t580, t581, t582, t583, t584, t585, t586, t587, t588, t589, t590, t591, t592, t593, t594, t595, t596, t597, t598, t599, t600, t601, t602, t603, t604, t605, t606, t607, t608, t609, t610, t611, t612, t613, t614, t615, t616, t617, t618, t619;
     t558 = P + 1;
     t559 = Stack[(int)t558];
@@ -2375,7 +2375,7 @@ L83:
     return;
 }
 
-void contarTipo_int() {
+void Tablero_contarTipo_int() {
     double t620, t621, t622, t623, t624, t625, t626, t627, t628, t629, t630, t631, t632, t633, t634, t635, t636, t637, t638, t639, t640, t641, t642, t643, t644, t645, t646, t647, t648, t649, t650, t651, t652, t653, t654, t655, t656, t657, t658, t659, t660, t661, t662, t663, t664, t665, t666, t667, t668, t669;
     t620 = P + 3;
     Stack[(int)t620] = 0;
@@ -2460,7 +2460,7 @@ L90:
     return;
 }
 
-void primeraColumnaLibre_int() {
+void Tablero_primeraColumnaLibre_int() {
     double t670, t671, t672, t673, t674, t675, t676, t677, t678, t679, t680, t681, t683, t684, t685, t686, t687, t688, t689, t690, t691, t692, t693, t694, t695, t696, t697, t698, t682, t699, t700, t701;
     t670 = P + 3;
     Stack[(int)t670] = 0;
@@ -2515,7 +2515,7 @@ L98:
     return;
 }
 
-void distanciaAPared_int_int_int_int() {
+void Tablero_distanciaAPared_int_int_int_int() {
     double t702, t703, t704, t705, t706, t707, t708, t709, t710, t711, t712, t713, t714, t715, t716, t717, t718, t719, t720, t721, t722, t723, t724, t725, t726, t727, t728, t729, t730, t731, t732, t733, t734, t735, t736, t737, t738, t739, t740, t741, t742, t743, t744, t745, t746, t747, t748, t749, t750, t751, t752, t753, t754, t755, t756, t757;
     t702 = P + 6;
     Stack[(int)t702] = 0;
@@ -2557,7 +2557,7 @@ L101:
     t730 = t727 + 3;
     Stack[(int)t730] = t726;
     P = P + 9;
-    esValida_int_int();
+    Tablero_esValida_int_int();
     t731 = P + 0;
     t732 = Stack[(int)t731];
     P = P - 9;
@@ -2610,7 +2610,7 @@ L103:
     return;
 }
 
-void explorar_int_int() {
+void Tablero_explorar_int_int() {
     double t758, t759, t760, t761, t762, t763, t764, t765, t766, t767, t768, t769, t770, t771, t772, t773, t774, t775, t776, t777, t778, t779, t780, t781, t782, t783, t784, t785, t786, t787, t788, t789, t790, t791, t792, t793, t794, t795, t796, t797, t798, t799, t800, t801, t802, t803, t804, t805, t806, t807, t808, t809, t810, t811, t812, t813, t814, t815, t816, t817, t818, t819, t820, t821, t822, t823, t824, t825, t826, t827, t828, t829, t830, t831, t832, t833, t834, t835, t836, t837, t838, t839, t840, t841, t842, t843, t844, t845, t846, t847, t848, t849, t850, t851, t852, t853, t854, t855, t856, t857, t858, t859, t860, t861, t862, t863, t864, t865, t866, t867, t868, t869, t870, t871, t872, t873, t874, t875;
     t758 = P + 1;
     t759 = Stack[(int)t758];
@@ -2626,7 +2626,7 @@ void explorar_int_int() {
     t767 = t764 + 3;
     Stack[(int)t767] = t763;
     P = P + 4;
-    esValida_int_int();
+    Tablero_esValida_int_int();
     t768 = P + 0;
     t769 = Stack[(int)t768];
     P = P - 4;
@@ -2719,7 +2719,7 @@ L112:
     t829 = t826 + 3;
     Stack[(int)t829] = t825;
     P = P + 4;
-    explorar_int_int();
+    Tablero_explorar_int_int();
     t830 = P + 0;
     t831 = Stack[(int)t830];
     P = P - 4;
@@ -2739,7 +2739,7 @@ L112:
     t843 = t840 + 3;
     Stack[(int)t843] = t839;
     P = P + 4;
-    explorar_int_int();
+    Tablero_explorar_int_int();
     t844 = P + 0;
     t845 = Stack[(int)t844];
     P = P - 4;
@@ -2759,7 +2759,7 @@ L112:
     t857 = t854 + 3;
     Stack[(int)t857] = t853;
     P = P + 4;
-    explorar_int_int();
+    Tablero_explorar_int_int();
     t858 = P + 0;
     t859 = Stack[(int)t858];
     P = P - 4;
@@ -2779,7 +2779,7 @@ L112:
     t871 = t868 + 3;
     Stack[(int)t871] = t867;
     P = P + 4;
-    explorar_int_int();
+    Tablero_explorar_int_int();
     t872 = P + 0;
     t873 = Stack[(int)t872];
     P = P - 4;
@@ -2789,7 +2789,7 @@ L112:
     return;
 }
 
-void contarAccesibles_int_int() {
+void Tablero_contarAccesibles_int_int() {
     double t876, t877, t878, t879, t880, t881, t882, t883, t884, t885, t886, t887, t888, t889, t890, t891, t892, t893, t894, t895, t896, t897, t898, t899, t900, t901, t902, t903, t904;
     t876 = P + 1;
     t877 = Stack[(int)t876];
@@ -2826,7 +2826,7 @@ void contarAccesibles_int_int() {
     t901 = t898 + 3;
     Stack[(int)t901] = t897;
     P = P + 4;
-    explorar_int_int();
+    Tablero_explorar_int_int();
     t902 = P + 0;
     t903 = Stack[(int)t902];
     P = P - 4;
@@ -2835,7 +2835,7 @@ void contarAccesibles_int_int() {
     return;
 }
 
-void imprimir_int_int() {
+void Tablero_imprimir_int_int() {
     double t905, t906, t907, t908, t909, t910, t911, t912, t913, t914, t915, t916, t917, t918, t919, t920, t921, t922, t923, t924, t925, t926, t927, t928, t929, t930, t931, t932, t933, t934, t935, t936, t937, t938, t939, t940, t941, t942, t943, t944, t945, t946, t947, t948, t949, t950, t951, t952, t953, t954, t955, t956, t957, t958, t959, t960, t961, t962, t963, t964, t965, t966, t967, t968, t969, t970, t971, t972, t973, t974, t976, t977, t978, t979, t980, t975, t981, t982, t983, t984, t985, t986, t987, t988, t989, t990, t991, t992, t993, t994, t995, t996, t997, t998, t999, t1000, t1001, t1002, t1003, t1004, t1005, t1006, t1007, t1008, t1009, t1010, t1011, t1012, t1013, t1014, t1015, t1016, t1017, t1018, t1019, t1020, t1021, t1022, t1023, t1024, t1025, t1026, t1027, t1028, t1029, t1030, t1031, t1032, t1033, t1034, t1035, t1036, t1037, t1038, t1039, t1040, t1041, t1042, t1043, t1044, t1045, t1046, t1047, t1048, t1049, t1050, t1051, t1052, t1053, t1054, t1055, t1056, t1057, t1058, t1059, t1060, t1061, t1062, t1063, t1064, t1065, t1066, t1067, t1068, t1069, t1070, t1071, t1072, t1073, t1074, t1075, t1076, t1077, t1078, t1079, t1080, t1081, t1082, t1083, t1084, t1085, t1086, t1087;
     t905 = H;
     Heap[(int)H] = 32;
@@ -3410,6 +3410,8 @@ L127:
 
 void Juego_String() {
     double t1088, t1089, t1090, t1091, t1092, t1093, t1094, t1095, t1096, t1097, t1098, t1099, t1100, t1101, t1102, t1103, t1104, t1105, t1106, t1107, t1108, t1109, t1110, t1111, t1112, t1113, t1114, t1115, t1116, t1117, t1118, t1119, t1120, t1121, t1122, t1123, t1124, t1125, t1126;
+    Heap[(int)H] = 111748715;
+    H = H + 1;
     t1088 = H;
     H = H + 5;
     t1089 = P + 3;
@@ -3430,7 +3432,7 @@ void Juego_String() {
     t1099 = t1098 + 1;
     Stack[(int)t1099] = t1097;
     P = P + 3;
-    inicializar_();
+    Tablero_inicializar_();
     P = P - 3;
     t1100 = P + 2;
     t1101 = Stack[(int)t1100];
@@ -3444,10 +3446,12 @@ void Juego_String() {
     t1108 = t1106 + 2;
     Stack[(int)t1108] = 1;
     P = P + 3;
-    primeraColumnaLibre_int();
+    Tablero_primeraColumnaLibre_int();
     t1109 = P + 0;
     t1110 = Stack[(int)t1109];
     P = P - 3;
+    Heap[(int)H] = 403518370;
+    H = H + 1;
     t1111 = H;
     H = H + 7;
     t1112 = P + 3;
@@ -3515,7 +3519,7 @@ void Juego_String() {
     Heap[(int)t1126] = t1123;
 }
 
-void mover_int() {
+void Juego_mover_int() {
     double t1127, t1128, t1129, t1130, t1131, t1132, t1133, t1134, t1135, t1136, t1137, t1138, t1139, t1140, t1141, t1142, t1143, t1144, t1145, t1146, t1147, t1148, t1149, t1150, t1151, t1152, t1153, t1154, t1155, t1156, t1157, t1158, t1159, t1160, t1161, t1162, t1163, t1164, t1165, t1166, t1167, t1168, t1169, t1170, t1171, t1172, t1173, t1174, t1175, t1176, t1177, t1178, t1179, t1180, t1181, t1182, t1183, t1184, t1185, t1186, t1187, t1188, t1189, t1190, t1191, t1192, t1193, t1194, t1195, t1196, t1197, t1198, t1199, t1200, t1201, t1202, t1203, t1204, t1205, t1206, t1207, t1208, t1209, t1210, t1211, t1212, t1213, t1214, t1215, t1216, t1217, t1218, t1219, t1220, t1221, t1222, t1223, t1224, t1225, t1226, t1227, t1228, t1229, t1230, t1231, t1232, t1233, t1234, t1235, t1236, t1237, t1238, t1239, t1240, t1241, t1242, t1243, t1244, t1245, t1246, t1247, t1248, t1249, t1250, t1251, t1252, t1253, t1254, t1255, t1256, t1257, t1258, t1259, t1260, t1261, t1262, t1263, t1264, t1265, t1266, t1267, t1268, t1269, t1270, t1271, t1272, t1273, t1274, t1275, t1276, t1277, t1278, t1279, t1280, t1281, t1282, t1283, t1284, t1285, t1286, t1287, t1288, t1289, t1290, t1291, t1292, t1293, t1294, t1295, t1296, t1297, t1298, t1299, t1300, t1301, t1302, t1303, t1304, t1305, t1306, t1307, t1308, t1309, t1310, t1311, t1312, t1313, t1314, t1315, t1316, t1317, t1318, t1319, t1320, t1321, t1322, t1323, t1324, t1325, t1326, t1327, t1328, t1329, t1330, t1331, t1332, t1333, t1334, t1335, t1336, t1337, t1338, t1339, t1340, t1341, t1342, t1343, t1344, t1345, t1346, t1347, t1348, t1349, t1350, t1351, t1352, t1353, t1354, t1355, t1356, t1357, t1358, t1359, t1360, t1361, t1362, t1363, t1364, t1365, t1366, t1367, t1368, t1369, t1370, t1371, t1372, t1373, t1374, t1375, t1376, t1377, t1378, t1379, t1380, t1381, t1382, t1383, t1384, t1385, t1386, t1387, t1388, t1389, t1390, t1391, t1392, t1393, t1394, t1395;
     t1127 = P + 1;
     t1128 = Stack[(int)t1127];
@@ -3654,7 +3658,7 @@ L184:
     t1179 = t1176 + 3;
     Stack[(int)t1179] = t1175;
     P = P + 6;
-    esValida_int_int();
+    Tablero_esValida_int_int();
     t1180 = P + 0;
     t1181 = Stack[(int)t1180];
     P = P - 6;
@@ -3680,7 +3684,7 @@ L191:
     t1195 = t1192 + 3;
     Stack[(int)t1195] = t1191;
     P = P + 6;
-    esPared_int_int();
+    Tablero_esPared_int_int();
     t1196 = P + 0;
     t1197 = Stack[(int)t1196];
     P = P - 6;
@@ -3765,7 +3769,7 @@ L189:
     t1214 = t1211 + 3;
     Stack[(int)t1214] = t1210;
     P = P + 6;
-    mover_int_int();
+    Jugador_mover_int_int();
     P = P - 6;
     t1215 = P + 1;
     t1216 = Stack[(int)t1215];
@@ -3783,7 +3787,7 @@ L189:
     t1226 = t1223 + 3;
     Stack[(int)t1226] = t1222;
     P = P + 6;
-    recoger_int_int();
+    Tablero_recoger_int_int();
     t1227 = P + 0;
     t1228 = Stack[(int)t1227];
     P = P - 6;
@@ -3805,7 +3809,7 @@ L189:
     t1242 = t1240 + 2;
     Stack[(int)t1242] = t1239;
     P = P + 6;
-    puntosPorTipo_int();
+    Tablero_puntosPorTipo_int();
     t1243 = P + 0;
     t1244 = Stack[(int)t1243];
     P = P - 6;
@@ -3815,7 +3819,7 @@ L189:
     t1247 = t1245 + 2;
     Stack[(int)t1247] = t1244;
     P = P + 6;
-    sumarPuntos_int();
+    Jugador_sumarPuntos_int();
     P = P - 6;
     t1248 = P + 5;
     t1249 = Stack[(int)t1248];
@@ -3947,7 +3951,7 @@ L194:
     t1277 = t1276 + 1;
     Stack[(int)t1277] = t1275;
     P = P + 6;
-    perderVida_();
+    Jugador_perderVida_();
     P = P - 6;
     t1278 = H;
     Heap[(int)H] = 80;
@@ -4276,7 +4280,7 @@ L193:
     t1348 = t1347 + 1;
     Stack[(int)t1348] = t1346;
     P = P + 6;
-    estaVivo_();
+    Jugador_estaVivo_();
     t1349 = P + 0;
     t1350 = Stack[(int)t1349];
     P = P - 6;
@@ -4499,7 +4503,7 @@ L221:
     return;
 }
 
-void obtenerVeredicto_() {
+void Juego_obtenerVeredicto_() {
     double t1396, t1397, t1398, t1399, t1400, t1401, t1402, t1404, t1403, t1405, t1406, t1407, t1408, t1409;
     t1396 = P + 1;
     t1397 = Stack[(int)t1396];
@@ -4614,7 +4618,10 @@ void main_pig() {
     Stack[(int)t4] = 0;
     t5 = P + 3;
     Stack[(int)t5] = 60;
-    t6 = H;
+    t6 = P + 4;
+    Heap[(int)H] = 71926466;
+    H = H + 1;
+    t7 = H;
     Heap[(int)H] = 0;
     H = H + 1;
     Heap[(int)H] = 0;
@@ -4623,8 +4630,7 @@ void main_pig() {
     H = H + 1;
     Heap[(int)H] = 0;
     H = H + 1;
-    t7 = P + 4;
-    Stack[(int)t7] = t6;
+    Stack[(int)t6] = t7;
     t8 = H;
     Heap[(int)H] = 84;
     H = H + 1;
@@ -4646,7 +4652,7 @@ void main_pig() {
     H = H + 1;
     t9 = P + 9;
     t10 = t9 + 1;
-    Stack[(int)t10] = t6;
+    Stack[(int)t10] = t7;
     t11 = t9 + 2;
     Stack[(int)t11] = t8;
     P = P + 9;
@@ -4672,15 +4678,15 @@ void main_pig() {
     Heap[(int)t16] = 0;
     t17 = P + 5;
     Stack[(int)t17] = t12;
-    t18 = H;
+    t18 = P + 6;
+    t19 = H;
     Heap[(int)H] = 0;
     H = H + 1;
     Heap[(int)H] = 0;
     H = H + 1;
     Heap[(int)H] = 0;
     H = H + 1;
-    t19 = P + 6;
-    Stack[(int)t19] = t18;
+    Stack[(int)t18] = t19;
     t20 = H;
     Heap[(int)H] = 78;
     H = H + 1;
@@ -4694,13 +4700,13 @@ void main_pig() {
     H = H + 1;
     Heap[(int)H] = -1;
     H = H + 1;
-    t21 = t18 + 0;
+    t21 = t19 + 0;
     Heap[(int)t21] = t20;
-    t22 = t18 + 1;
+    t22 = t19 + 1;
     Heap[(int)t22] = 0;
     t23 = P + 5;
     t24 = Stack[(int)t23];
-    t25 = t18 + 2;
+    t25 = t19 + 2;
     Heap[(int)t25] = t24;
     t26 = H;
     Heap[(int)H] = 61;
@@ -5035,6 +5041,8 @@ L1:
     Stack[(int)t36] = t35;
     t37 = P + 0;
     t38 = Stack[(int)t37];
+    Heap[(int)H] = 71926466;
+    H = H + 1;
     t39 = H;
     Heap[(int)H] = 0;
     H = H + 1;
@@ -5151,7 +5159,7 @@ L1:
     t56 = t53 + 3;
     Stack[(int)t56] = 1;
     P = P + 9;
-    contarAccesibles_int_int();
+    Tablero_contarAccesibles_int_int();
     t57 = P + 0;
     t58 = Stack[(int)t57];
     P = P - 9;
@@ -5227,7 +5235,7 @@ L1:
     t70 = t68 + 2;
     Stack[(int)t70] = 2;
     P = P + 9;
-    contarTipo_int();
+    Tablero_contarTipo_int();
     t71 = P + 0;
     t72 = Stack[(int)t71];
     P = P - 9;
@@ -5329,7 +5337,7 @@ L1:
     t99 = t94 + 5;
     Stack[(int)t99] = 1;
     P = P + 9;
-    distanciaAPared_int_int_int_int();
+    Tablero_distanciaAPared_int_int_int_int();
     t100 = P + 0;
     t101 = Stack[(int)t100];
     P = P - 9;
@@ -5374,7 +5382,7 @@ L4:
     t132 = t129 + 3;
     Stack[(int)t132] = t128;
     P = P + 9;
-    imprimir_int_int();
+    Tablero_imprimir_int_int();
     P = P - 9;
     t133 = P + 4;
     t134 = Stack[(int)t133];
@@ -5388,7 +5396,7 @@ L4:
     t142 = t141 + 1;
     Stack[(int)t142] = t140;
     P = P + 9;
-    mostrarEstado_();
+    Jugador_mostrarEstado_();
     P = P - 9;
     t143 = H;
     Heap[(int)H] = 77;
@@ -5544,7 +5552,7 @@ L6:
     t157 = t155 + 2;
     Stack[(int)t157] = t154;
     P = P + 9;
-    mover_int();
+    Juego_mover_int();
     t158 = P + 0;
     t159 = Stack[(int)t158];
     P = P - 9;
@@ -5709,7 +5717,7 @@ L5:
     t184 = t183 + 1;
     Stack[(int)t184] = t182;
     P = P + 9;
-    mostrarEstado_();
+    Jugador_mostrarEstado_();
     P = P - 9;
     t185 = H;
     Heap[(int)H] = 86;
@@ -5752,7 +5760,7 @@ L5:
     t191 = t190 + 1;
     Stack[(int)t191] = t189;
     P = P + 9;
-    obtenerVeredicto_();
+    Juego_obtenerVeredicto_();
     t192 = P + 0;
     t193 = Stack[(int)t192];
     P = P - 9;
