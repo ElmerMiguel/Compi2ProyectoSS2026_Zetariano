@@ -270,6 +270,95 @@ public class GeneradorC3DZ {
         return null;
     }
 
+    private static class MetodoResueltoZ {
+        final String claseDeclarante;
+        final MetodoASTZ metodo;
+        final String firmaDeclarada;
+
+        MetodoResueltoZ(String claseDeclarante, MetodoASTZ metodo, String firmaDeclarada) {
+            this.claseDeclarante = claseDeclarante;
+            this.metodo = metodo;
+            this.firmaDeclarada = firmaDeclarada;
+        }
+    }
+
+    private MetodoResueltoZ buscarMetodoDeclaradoEnJerarquia(
+            String nombreClase,
+            String nombreMetodo,
+            List<ExpresionASTZ> argumentos) {
+
+        if (nombreClase == null || nombreMetodo == null) {
+            return null;
+        }
+
+        Set<String> visitadas = new HashSet<>();
+        String actual = nombreClase;
+        int aridad = argumentos != null ? argumentos.size() : 0;
+        List<MetodoResueltoZ> candidatos = new ArrayList<>();
+
+        while (actual != null && visitadas.add(actual)) {
+            ClaseASTZ clase = clasesAST.get(actual);
+            if (clase == null) {
+                break;
+            }
+
+            for (MiembroASTZ miembro : clase.getMiembros()) {
+                if (miembro instanceof MetodoASTZ metodo) {
+                    if (nombreMetodo.equals(metodo.getNombre()) && metodo.getParametros().size() == aridad) {
+                        String firmaDecl = construirFirma(metodo.getNombre(), metodo.getParametros());
+                        candidatos.add(new MetodoResueltoZ(actual, metodo, firmaDecl));
+                    }
+                }
+            }
+
+            if (!candidatos.isEmpty()) {
+                break;
+            }
+
+            actual = clase.getNombrePadre();
+        }
+
+        if (candidatos.isEmpty()) {
+            return null;
+        }
+
+        for (MetodoResueltoZ cand : candidatos) {
+            boolean exacta = true;
+            for (int i = 0; i < aridad; i++) {
+                String tipoArg = inferirTipoBasicoAST(argumentos.get(i));
+                String tipoParam = cand.metodo.getParametros().get(i).getTipo();
+                if (!tipoParam.equalsIgnoreCase(tipoArg)) {
+                    exacta = false;
+                    break;
+                }
+            }
+            if (exacta) {
+                return cand;
+            }
+        }
+
+        for (MetodoResueltoZ cand : candidatos) {
+            boolean compatible = true;
+            for (int i = 0; i < aridad; i++) {
+                String tipoArg = inferirTipoBasicoAST(argumentos.get(i));
+                String tipoParam = cand.metodo.getParametros().get(i).getTipo();
+                if (!tiposCompatiblesLlamadaC3D(tipoParam, tipoArg)) {
+                    compatible = false;
+                    break;
+                }
+            }
+            if (compatible) {
+                return cand;
+            }
+        }
+
+        if (candidatos.size() == 1) {
+            return candidatos.get(0);
+        }
+
+        return null;
+    }
+
     private boolean esSubclaseAST(
             String posibleHija,
             String posiblePadre) {
@@ -3032,6 +3121,10 @@ public class GeneradorC3DZ {
         // =====================================================
         // 1. RESOLVER BASE
         // =====================================================
+        boolean baseEspecial
+                = "this".equals(nombreBase)
+                || "super".equals(nombreBase);
+
         VariableMemoriaZ variableBase
                 = marcoActual != null
                         ? marcoActual.buscar(nombreBase)
@@ -3040,9 +3133,21 @@ public class GeneradorC3DZ {
         AtributoMemoriaZ atributoBase = null;
 
         // =====================================================
-        // 1.1 BASE LOCAL / PARAMETRO
+        // 1.1 BASE THIS / SUPER / LOCAL / PARAMETRO
         // =====================================================
-        if (variableBase != null) {
+        if (baseEspecial && (claseASTActual != null || claseActual != null)) {
+
+            punteroActual = leerThis();
+            dimensionesActual = 0;
+            tipoActual = "super".equals(nombreBase)
+                    ? (claseASTActual != null ? claseASTActual.getNombrePadre() : claseActual.getNombrePadre())
+                    : (claseASTActual != null ? claseASTActual.getNombre() : claseActual.getNombre());
+
+            if (tipoActual == null) {
+                return null;
+            }
+
+        } else if (variableBase != null) {
 
             tipoActual
                     = variableBase.getTipo();
@@ -3121,7 +3226,7 @@ public class GeneradorC3DZ {
                 return null;
             }
 
-            if (variableBase == null) {
+            if (variableBase == null && atributoBase == null) {
                 return null;
             }
 
@@ -3387,13 +3492,24 @@ public class GeneradorC3DZ {
                 ? claseASTActual.getNombre()
                 : null;
 
+        MetodoResueltoZ resuelto = buscarMetodoDeclaradoEnJerarquia(
+                tipoThis,
+                nombreMetodo,
+                argumentos
+        );
+
+        String declarante = resuelto != null
+                ? resuelto.claseDeclarante
+                : buscarClaseDeclaranteMetodo(tipoThis, firma);
+
+        String firmaMetodoEfectiva = resuelto != null
+                ? resuelto.firmaDeclarada
+                : firma;
+
         String firmaEstatica
                 = construirFirmaEnlaceMetodo(
-                        buscarClaseDeclaranteMetodo(
-                                tipoThis,
-                                firma
-                        ),
-                        firma
+                        declarante,
+                        firmaMetodoEfectiva
                 );
 
         MarcoMetodoZ marcoDestino
@@ -3419,9 +3535,11 @@ public class GeneradorC3DZ {
         // 3. BUSCAR INFORMACION DEL METODO
         // =====================================================
         MetodoASTZ metodoDestino
-                = buscarMetodoPorFirma(
-                        firma
-                );
+                = resuelto != null
+                        ? resuelto.metodo
+                        : buscarMetodoPorFirma(
+                                firmaMetodoEfectiva
+                        );
 
         String tipoRetorno
                 = metodoDestino != null
@@ -3524,7 +3642,7 @@ public class GeneradorC3DZ {
         generarCallMetodoDinamico(
                 thisActual,
                 tipoThis,
-                firma,
+                firmaMetodoEfectiva,
                 firmaEstatica
         );
 
@@ -3749,7 +3867,7 @@ public class GeneradorC3DZ {
                 return null;
             }
 
-            if (variableBase == null) {
+            if (variableBase == null && atributoBase == null) {
 
                 return null;
             }
@@ -3949,16 +4067,27 @@ public class GeneradorC3DZ {
                         argumentos
                 );
 
+        MetodoResueltoZ resuelto = buscarMetodoDeclaradoEnJerarquia(
+                receptor.getTipo(),
+                nombreMetodo,
+                argumentos
+        );
+
+        String declarante = resuelto != null
+                ? resuelto.claseDeclarante
+                : buscarClaseDeclaranteMetodo(receptor.getTipo(), firma);
+
+        String firmaMetodoEfectiva = resuelto != null
+                ? resuelto.firmaDeclarada
+                : firma;
+
         // =====================================================
         // 4. BUSCAR FRAME
         // =====================================================
         String firmaEstatica
                 = construirFirmaEnlaceMetodo(
-                        buscarClaseDeclaranteMetodo(
-                                receptor.getTipo(),
-                                firma
-                        ),
-                        firma
+                        declarante,
+                        firmaMetodoEfectiva
                 );
 
         MarcoMetodoZ marcoDestino
@@ -3984,10 +4113,12 @@ public class GeneradorC3DZ {
         // 5. TIPO DE RETORNO
         // =====================================================
         MetodoASTZ metodoDestino
-                = buscarMetodoPorFirma(
-                        receptor.getTipo(),
-                        firma
-                );
+                = resuelto != null
+                        ? resuelto.metodo
+                        : buscarMetodoPorFirma(
+                                receptor.getTipo(),
+                                firmaMetodoEfectiva
+                        );
 
         String tipoRetorno
                 = metodoDestino != null
@@ -4087,7 +4218,7 @@ public class GeneradorC3DZ {
             generarCallMetodoDinamico(
                     punteroReceptor,
                     receptor.getTipo(),
-                    firma,
+                    firmaMetodoEfectiva,
                     firmaEstatica
             );
         }
@@ -4570,17 +4701,20 @@ public class GeneradorC3DZ {
                         acceso.getBase()
                 );
 
-        if (variable == null) {
+        AtributoMemoriaZ atributo = null;
+        if (variable == null && claseActual != null) {
+            atributo = claseActual.buscarAtributo(acceso.getBase());
+        }
+
+        if (variable == null && atributo == null) {
             return null;
         }
 
-        if (variable.getDimensiones() <= 0) {
-            return null;
-        }
+        int dimensiones = variable != null
+                ? variable.getDimensiones()
+                : atributo.getDimensiones();
 
-        if (cantidadIndices
-                != variable.getDimensiones()) {
-
+        if (dimensiones <= 0 || cantidadIndices != dimensiones) {
             return null;
         }
 
@@ -4602,10 +4736,16 @@ public class GeneradorC3DZ {
             }
         }
 
-        String punteroArreglo
-                = leerVariableStack(
-                        acceso.getBase()
-                );
+        String punteroArreglo;
+        if (variable != null) {
+            punteroArreglo = leerVariableStack(
+                    acceso.getBase()
+            );
+        } else {
+            String dirAttr = generarDireccionAtributoThis(acceso.getBase());
+            punteroArreglo = temporales.nuevoTemporal();
+            agregar("HEAP_GET", dirAttr, null, punteroArreglo);
+        }
 
         List<String> indices
                 = new ArrayList<>();
@@ -4685,7 +4825,7 @@ public class GeneradorC3DZ {
                 "+",
                 punteroArreglo,
                 String.valueOf(
-                        variable.getDimensiones() + 1
+                        dimensiones + 1
                 ),
                 inicioDatos
         );
@@ -6484,7 +6624,7 @@ public class GeneradorC3DZ {
         // STRING
         // Ya es un puntero al Heap.
         // =====================================================
-        if ("String".equals(tipo)) {
+        if ("String".equalsIgnoreCase(tipo)) {
             return valor;
         }
 
@@ -6494,7 +6634,7 @@ public class GeneradorC3DZ {
         // =====================================================
         // INT
         // =====================================================
-        if ("int".equals(tipo)) {
+        if ("int".equalsIgnoreCase(tipo)) {
 
             agregar(
                     "INT_TO_STRING",
@@ -6509,7 +6649,7 @@ public class GeneradorC3DZ {
         // =====================================================
         // DOUBLE
         // =====================================================
-        if ("double".equals(tipo)) {
+        if ("double".equalsIgnoreCase(tipo)) {
 
             agregar(
                     "DOUBLE_TO_STRING",
@@ -6524,7 +6664,7 @@ public class GeneradorC3DZ {
         // =====================================================
         // BOOLEAN
         // =====================================================
-        if ("boolean".equals(tipo)) {
+        if ("boolean".equalsIgnoreCase(tipo) || "bool".equalsIgnoreCase(tipo)) {
 
             agregar(
                     "BOOL_TO_STRING",
@@ -6539,7 +6679,7 @@ public class GeneradorC3DZ {
         // =====================================================
         // CHAR
         // =====================================================
-        if ("char".equals(tipo)) {
+        if ("char".equalsIgnoreCase(tipo)) {
 
             agregar(
                     "CHAR_TO_STRING",
@@ -6551,7 +6691,14 @@ public class GeneradorC3DZ {
             return temporal;
         }
 
-        return null;
+        agregar(
+                "DOUBLE_TO_STRING",
+                valor,
+                null,
+                temporal
+        );
+
+        return temporal;
     }
 
     private void generarCopiaCadenaHeap(
@@ -6678,61 +6825,44 @@ public class GeneradorC3DZ {
         }
 
         // =====================================================
-        // BUSCAR METODOS DE LA CLASE ACTUAL
+        // BUSCAR METODOS EN LA JERARQUIA DE CLASES
         // =====================================================
-        for (MiembroASTZ miembro
-                : claseASTActual.getMiembros()) {
+        ClaseASTZ actualClase = claseASTActual;
+        Set<String> visitadas = new HashSet<>();
 
-            if (!(miembro instanceof MetodoASTZ metodo)) {
-                continue;
-            }
+        while (actualClase != null && visitadas.add(actualClase.getNombre())) {
+            for (MiembroASTZ miembro : actualClase.getMiembros()) {
+                if (!(miembro instanceof MetodoASTZ metodo)) {
+                    continue;
+                }
 
-            if (!nombre.equals(
-                    metodo.getNombre())) {
-                continue;
-            }
+                if (!nombre.equals(metodo.getNombre())) {
+                    continue;
+                }
 
-            // Debe coincidir al menos la cantidad de parametros.
-            if (metodo.getParametros().size()
-                    != llamada.getArgumentos().size()) {
-                continue;
-            }
+                if (metodo.getParametros().size() != llamada.getArgumentos().size()) {
+                    continue;
+                }
 
-            boolean compatible = true;
+                boolean compatible = true;
+                for (int i = 0; i < llamada.getArgumentos().size(); i++) {
+                    ExpresionASTZ argumento = llamada.getArgumentos().get(i);
+                    ParametroASTZ parametro = metodo.getParametros().get(i);
+                    String tipoArgumento = inferirTipoBasicoAST(argumento);
+                    String tipoParametro = parametro.getTipo();
 
-            // =================================================
-            // COMPROBAR TIPOS DE LOS ARGUMENTOS
-            // =================================================
-            for (int i = 0;
-                    i < llamada.getArgumentos().size();
-                    i++) {
+                    if (!tiposCompatiblesLlamadaC3D(tipoParametro, tipoArgumento)) {
+                        compatible = false;
+                        break;
+                    }
+                }
 
-                ExpresionASTZ argumento
-                        = llamada.getArgumentos().get(i);
-
-                ParametroASTZ parametro
-                        = metodo.getParametros().get(i);
-
-                String tipoArgumento
-                        = inferirTipoBasicoAST(
-                                argumento
-                        );
-
-                String tipoParametro
-                        = parametro.getTipo();
-
-                if (!tiposCompatiblesLlamadaC3D(
-                        tipoParametro,
-                        tipoArgumento)) {
-
-                    compatible = false;
-                    break;
+                if (compatible) {
+                    return metodo.getTipoRetorno();
                 }
             }
 
-            if (compatible) {
-                return metodo.getTipoRetorno();
-            }
+            actualClase = actualClase.getNombrePadre() != null ? clasesAST.get(actualClase.getNombrePadre()) : null;
         }
 
         return null;
@@ -6751,6 +6881,11 @@ public class GeneradorC3DZ {
 
         // Coincidencia exacta.
         if (esperado.equals(recibido)) {
+            return true;
+        }
+
+        // Subtipo OOP permitido.
+        if (esSubclaseAST(recibido, esperado)) {
             return true;
         }
 
@@ -6789,66 +6924,47 @@ public class GeneradorC3DZ {
                         : 0;
 
         // =====================================================
-        // BUSCAR METODO COMPATIBLE
+        // BUSCAR METODO COMPATIBLE EN LA JERARQUIA
         // =====================================================
-        for (MiembroASTZ miembro
-                : claseObjeto.getMiembros()) {
+        ClaseASTZ actual = claseObjeto;
+        Set<String> visitadas = new HashSet<>();
 
-            if (!(miembro instanceof MetodoASTZ metodo)) {
-                continue;
-            }
+        while (actual != null && visitadas.add(actual.getNombre())) {
+            for (MiembroASTZ miembro : actual.getMiembros()) {
+                if (!(miembro instanceof MetodoASTZ metodo)) {
+                    continue;
+                }
 
-            if (!nombreMetodo.equals(
-                    metodo.getNombre())) {
+                if (!nombreMetodo.equals(metodo.getNombre())) {
+                    continue;
+                }
 
-                continue;
-            }
+                if (metodo.getParametros().size() != cantidadArgumentos) {
+                    continue;
+                }
 
-            if (metodo.getParametros().size()
-                    != cantidadArgumentos) {
+                boolean compatible = true;
+                for (int i = 0; i < cantidadArgumentos; i++) {
+                    ExpresionASTZ argumento = argumentos.get(i);
+                    ParametroASTZ parametro = metodo.getParametros().get(i);
+                    String tipoArgumento = inferirTipoBasicoAST(argumento);
+                    String tipoParametro = describirTipo(
+                            parametro.getTipo(),
+                            parametro.getDimensiones()
+                    );
 
-                continue;
-            }
+                    if (!tiposCompatiblesLlamadaC3D(tipoParametro, tipoArgumento)) {
+                        compatible = false;
+                        break;
+                    }
+                }
 
-            boolean compatible = true;
-
-            // =================================================
-            // COMPARAR PARAMETROS
-            // =================================================
-            for (int i = 0;
-                    i < cantidadArgumentos;
-                    i++) {
-
-                ExpresionASTZ argumento
-                        = argumentos.get(i);
-
-                ParametroASTZ parametro
-                        = metodo.getParametros().get(i);
-
-                String tipoArgumento
-                        = inferirTipoBasicoAST(
-                                argumento
-                        );
-
-                String tipoParametro
-                        = describirTipo(
-                                parametro.getTipo(),
-                                parametro.getDimensiones()
-                        );
-
-                if (!tiposCompatiblesLlamadaC3D(
-                        tipoParametro,
-                        tipoArgumento)) {
-
-                    compatible = false;
-                    break;
+                if (compatible) {
+                    return metodo.getTipoRetorno();
                 }
             }
 
-            if (compatible) {
-
-                return metodo.getTipoRetorno();
-            }
+            actual = actual.getNombrePadre() != null ? clasesAST.get(actual.getNombrePadre()) : null;
         }
 
         return null;

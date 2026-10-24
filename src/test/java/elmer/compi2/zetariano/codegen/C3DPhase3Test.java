@@ -166,6 +166,19 @@ public class C3DPhase3Test {
         Assertions.assertTrue(llamaBaseConstructor, "Constructor Hijo debe llamar a Base()");
     }
 
+    private void validarCuadruplosSinErrores(List<Cuadruplo> cuadruplos, String nombreSuite) {
+        Assertions.assertFalse(cuadruplos.isEmpty(), nombreSuite + " no debe tener lista vacia de C3D");
+        for (Cuadruplo q : cuadruplos) {
+            Assertions.assertNotEquals("ERROR_C3D", q.getOperador(), nombreSuite + " tiene ERROR_C3D: " + q);
+            Assertions.assertNotEquals("?", q.getArgumento1(), nombreSuite + " tiene '?' en arg1: " + q);
+            Assertions.assertNotEquals("?", q.getArgumento2(), nombreSuite + " tiene '?' en arg2: " + q);
+            Assertions.assertNotEquals("?", q.getResultado(), nombreSuite + " tiene '?' en resultado: " + q);
+            if (q.getResultado() != null) {
+                Assertions.assertFalse(q.getResultado().startsWith("this."), nombreSuite + " tiene 'this.' no resuelto: " + q);
+            }
+        }
+    }
+
     @Test
     public void testSuiteOficialZoologicoC3D() throws Exception {
         var ruta = Path.of("docs/Pruebas/ArchivosProyectoFinal/01_zoologico/Zoologico.pig");
@@ -173,6 +186,7 @@ public class C3DPhase3Test {
             String codigo = Files.readString(ruta);
             var res = new CompilerService().compilePigSource(codigo, ruta.getParent());
             Assertions.assertTrue(res.isSuccess(), "Zoologico.pig debe compilar y enlazar C3D: " + res.getErrors());
+            validarCuadruplosSinErrores(res.getC3dInstructions(), "01_zoologico");
         }
     }
 
@@ -183,6 +197,7 @@ public class C3DPhase3Test {
             String codigo = Files.readString(ruta);
             var res = new CompilerService().compilePigSource(codigo, ruta.getParent());
             Assertions.assertTrue(res.isSuccess(), "Escuela.pig debe compilar y enlazar C3D: " + res.getErrors());
+            validarCuadruplosSinErrores(res.getC3dInstructions(), "02_escuela");
         }
     }
 
@@ -193,6 +208,7 @@ public class C3DPhase3Test {
             String codigo = Files.readString(ruta);
             var res = new CompilerService().compilePigSource(codigo, ruta.getParent());
             Assertions.assertTrue(res.isSuccess(), "Figuras.pig debe compilar y enlazar C3D: " + res.getErrors());
+            validarCuadruplosSinErrores(res.getC3dInstructions(), "04_figuras");
         }
     }
 
@@ -203,6 +219,7 @@ public class C3DPhase3Test {
             String codigo = Files.readString(ruta);
             var res = new CompilerService().compilePigSource(codigo, ruta.getParent());
             Assertions.assertTrue(res.isSuccess(), "Arena.pig debe compilar y enlazar C3D: " + res.getErrors());
+            validarCuadruplosSinErrores(res.getC3dInstructions(), "05_arena");
         }
     }
 }
