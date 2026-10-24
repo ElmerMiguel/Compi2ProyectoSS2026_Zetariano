@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import elmer.compi2.zetariano.CompilerService;
 import elmer.compi2.zetariano.NativeCompilerService;
+import elmer.compi2.zetariano.RarsExecutionService;
 
 /**
  * Ventana Principal del Compilador Zetariano con arquitectura desacoplada y responsiva.
@@ -31,8 +32,10 @@ public class MainWindow extends JFrame {
     private final OutputPanel outputPanel;
 
     private final JButton compileBtn = new JButton("Compilar Proyecto (F5)");
-    private final JButton executeBtn = new JButton("Ejecutar Programa (F6)");
+    private final JButton executeRarsBtn = new JButton("Ejecutar en RARS (F7)");
+    private final JButton executeBtn = new JButton("Ejecutar C (F6)");
     private final JLabel statusLabel = new JLabel("Listo");
+    private final RarsExecutionService rarsExecutionService = new RarsExecutionService();
     private CompilerService.CompilationResult lastResult = null;
 
     public MainWindow() {
@@ -122,7 +125,18 @@ public class MainWindow extends JFrame {
         itemRun.addActionListener(e -> triggerCompilation());
         menuCompilar.add(itemRun);
 
-        JMenuItem itemExec = new JMenuItem("Ejecutar Programa (Terminal)");
+        JMenuItem itemRars = new JMenuItem("Ejecutar en RARS");
+        itemRars.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F7, 0));
+        itemRars.addActionListener(e -> triggerRarsExecution(false));
+        menuCompilar.add(itemRars);
+
+        JMenuItem itemRarsGui = new JMenuItem("Abrir Simulador RARS (GUI)");
+        itemRarsGui.addActionListener(e -> triggerRarsExecution(true));
+        menuCompilar.add(itemRarsGui);
+
+        menuCompilar.addSeparator();
+
+        JMenuItem itemExec = new JMenuItem("Ejecutar Programa C (Terminal)");
         itemExec.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F6, 0));
         itemExec.addActionListener(e -> triggerExecution());
         menuCompilar.add(itemExec);
@@ -156,6 +170,9 @@ public class MainWindow extends JFrame {
 
         compileBtn.addActionListener(e -> triggerCompilation());
         toolBar.add(compileBtn);
+
+        executeRarsBtn.addActionListener(e -> triggerRarsExecution(false));
+        toolBar.add(executeRarsBtn);
 
         executeBtn.addActionListener(e -> triggerExecution());
         toolBar.add(executeBtn);
@@ -295,17 +312,19 @@ public class MainWindow extends JFrame {
 
         outputPanel.setConsoleOutput(lastResult.getConsoleLog());
         outputPanel.setC3DOutput(lastResult.getC3dText());
+        outputPanel.setRiscVOutput(lastResult.getCodigoRiscV());
         outputPanel.setCCodeOutput(lastResult.getGeneratedCCode());
         outputPanel.setErrors(lastResult.getErrors());
 
         if (lastResult.isSuccess()) {
             statusLabel.setText("Compilacion finalizada exitosamente.");
             StringBuilder msg = new StringBuilder();
-            msg.append("Compilacion finalizada con exito.\n");
-            msg.append("Codigo C unificado generado en: ").append(baseDir.resolve("salida_unificada.c")).append("\n");
+            msg.append("Compilacion finalizada con exito.\n\n");
+            msg.append("1. Ensamblador RISC-V generado en:\n   ").append(baseDir.resolve("salida_riscv.s")).append("\n");
+            msg.append("   -> Puedes simularlo con el boton 'Ejecutar en RARS (F7)'.\n\n");
+            msg.append("2. Codigo C unificado generado en:\n   ").append(baseDir.resolve("salida_unificada.c")).append("\n");
             if (lastResult.getNativeBinaryPath() != null) {
-                msg.append("Binario nativo compilado en: ").append(lastResult.getNativeBinaryPath().toAbsolutePath()).append("\n\n");
-                msg.append("Puedes ejecutarlo haciendo clic en 'Ejecutar Programa' (F6).");
+                msg.append("   -> Binario nativo (GCC): ").append(lastResult.getNativeBinaryPath().getFileName()).append("\n");
             }
             JOptionPane.showMessageDialog(this, msg.toString(), "Compilacion Exitosa", JOptionPane.INFORMATION_MESSAGE);
         } else {
@@ -313,6 +332,58 @@ public class MainWindow extends JFrame {
             JOptionPane.showMessageDialog(this,
                     "Se encontraron errores durante la compilacion.\nRevisa el panel de Errores y la Consola.",
                     "Errores de Compilacion", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private void triggerRarsExecution(boolean abrirGui) {
+        if (lastResult == null || !lastResult.isSuccess() || lastResult.getArchivoRiscV() == null) {
+            triggerCompilation();
+        }
+
+        if (lastResult != null && lastResult.isSuccess() && lastResult.getArchivoRiscV() != null) {
+            Path asm = lastResult.getArchivoRiscV();
+            if (!Files.exists(asm)) {
+                JOptionPane.showMessageDialog(this,
+                        "El archivo ensamblador RISC-V no existe: " + asm.toAbsolutePath(),
+                        "Archivo no encontrado", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (abrirGui) {
+                statusLabel.setText("Lanzando interfaz grafica de RARS 1.6...");
+                boolean lanzada = rarsExecutionService.abrirGui(asm);
+                if (!lanzada) {
+                    JOptionPane.showMessageDialog(this,
+                            "No se pudo iniciar la interfaz grafica de RARS 1.6.",
+                            "Error RARS", JOptionPane.ERROR_MESSAGE);
+                }
+                return;
+            }
+
+            statusLabel.setText("Ejecutando en simulador RARS 1.6...");
+            outputPanel.selectTabByTitle("Consola");
+            outputPanel.appendConsole("\n========================================\nINICIANDO SIMULACION RISC-V EN RARS 1.6\n========================================\n");
+
+            new javax.swing.SwingWorker<RarsExecutionService.RarsExecutionResult, Void>() {
+                @Override
+                protected RarsExecutionService.RarsExecutionResult doInBackground() {
+                    return rarsExecutionService.ejecutar(asm, 15, null);
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        var res = get();
+                        outputPanel.appendConsole(res.getOutput());
+                        outputPanel.appendConsole("\n--- Simulacion finalizada con codigo de salida: "
+                                + res.getExitCode() + " ---\n");
+                        statusLabel.setText("Simulacion RARS finalizada (codigo " + res.getExitCode() + ").");
+                    } catch (Exception ex) {
+                        outputPanel.appendConsole("\n[ERROR RARS]: " + ex.getMessage() + "\n");
+                        statusLabel.setText("Error en simulacion RARS.");
+                    }
+                }
+            }.execute();
         }
     }
 

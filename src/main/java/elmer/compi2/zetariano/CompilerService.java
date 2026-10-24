@@ -7,6 +7,7 @@ import elmer.compi2.zetariano.antlr.ypython.YParser;
 import elmer.compi2.zetariano.codegen.C3DEmitter;
 import elmer.compi2.zetariano.codegen.Cuadruplo;
 import elmer.compi2.zetariano.codegen.piglatin.PigC3DEmitter;
+import elmer.compi2.zetariano.codegen.riscv.GeneradorRiscV;
 import elmer.compi2.zetariano.codegen.zeta.ZC3DEmitter;
 import elmer.compi2.zetariano.codigo.unificado.GeneradorCUnificado;
 import elmer.compi2.zetariano.core.node.NodoAST;
@@ -45,18 +46,23 @@ public class CompilerService {
         private final String consoleLog;
         private final List<Cuadruplo> c3dInstructions;
         private final String c3dText;
+        private final String codigoRiscV;
+        private final Path archivoRiscV;
         private final String generatedCCode;
         private final Path nativeBinaryPath;
         private final String nativeCompileLog;
         private final List<ErrorReport> errors;
 
         public CompilationResult(boolean success, String consoleLog, List<Cuadruplo> c3dInstructions,
-                                 String c3dText, String generatedCCode, Path nativeBinaryPath,
+                                 String c3dText, String codigoRiscV, Path archivoRiscV,
+                                 String generatedCCode, Path nativeBinaryPath,
                                  String nativeCompileLog, List<ErrorReport> errors) {
             this.success = success;
             this.consoleLog = consoleLog;
             this.c3dInstructions = (c3dInstructions != null) ? c3dInstructions : new ArrayList<>();
             this.c3dText = c3dText;
+            this.codigoRiscV = codigoRiscV != null ? codigoRiscV : "";
+            this.archivoRiscV = archivoRiscV;
             this.generatedCCode = generatedCCode;
             this.nativeBinaryPath = nativeBinaryPath;
             this.nativeCompileLog = nativeCompileLog;
@@ -77,6 +83,14 @@ public class CompilerService {
 
         public String getC3dText() {
             return c3dText;
+        }
+
+        public String getCodigoRiscV() {
+            return codigoRiscV;
+        }
+
+        public Path getArchivoRiscV() {
+            return archivoRiscV;
         }
 
         public String getGeneratedCCode() {
@@ -104,6 +118,8 @@ public class CompilerService {
             private String consoleLog;
             private List<Cuadruplo> c3dInstructions = new ArrayList<>();
             private String c3dText;
+            private String codigoRiscV = "";
+            private Path archivoRiscV;
             private String generatedCCode;
             private Path nativeBinaryPath;
             private String nativeCompileLog;
@@ -129,6 +145,16 @@ public class CompilerService {
                 return this;
             }
 
+            public Builder codigoRiscV(String codigoRiscV) {
+                this.codigoRiscV = codigoRiscV;
+                return this;
+            }
+
+            public Builder archivoRiscV(Path archivoRiscV) {
+                this.archivoRiscV = archivoRiscV;
+                return this;
+            }
+
             public Builder generatedCCode(String generatedCCode) {
                 this.generatedCCode = generatedCCode;
                 return this;
@@ -151,7 +177,7 @@ public class CompilerService {
 
             public CompilationResult build() {
                 return new CompilationResult(success, consoleLog, c3dInstructions, c3dText,
-                        generatedCCode, nativeBinaryPath, nativeCompileLog, errors);
+                        codigoRiscV, archivoRiscV, generatedCCode, nativeBinaryPath, nativeCompileLog, errors);
             }
         }
     }
@@ -274,7 +300,14 @@ public class CompilerService {
             }
             log.append("Total C3D Enlazado: ").append(enlazado.size()).append(" instrucciones.\n");
 
-            // 7. Generacion de Codigo C Unificado
+            // 7. Generacion de Ensamblador RISC-V RV32
+            GeneradorRiscV generadorRiscV = new GeneradorRiscV(enlazado);
+            String codigoRiscV = generadorRiscV.generar();
+            Path salidaRiscV = base.resolve("salida_riscv.s");
+            Files.writeString(salidaRiscV, codigoRiscV, StandardCharsets.UTF_8);
+            log.append("Codigo RISC-V generado exitosamente en: ").append(salidaRiscV.toAbsolutePath()).append("\n");
+
+            // 8. Generacion de Codigo C Unificado
             GeneradorCUnificado generadorC = new GeneradorCUnificado(enlazado);
             String codigoC = generadorC.generar();
 
@@ -283,7 +316,7 @@ public class CompilerService {
             Files.writeString(salidaC, codigoC, StandardCharsets.UTF_8);
             log.append("Codigo C generado exitosamente en: ").append(salidaC.toAbsolutePath()).append("\n");
 
-            // 8. Compilar codigo C con GCC nativo
+            // 9. Compilar codigo C con GCC nativo
             var nativeRes = NativeCompilerService.compileC(salidaC);
             Path binaryPath = nativeRes.getBinaryPath();
             if (nativeRes.isSuccess()) {
@@ -293,7 +326,7 @@ public class CompilerService {
             }
 
             log.append("\n========================================\n");
-            log.append("COMPILACION EXITOSA CON C3D, C Y BINARIO NATIVO\n");
+            log.append("COMPILACION EXITOSA CON C3D, RISC-V, C Y BINARIO NATIVO\n");
             log.append("========================================\n");
 
             // Construir texto legible de C3D
@@ -307,6 +340,8 @@ public class CompilerService {
                     .consoleLog(log.toString())
                     .c3dInstructions(enlazado)
                     .c3dText(c3dText.toString())
+                    .codigoRiscV(codigoRiscV)
+                    .archivoRiscV(salidaRiscV)
                     .generatedCCode(codigoC)
                     .nativeBinaryPath(binaryPath)
                     .nativeCompileLog(nativeRes.getOutputMessage())

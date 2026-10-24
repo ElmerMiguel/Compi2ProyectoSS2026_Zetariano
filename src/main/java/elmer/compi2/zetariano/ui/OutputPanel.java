@@ -25,6 +25,7 @@ public class OutputPanel extends JPanel {
 
     private final JTextArea consoleArea;
     private final JTextArea c3dArea;
+    private final JTextArea riscvArea;
     private final JTextArea cCodeArea;
 
     private final DefaultTableModel errorsModel;
@@ -45,13 +46,19 @@ public class OutputPanel extends JPanel {
         c3dScroll.setRowHeaderView(new LineNumberGutter(c3dArea));
         tabbedPane.addTab("Cuadruplos (C3D)", c3dScroll);
 
-        // 3. Codigo C generado
+        // 3. Ensamblador RISC-V generado
+        riscvArea = createTextArea();
+        JScrollPane riscvScroll = new JScrollPane(riscvArea);
+        riscvScroll.setRowHeaderView(new LineNumberGutter(riscvArea));
+        tabbedPane.addTab("Ensamblador RISC-V", riscvScroll);
+
+        // 4. Codigo C generado
         cCodeArea = createTextArea();
         JScrollPane cCodeScroll = new JScrollPane(cCodeArea);
         cCodeScroll.setRowHeaderView(new LineNumberGutter(cCodeArea));
         tabbedPane.addTab("Codigo C", cCodeScroll);
 
-        // 4. Tabla de Errores
+        // 5. Tabla de Errores
         errorsModel = new DefaultTableModel(new Object[]{"Fase", "Linea", "Columna", "Mensaje"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -86,12 +93,32 @@ public class OutputPanel extends JPanel {
         consoleArea.setText(text == null ? "" : text);
     }
 
+    public void appendConsole(String text) {
+        if (text != null) {
+            consoleArea.append(text);
+            consoleArea.setCaretPosition(consoleArea.getDocument().getLength());
+        }
+    }
+
     public void setC3DOutput(String text) {
         c3dArea.setText(text == null ? "" : text);
     }
 
+    public void setRiscVOutput(String text) {
+        riscvArea.setText(text == null ? "" : text);
+    }
+
     public void setCCodeOutput(String text) {
         cCodeArea.setText(text == null ? "" : text);
+    }
+
+    public void selectTabByTitle(String title) {
+        for (int i = 0; i < tabbedPane.getTabCount(); i++) {
+            if (tabbedPane.getTitleAt(i).equalsIgnoreCase(title)) {
+                tabbedPane.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 
     public void setErrors(List<ErrorReport> errors) {
@@ -110,6 +137,7 @@ public class OutputPanel extends JPanel {
     public void clearAll() {
         consoleArea.setText("");
         c3dArea.setText("");
+        riscvArea.setText("");
         cCodeArea.setText("");
         errorsModel.setRowCount(0);
     }
