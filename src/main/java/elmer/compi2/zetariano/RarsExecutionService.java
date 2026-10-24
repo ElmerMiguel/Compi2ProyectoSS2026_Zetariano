@@ -1,10 +1,8 @@
 package elmer.compi2.zetariano;
 
-import lombok.Builder;
-import lombok.Getter;
-
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -21,8 +19,9 @@ public class RarsExecutionService {
 
     private static final String RARS_JAR_NAME = "tools/rars1_6.jar";
 
-    @Getter
-    @Builder
+    /**
+     * DTO con el resultado de la simulacion en RARS.
+     */
     public static class RarsExecutionResult {
         private final boolean success;
         private final int exitCode;
@@ -31,8 +30,95 @@ public class RarsExecutionService {
         private final String combinedOutput;
         private final boolean timedOut;
 
+        public RarsExecutionResult(
+                boolean success,
+                int exitCode,
+                String stdout,
+                String stderr,
+                String combinedOutput,
+                boolean timedOut
+        ) {
+            this.success = success;
+            this.exitCode = exitCode;
+            this.stdout = stdout;
+            this.stderr = stderr;
+            this.combinedOutput = combinedOutput;
+            this.timedOut = timedOut;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public int getExitCode() {
+            return exitCode;
+        }
+
+        public String getStdout() {
+            return stdout;
+        }
+
+        public String getStderr() {
+            return stderr;
+        }
+
+        public String getCombinedOutput() {
+            return combinedOutput;
+        }
+
+        public boolean isTimedOut() {
+            return timedOut;
+        }
+
         public String getOutput() {
             return combinedOutput != null ? combinedOutput : "";
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+            private boolean success;
+            private int exitCode;
+            private String stdout;
+            private String stderr;
+            private String combinedOutput;
+            private boolean timedOut;
+
+            public Builder success(boolean success) {
+                this.success = success;
+                return this;
+            }
+
+            public Builder exitCode(int exitCode) {
+                this.exitCode = exitCode;
+                return this;
+            }
+
+            public Builder stdout(String stdout) {
+                this.stdout = stdout;
+                return this;
+            }
+
+            public Builder stderr(String stderr) {
+                this.stderr = stderr;
+                return this;
+            }
+
+            public Builder combinedOutput(String combinedOutput) {
+                this.combinedOutput = combinedOutput;
+                return this;
+            }
+
+            public Builder timedOut(boolean timedOut) {
+                this.timedOut = timedOut;
+                return this;
+            }
+
+            public RarsExecutionResult build() {
+                return new RarsExecutionResult(success, exitCode, stdout, stderr, combinedOutput, timedOut);
+            }
         }
     }
 
@@ -139,6 +225,91 @@ public class RarsExecutionService {
                 .combinedOutput(output.toString())
                 .timedOut(timedOut)
                 .build();
+    }
+
+    /**
+     * Lanza la simulacion interactiva en una terminal grafica externa.
+     */
+    public boolean launchInTerminal(Path archivoAsm) {
+        if (archivoAsm == null || !Files.exists(archivoAsm)) {
+            return false;
+        }
+
+        Path rarsJar = resolverRarsJar();
+        if (!Files.exists(rarsJar)) {
+            return false;
+        }
+
+        ProcessBuilder pb = createTerminalProcess(rarsJar, archivoAsm);
+        if (pb == null) {
+            return false;
+        }
+
+        try {
+            if (archivoAsm.getParent() != null) {
+                pb.directory(archivoAsm.getParent().toFile());
+            }
+            pb.start();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private ProcessBuilder createTerminalProcess(Path rarsJar, Path archivoAsm) {
+        String jarPath = rarsJar.toAbsolutePath().toString();
+        String asmPath = archivoAsm.toAbsolutePath().toString();
+
+        if (isWindows()) {
+            String winCmd = "java -jar \"" + jarPath + "\" nc sm \"" + asmPath + "\"";
+            return new ProcessBuilder("cmd.exe", "/c", "start", "Simulacion RISC-V en RARS", "cmd.exe", "/k", winCmd);
+        }
+
+        if (isMac()) {
+            String script = "tell application \"Terminal\" to do script \"java -jar '" + jarPath + "' nc sm '" + asmPath + "'; echo; read -p 'Presiona Enter para cerrar...'\"";
+            return new ProcessBuilder("osascript", "-e", script);
+        }
+
+        // Linux terminals
+        String command = "java -jar \"" + jarPath + "\" nc sm \"" + asmPath + "\"; echo; echo 'Simulacion RARS finalizada. Presiona Enter para cerrar...'; read";
+
+        if (isCommandAvailable("x-terminal-emulator")) {
+            return new ProcessBuilder("x-terminal-emulator", "-e", "bash", "-lc", command);
+        }
+        if (isCommandAvailable("gnome-terminal")) {
+            return new ProcessBuilder("gnome-terminal", "--", "bash", "-lc", command);
+        }
+        if (isCommandAvailable("konsole")) {
+            return new ProcessBuilder("konsole", "-e", "bash", "-lc", command);
+        }
+        if (isCommandAvailable("xfce4-terminal")) {
+            return new ProcessBuilder("xfce4-terminal", "--command", "bash -lc \"" + command + "\"");
+        }
+        if (isCommandAvailable("xterm")) {
+            return new ProcessBuilder("xterm", "-e", "bash", "-lc", command);
+        }
+
+        return null;
+    }
+
+    private static boolean isWindows() {
+        return System.getProperty("os.name", "").toLowerCase().contains("win");
+    }
+
+    private static boolean isMac() {
+        return System.getProperty("os.name", "").toLowerCase().contains("mac");
+    }
+
+    private static boolean isCommandAvailable(String cmd) {
+        try {
+            ProcessBuilder pb = isWindows()
+                    ? new ProcessBuilder("where", cmd)
+                    : new ProcessBuilder("which", cmd);
+            Process p = pb.start();
+            return p.waitFor() == 0;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean abrirGui(Path archivoAsm) {

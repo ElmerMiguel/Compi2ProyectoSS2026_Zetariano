@@ -125,10 +125,14 @@ public class MainWindow extends JFrame {
         itemRun.addActionListener(e -> triggerCompilation());
         menuCompilar.add(itemRun);
 
-        JMenuItem itemRars = new JMenuItem("Ejecutar en RARS");
+        JMenuItem itemRars = new JMenuItem("Ejecutar en RARS (Terminal)");
         itemRars.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F7, 0));
         itemRars.addActionListener(e -> triggerRarsExecution(false));
         menuCompilar.add(itemRars);
+
+        JMenuItem itemRarsConsola = new JMenuItem("Ejecutar en RARS (Consola interna)");
+        itemRarsConsola.addActionListener(e -> triggerRarsConsoleExecution());
+        menuCompilar.add(itemRarsConsola);
 
         JMenuItem itemRarsGui = new JMenuItem("Abrir Simulador RARS (GUI)");
         itemRarsGui.addActionListener(e -> triggerRarsExecution(true));
@@ -360,6 +364,28 @@ public class MainWindow extends JFrame {
                 return;
             }
 
+            statusLabel.setText("Lanzando simulador RARS en terminal: " + asm.getFileName());
+            boolean launched = rarsExecutionService.launchInTerminal(asm);
+            if (!launched) {
+                triggerRarsConsoleExecution();
+            }
+        }
+    }
+
+    private void triggerRarsConsoleExecution() {
+        if (lastResult == null || !lastResult.isSuccess() || lastResult.getArchivoRiscV() == null) {
+            triggerCompilation();
+        }
+
+        if (lastResult != null && lastResult.isSuccess() && lastResult.getArchivoRiscV() != null) {
+            Path asm = lastResult.getArchivoRiscV();
+            if (!Files.exists(asm)) {
+                JOptionPane.showMessageDialog(this,
+                        "El archivo ensamblador RISC-V no existe: " + asm.toAbsolutePath(),
+                        "Archivo no encontrado", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             statusLabel.setText("Ejecutando en simulador RARS 1.6...");
             outputPanel.selectTabByTitle("Consola");
             outputPanel.appendConsole("\n========================================\nINICIANDO SIMULACION RISC-V EN RARS 1.6\n========================================\n");
@@ -373,7 +399,7 @@ public class MainWindow extends JFrame {
                 @Override
                 protected void done() {
                     try {
-                        var res = get();
+                        RarsExecutionService.RarsExecutionResult res = get();
                         outputPanel.appendConsole(res.getOutput());
                         outputPanel.appendConsole("\n--- Simulacion finalizada con codigo de salida: "
                                 + res.getExitCode() + " ---\n");
