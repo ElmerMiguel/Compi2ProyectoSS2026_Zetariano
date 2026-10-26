@@ -1,5 +1,6 @@
 package elmer.compi2.zetariano.analysis.semantic;
 
+import elmer.compi2.zetariano.TestPathResolver;
 import elmer.compi2.zetariano.antlr.zeta.ZLexer;
 import elmer.compi2.zetariano.antlr.zeta.ZParser;
 import elmer.compi2.zetariano.analysis.semantic.zeta.ClaseZ;
@@ -17,10 +18,10 @@ public class ZAnalyzerTest {
 
     @Test
     public void testAnalisisSemanticoZ() throws Exception {
-        File archivoZ = new File("docs/Pruebas/Prueba.z");
-        assertTrue(archivoZ.exists(), "El archivo docs/Pruebas/Prueba.z debe existir");
+        java.nio.file.Path pathZ = TestPathResolver.resolve("docs/Pruebas/Prueba.z");
+        assertTrue(Files.exists(pathZ), "El archivo Prueba.z debe existir en docs/Pruebas, PruebaReal o ruta configurada");
 
-        String codigo = Files.readString(archivoZ.toPath());
+        String codigo = Files.readString(pathZ);
         ZLexer lexer = new ZLexer(CharStreams.fromString(codigo));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         ZParser parser = new ZParser(tokens);

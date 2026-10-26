@@ -1,5 +1,6 @@
 package elmer.compi2.zetariano.analysis.semantic;
 
+import elmer.compi2.zetariano.TestPathResolver;
 import elmer.compi2.zetariano.antlr.piglatin.PigLatinLexer;
 import elmer.compi2.zetariano.antlr.piglatin.PigLatinParser;
 import org.antlr.v4.runtime.CharStreams;
@@ -17,10 +18,10 @@ public class PigAnalyzerTest {
 
     @Test
     public void testAnalisisSemanticoPigConImports() throws Exception {
-        File archivoPig = new File("docs/Pruebas/Principal.pig");
-        assertTrue(archivoPig.exists(), "El archivo docs/Pruebas/Principal.pig debe existir");
+        Path pathPig = TestPathResolver.resolve("docs/Pruebas/Principal.pig");
+        assertTrue(Files.exists(pathPig), "El archivo Principal.pig debe existir");
 
-        String codigo = Files.readString(archivoPig.toPath());
+        String codigo = Files.readString(pathPig);
         PigLatinLexer lexer = new PigLatinLexer(CharStreams.fromString(codigo));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         PigLatinParser parser = new PigLatinParser(tokens);
@@ -28,7 +29,7 @@ public class PigAnalyzerTest {
         PigLatinParser.ProgramaContext arbol = parser.programa();
         assertEquals(0, parser.getNumberOfSyntaxErrors(), "No debe haber errores sintacticos");
 
-        Path baseDir = Path.of("docs/Pruebas");
+        Path baseDir = pathPig.getParent();
         PigAnalyzer semantico = new PigAnalyzer(baseDir);
         semantico.visit(arbol);
 

@@ -1,5 +1,6 @@
 package elmer.compi2.zetariano.codegen;
 
+import elmer.compi2.zetariano.TestPathResolver;
 import elmer.compi2.zetariano.antlr.piglatin.PigLatinLexer;
 import elmer.compi2.zetariano.antlr.piglatin.PigLatinParser;
 import elmer.compi2.zetariano.antlr.ypython.YLexer;
@@ -31,11 +32,13 @@ public class UnifiedCGeneratorTest {
 
     @Test
     public void testCompilacionCompletaYGeneracionC() throws Exception {
-        Path baseDir = Path.of("docs/Pruebas");
+        Path pathPruebaZ = TestPathResolver.resolve("docs/Pruebas/Prueba.z");
+        assertTrue(Files.exists(pathPruebaZ), "Prueba.z debe existir");
+        Path baseDir = pathPruebaZ.getParent();
 
         // 1. Z
         CargadorImportZPig cargadorZ = new CargadorImportZPig();
-        TablaMemoriaZ tablaZ = cargadorZ.cargarTabla(baseDir.resolve("Prueba.z").toString());
+        TablaMemoriaZ tablaZ = cargadorZ.cargarTabla(pathPruebaZ.toString());
         assertNotNull(tablaZ);
         ZC3DEmitter emitterZ = new ZC3DEmitter();
         List<Cuadruplo> c3dZ = emitterZ.generar(cargadorZ.getUltimoProgramaAST());
@@ -44,7 +47,9 @@ public class UnifiedCGeneratorTest {
 
         // 2. Y
         CargadorImportYPig cargadorY = new CargadorImportYPig();
-        String codigoY = Files.readString(baseDir.resolve("Utilidades.y"));
+        Path pathUtilY = TestPathResolver.resolve("docs/Pruebas/Utilidades.y");
+        assertTrue(Files.exists(pathUtilY), "Utilidades.y debe existir");
+        String codigoY = Files.readString(pathUtilY);
         YLexer lexerY = new YLexer(CharStreams.fromString(codigoY));
         YParser parserY = new YParser(new CommonTokenStream(lexerY));
         NodoAST astY = new YTreeBuilder().visit(parserY.programa());
@@ -54,13 +59,15 @@ public class UnifiedCGeneratorTest {
         assertFalse(c3dY.isEmpty());
 
         // 3. Pig Latin
-        String codigoPig = Files.readString(baseDir.resolve("Principal.pig"));
+        Path pathPrincipalPig = TestPathResolver.resolve("docs/Pruebas/Principal.pig");
+        assertTrue(Files.exists(pathPrincipalPig), "Principal.pig debe existir");
+        String codigoPig = Files.readString(pathPrincipalPig);
         PigLatinLexer lexerPig = new PigLatinLexer(CharStreams.fromString(codigoPig));
         PigLatinParser parserPig = new PigLatinParser(new CommonTokenStream(lexerPig));
         ProgramaASTPig astPig = (ProgramaASTPig) new PigTreeBuilder().visit(parserPig.programa());
 
         RegistroImportsPig registro = new RegistroImportsPig();
-        new AdaptadorImportYPig().importar(cargadorY.cargarSemantico(baseDir.resolve("Utilidades.y").toString()), registro);
+        new AdaptadorImportYPig().importar(cargadorY.cargarSemantico(pathUtilY.toString()), registro);
         new AdaptadorImportZPig().importar(tablaZ, registro);
 
         MarcoPrincipalPig marcoPig = new ConstructorMemoriaPig().construir(astPig);

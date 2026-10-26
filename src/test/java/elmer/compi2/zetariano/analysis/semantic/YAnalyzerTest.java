@@ -1,8 +1,10 @@
 package elmer.compi2.zetariano.analysis.semantic;
 
+import elmer.compi2.zetariano.TestPathResolver;
 import elmer.compi2.zetariano.imports.CargadorImportYPig;
 import org.junit.jupiter.api.Test;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,11 +13,11 @@ public class YAnalyzerTest {
 
     @Test
     public void testAnalisisSemanticoY() throws Exception {
-        File archivoY = new File("docs/Pruebas/Utilidades.y");
-        assertTrue(archivoY.exists(), "El archivo docs/Pruebas/Utilidades.y debe existir");
+        Path pathY = TestPathResolver.resolve("docs/Pruebas/Utilidades.y");
+        assertTrue(Files.exists(pathY), "El archivo Utilidades.y debe existir en docs/Pruebas, PruebaReal o ruta configurada");
 
         CargadorImportYPig cargador = new CargadorImportYPig();
-        SemanticoY semantico = cargador.cargarSemantico(archivoY.getAbsolutePath());
+        SemanticoY semantico = cargador.cargarSemantico(pathY.toAbsolutePath().toString());
 
         assertNotNull(semantico, "El analizador semántico no debe ser nulo");
         assertNotNull(semantico.getTabla(), "La tabla de símbolos no debe ser nula");

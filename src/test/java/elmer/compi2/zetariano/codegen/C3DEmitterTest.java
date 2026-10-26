@@ -1,5 +1,6 @@
 package elmer.compi2.zetariano.codegen;
 
+import elmer.compi2.zetariano.TestPathResolver;
 import elmer.compi2.zetariano.antlr.piglatin.PigLatinLexer;
 import elmer.compi2.zetariano.antlr.piglatin.PigLatinParser;
 import elmer.compi2.zetariano.antlr.ypython.YLexer;
@@ -28,10 +29,10 @@ public class C3DEmitterTest {
 
     @Test
     public void testGeneracionC3D_Y() throws Exception {
-        File archivoY = new File("docs/Pruebas/Utilidades.y");
-        assertTrue(archivoY.exists());
+        Path pathY = TestPathResolver.resolve("docs/Pruebas/Utilidades.y");
+        assertTrue(Files.exists(pathY));
 
-        String codigo = Files.readString(archivoY.toPath());
+        String codigo = Files.readString(pathY);
         YLexer lexer = new YLexer(CharStreams.fromString(codigo));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         YParser parser = new YParser(tokens);
@@ -51,11 +52,11 @@ public class C3DEmitterTest {
 
     @Test
     public void testGeneracionC3D_PigLatinConImports() throws Exception {
-        File archivoPig = new File("docs/Pruebas/Principal.pig");
-        assertTrue(archivoPig.exists());
+        Path pathPig = TestPathResolver.resolve("docs/Pruebas/Principal.pig");
+        assertTrue(Files.exists(pathPig));
 
-        Path baseDir = Path.of("docs/Pruebas");
-        String codigoPig = Files.readString(archivoPig.toPath());
+        Path baseDir = pathPig.getParent();
+        String codigoPig = Files.readString(pathPig);
 
         PigLatinLexer lexerPig = new PigLatinLexer(CharStreams.fromString(codigoPig));
         CommonTokenStream tokensPig = new CommonTokenStream(lexerPig);
