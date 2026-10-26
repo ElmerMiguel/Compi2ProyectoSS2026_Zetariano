@@ -329,11 +329,14 @@ public class CompilerService {
             log.append("COMPILACION EXITOSA CON C3D, RISC-V, C Y BINARIO NATIVO\n");
             log.append("========================================\n");
 
-            // Construir texto legible de C3D
+            // Construir texto legible de C3D y guardar archivo fisico
             StringBuilder c3dText = new StringBuilder();
             for (Cuadruplo q : enlazado) {
                 c3dText.append(q.toString()).append("\n");
             }
+            Path salidaC3D = base.resolve("salida_c3d.txt");
+            Files.writeString(salidaC3D, c3dText.toString(), StandardCharsets.UTF_8);
+            log.append("Cuartetos C3D guardados en: ").append(salidaC3D.toAbsolutePath()).append("\n");
 
             return CompilationResult.builder()
                     .success(true)

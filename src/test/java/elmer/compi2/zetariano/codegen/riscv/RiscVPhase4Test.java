@@ -17,13 +17,14 @@ import java.util.List;
  */
 public class RiscVPhase4Test {
 
-    private static final String RARS_JAR = "tools/rars1_6.jar";
+    private final elmer.compi2.zetariano.RarsExecutionService rarsService = new elmer.compi2.zetariano.RarsExecutionService();
 
     private String ejecutarRars(Path archivoAsm, boolean soloEnsamblar) throws Exception {
+        Path rarsPath = rarsService.resolverRarsJar();
         List<String> comando = new ArrayList<>();
         comando.add("java");
         comando.add("-jar");
-        comando.add(RARS_JAR);
+        comando.add(rarsPath.toString());
         if (soloEnsamblar) {
             comando.add("a");
         }

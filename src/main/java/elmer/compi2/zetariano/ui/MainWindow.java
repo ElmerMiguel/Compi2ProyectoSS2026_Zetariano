@@ -324,9 +324,10 @@ public class MainWindow extends JFrame {
             statusLabel.setText("Compilacion finalizada exitosamente.");
             StringBuilder msg = new StringBuilder();
             msg.append("Compilacion finalizada con exito.\n\n");
-            msg.append("1. Ensamblador RISC-V generado en:\n   ").append(baseDir.resolve("salida_riscv.s")).append("\n");
+            msg.append("1. Cuartetos C3D generados en:\n   ").append(baseDir.resolve("salida_c3d.txt")).append("\n\n");
+            msg.append("2. Ensamblador RISC-V generado en:\n   ").append(baseDir.resolve("salida_riscv.s")).append("\n");
             msg.append("   -> Puedes simularlo con el boton 'Ejecutar en RARS (F7)'.\n\n");
-            msg.append("2. Codigo C unificado generado en:\n   ").append(baseDir.resolve("salida_unificada.c")).append("\n");
+            msg.append("3. Codigo C unificado generado en:\n   ").append(baseDir.resolve("salida_unificada.c")).append("\n");
             if (lastResult.getNativeBinaryPath() != null) {
                 msg.append("   -> Binario nativo (GCC): ").append(lastResult.getNativeBinaryPath().getFileName()).append("\n");
             }

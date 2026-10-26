@@ -123,6 +123,7 @@ public class RarsExecutionService {
     }
 
     public Path resolverRarsJar() {
+        // 1. Verificar si existe en la carpeta tools local o relativa
         Path rutaDirecta = Path.of(RARS_JAR_NAME);
         if (Files.exists(rutaDirecta)) {
             return rutaDirecta.toAbsolutePath();
@@ -133,9 +134,43 @@ public class RarsExecutionService {
             return rutaSubdirectorio.toAbsolutePath();
         }
 
+        // 2. Verificar junto al JAR en ejecucion
+        try {
+            Path ubicacionApp = Path.of(
+                    RarsExecutionService.class.getProtectionDomain()
+                            .getCodeSource().getLocation().toURI()
+            ).toAbsolutePath().normalize();
+            Path dirPadre = Files.isRegularFile(ubicacionApp) ? ubicacionApp.getParent() : ubicacionApp;
+            if (dirPadre != null) {
+                Path juntoAlJar = dirPadre.resolve(RARS_JAR_NAME);
+                if (Files.exists(juntoAlJar)) {
+                    return juntoAlJar.toAbsolutePath();
+                }
+                Path enMismoDir = dirPadre.resolve("rars1_6.jar");
+                if (Files.exists(enMismoDir)) {
+                    return enMismoDir.toAbsolutePath();
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
         File backup = new File("src/backup_original/tools/rars1_6.jar");
         if (backup.exists()) {
             return backup.toPath().toAbsolutePath();
+        }
+
+        // 3. Extraer desde los recursos embebidos en el Fat JAR si no existe fisicamente
+        try {
+            var stream = getClass().getResourceAsStream("/tools/rars1_6.jar");
+            if (stream != null) {
+                Path tempRars = Files.createTempFile("rars1_6_", ".jar");
+                tempRars.toFile().deleteOnExit();
+                try (stream; var out = Files.newOutputStream(tempRars)) {
+                    stream.transferTo(out);
+                }
+                return tempRars.toAbsolutePath();
+            }
+        } catch (Exception ignored) {
         }
 
         return rutaDirecta.toAbsolutePath();

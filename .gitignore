@@ -12,6 +12,7 @@
 
 # Package Files #
 *.jar
+!src/main/resources/tools/rars1_6.jar
 *.war
 *.nar
 *.ear
