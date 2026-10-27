@@ -1,6 +1,7 @@
 package elmer.compi2.zetariano.ui;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -8,13 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Gestor de pestañas de edición para múltiples archivos abiertos con opción de cierre.
+ * Gestor de pestañas de edición para múltiples archivos abiertos con opción de cierre
+ * y seguimiento individual y desacoplado del archivo físico asociado a cada editor.
  */
 public class EditorTabPane extends JPanel {
 
     private final JTabbedPane tabbedPane;
     private final Map<String, CodeEditor> openEditors = new HashMap<>();
-    private final Map<CodeEditor, String> editorPaths = new HashMap<>();
+    private final Map<CodeEditor, File> editorFiles = new HashMap<>();
 
     public EditorTabPane() {
         super(new BorderLayout());
@@ -23,23 +25,25 @@ public class EditorTabPane extends JPanel {
     }
 
     public CodeEditor openFile(File file, String content) {
-        String path = file.getAbsolutePath();
+        File normalized = file.toPath().toAbsolutePath().normalize().toFile();
+        String path = normalized.getAbsolutePath();
         if (openEditors.containsKey(path)) {
-            tabbedPane.setSelectedComponent(openEditors.get(path));
-            return openEditors.get(path);
+            CodeEditor existing = openEditors.get(path);
+            tabbedPane.setSelectedComponent(existing);
+            return existing;
         }
 
-        CodeEditor.LanguageMode mode = determineMode(file.getName());
+        CodeEditor.LanguageMode mode = determineMode(normalized.getName());
         CodeEditor editor = new CodeEditor(mode);
         editor.setText(content);
 
         openEditors.put(path, editor);
-        editorPaths.put(editor, path);
+        editorFiles.put(editor, normalized);
 
-        tabbedPane.addTab(file.getName(), editor);
-        
+        tabbedPane.addTab(normalized.getName(), editor);
+
         int index = tabbedPane.indexOfComponent(editor);
-        tabbedPane.setTabComponentAt(index, new ButtonTabComponent(file.getName(), editor));
+        tabbedPane.setTabComponentAt(index, new ButtonTabComponent(normalized.getName(), editor));
 
         tabbedPane.setSelectedComponent(editor);
         return editor;
@@ -47,7 +51,8 @@ public class EditorTabPane extends JPanel {
 
     public void addTab(String title, CodeEditor editor) {
         tabbedPane.addTab(title, editor);
-        
+        editorFiles.put(editor, null);
+
         int index = tabbedPane.indexOfComponent(editor);
         tabbedPane.setTabComponentAt(index, new ButtonTabComponent(title, editor));
 
@@ -58,17 +63,66 @@ public class EditorTabPane extends JPanel {
         return (CodeEditor) tabbedPane.getSelectedComponent();
     }
 
-  
+    public File getCurrentFile() {
+        CodeEditor current = getCurrentEditor();
+        return (current != null) ? editorFiles.get(current) : null;
+    }
+
+    public File getFileForEditor(CodeEditor editor) {
+        return (editor != null) ? editorFiles.get(editor) : null;
+    }
+
+    public void setFileForEditor(CodeEditor editor, File file) {
+        if (editor == null) return;
+
+        File oldFile = editorFiles.get(editor);
+        if (oldFile != null) {
+            openEditors.remove(oldFile.getAbsolutePath());
+        }
+
+        if (file != null) {
+            File normalized = file.toPath().toAbsolutePath().normalize().toFile();
+            editorFiles.put(editor, normalized);
+            openEditors.put(normalized.getAbsolutePath(), editor);
+
+            int index = tabbedPane.indexOfComponent(editor);
+            if (index >= 0) {
+                tabbedPane.setTitleAt(index, normalized.getName());
+                Component tabComp = tabbedPane.getTabComponentAt(index);
+                if (tabComp instanceof ButtonTabComponent btc) {
+                    btc.setTitle(normalized.getName());
+                }
+            }
+        } else {
+            editorFiles.put(editor, null);
+        }
+    }
+
+    public String getCurrentTitle() {
+        int idx = tabbedPane.getSelectedIndex();
+        if (idx >= 0) {
+            return tabbedPane.getTitleAt(idx);
+        }
+        return "";
+    }
+
+    public int getTabCount() {
+        return tabbedPane.getTabCount();
+    }
+
+    public void addChangeListener(ChangeListener listener) {
+        tabbedPane.addChangeListener(listener);
+    }
+
     public void closeEditor(CodeEditor editor) {
         if (editor == null) return;
-        
-        tabbedPane.remove(editor);
-        
-        // Limpiar de los mapas
-        String path = editorPaths.remove(editor);
-        if (path != null) {
-            openEditors.remove(path);
+
+        File file = editorFiles.remove(editor);
+        if (file != null) {
+            openEditors.remove(file.getAbsolutePath());
         }
+
+        tabbedPane.remove(editor);
     }
 
     private CodeEditor.LanguageMode determineMode(String fileName) {
@@ -84,11 +138,13 @@ public class EditorTabPane extends JPanel {
     }
 
     private class ButtonTabComponent extends JPanel {
+        private final JLabel label;
+
         public ButtonTabComponent(String title, CodeEditor editor) {
             super(new FlowLayout(FlowLayout.LEFT, 0, 0));
             setOpaque(false);
 
-            JLabel label = new JLabel(title) {
+            label = new JLabel(title) {
                 @Override
                 public Dimension getPreferredSize() {
                     Dimension d = super.getPreferredSize();
@@ -111,6 +167,10 @@ public class EditorTabPane extends JPanel {
             });
 
             add(closeButton);
+        }
+
+        public void setTitle(String newTitle) {
+            label.setText(newTitle);
         }
     }
 }

@@ -119,6 +119,23 @@ public class MainWindow extends JFrame {
         itemSalir.addActionListener(e -> System.exit(0));
         menuArchivo.add(itemSalir);
 
+        JMenu menuEditar = new JMenu("Editar");
+        JMenuItem itemUndo = new JMenuItem("Deshacer");
+        itemUndo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        itemUndo.addActionListener(e -> {
+            CodeEditor current = editorTabPane.getCurrentEditor();
+            if (current != null) current.undo();
+        });
+        menuEditar.add(itemUndo);
+
+        JMenuItem itemRedo = new JMenuItem("Rehacer");
+        itemRedo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        itemRedo.addActionListener(e -> {
+            CodeEditor current = editorTabPane.getCurrentEditor();
+            if (current != null) current.redo();
+        });
+        menuEditar.add(itemRedo);
+
         JMenu menuCompilar = new JMenu("Compilar");
         JMenuItem itemRun = new JMenuItem("Compilar Proyecto");
         itemRun.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, 0));
@@ -146,6 +163,7 @@ public class MainWindow extends JFrame {
         menuCompilar.add(itemExec);
 
         bar.add(menuArchivo);
+        bar.add(menuEditar);
         bar.add(menuCompilar);
         return bar;
     }
@@ -187,29 +205,55 @@ public class MainWindow extends JFrame {
     private File activeFile = null;
     private final CompilerService compilerService = new CompilerService();
 
+    private void updateActiveFileInfo() {
+        File current = editorTabPane.getCurrentFile();
+        if (current != null) {
+            activeFile = current;
+            statusLabel.setText("Archivo: " + current.getAbsolutePath());
+            setTitle("Compilador Zetariano - " + current.getName());
+        } else {
+            CodeEditor editor = editorTabPane.getCurrentEditor();
+            if (editor != null) {
+                String title = editorTabPane.getCurrentTitle();
+                statusLabel.setText("Archivo sin guardar (" + title + ")");
+                setTitle("Compilador Zetariano - " + title);
+            } else {
+                activeFile = null;
+                statusLabel.setText("Listo");
+                setTitle("Compilador Zetariano");
+            }
+        }
+    }
+
     private void bindEvents() {
         fileExplorer.setOnFileDoubleClicked(file -> {
             try {
                 String content = Files.readString(file.toPath());
                 editorTabPane.openFile(file, content);
-                activeFile = file;
-                statusLabel.setText("Abierto: " + file.getName());
+                updateActiveFileInfo();
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, "Error al abrir archivo: " + e.getMessage());
             }
         });
+
+        // Sincronizar el archivo activo cada vez que el usuario cambia de pestaña
+        editorTabPane.addChangeListener(e -> updateActiveFileInfo());
     }
 
     private void chooseFile() {
-        JFileChooser chooser = new JFileChooser(activeFile != null ? activeFile.getParentFile() : new File("."));
+        File currentFile = editorTabPane.getCurrentFile();
+        File defaultDir = (currentFile != null && currentFile.getParentFile() != null)
+                ? currentFile.getParentFile()
+                : (activeFile != null && activeFile.getParentFile() != null ? activeFile.getParentFile() : new File("."));
+
+        JFileChooser chooser = new JFileChooser(defaultDir);
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File selected = chooser.getSelectedFile();
             try {
                 String content = Files.readString(selected.toPath());
                 editorTabPane.openFile(selected, content);
-                activeFile = selected;
-                statusLabel.setText("Abierto: " + selected.getName());
+                updateActiveFileInfo();
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, "Error al abrir archivo: " + e.getMessage());
             }
@@ -232,8 +276,7 @@ public class MainWindow extends JFrame {
         CodeEditor newEditor = new CodeEditor(mode);
         newEditor.setText("");
         editorTabPane.addTab(name, newEditor);
-        activeFile = null;
-        statusLabel.setText("Creado: " + name);
+        updateActiveFileInfo();
     }
 
     private void saveActiveFile(boolean saveAs) {
@@ -243,10 +286,18 @@ public class MainWindow extends JFrame {
             return;
         }
 
-        File target = activeFile;
+        // Siempre usar el archivo asociado al editor de la pestaña actual
+        File target = editorTabPane.getCurrentFile();
         if (saveAs || target == null) {
-            JFileChooser chooser = new JFileChooser(activeFile != null ? activeFile.getParentFile() : new File("."));
+            File defaultDir = (target != null && target.getParentFile() != null)
+                    ? target.getParentFile()
+                    : (activeFile != null && activeFile.getParentFile() != null ? activeFile.getParentFile() : new File("."));
+
+            JFileChooser chooser = new JFileChooser(defaultDir);
             chooser.setDialogTitle("Guardar Archivo Como...");
+            if (target != null) {
+                chooser.setSelectedFile(target);
+            }
             if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 target = chooser.getSelectedFile();
             } else {
@@ -256,8 +307,8 @@ public class MainWindow extends JFrame {
 
         try {
             Files.writeString(target.toPath(), currentEditor.getText(), StandardCharsets.UTF_8);
-            activeFile = target;
-            statusLabel.setText("Guardado: " + target.getName());
+            editorTabPane.setFileForEditor(currentEditor, target);
+            updateActiveFileInfo();
             JOptionPane.showMessageDialog(this, "Archivo guardado exitosamente: " + target.getName(),
                     "Guardado", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
@@ -285,8 +336,7 @@ public class MainWindow extends JFrame {
             try {
                 String content = Files.readString(demo.toPath());
                 editorTabPane.openFile(demo, content);
-                activeFile = demo;
-                statusLabel.setText("Abierto: Principal.pig");
+                updateActiveFileInfo();
                 return;
             } catch (IOException ignored) {}
         }
@@ -295,6 +345,7 @@ public class MainWindow extends JFrame {
         CodeEditor defaultEditor = new CodeEditor(CodeEditor.LanguageMode.PIG_LATIN);
         defaultEditor.setText("## Compilador Zetariano (Pig Latin, Y?, Zetariano) ##\nMAIOR>\n    >> \"Listo para compilar!\";\nFINIS;\n");
         editorTabPane.addTab("Bienvenido.pig", defaultEditor);
+        updateActiveFileInfo();
     }
 
     private void triggerCompilation() {
@@ -305,9 +356,16 @@ public class MainWindow extends JFrame {
         }
 
         String sourceCode = currentEditor.getText();
-        Path baseDir = (activeFile != null && activeFile.getParentFile() != null)
-                ? activeFile.getParentFile().toPath()
-                : Path.of("docs/Pruebas");
+        File currentFile = editorTabPane.getCurrentFile();
+        Path baseDir;
+        if (currentFile != null && currentFile.getParentFile() != null) {
+            baseDir = currentFile.getParentFile().toPath();
+        } else if (activeFile != null && activeFile.getParentFile() != null) {
+            baseDir = activeFile.getParentFile().toPath();
+        } else {
+            baseDir = Path.of("docs/Pruebas");
+        }
+        baseDir = baseDir.toAbsolutePath().normalize();
 
         statusLabel.setText("Compilando...");
         outputPanel.clearAll();
